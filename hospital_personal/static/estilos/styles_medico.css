@@ -1,0 +1,642 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+
+/* Clases globales */ 
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.error-message p{
+    margin: 0;
+}
+
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.btn-masDetalles{
+    background-color: #48e;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: clamp(0.8rem, 3vw, .9rem);
+    font-weight: normal;
+    border-radius: 5px;
+}
+
+
+.btn-masDetalles:hover{
+    background-color: #0056b3;
+}
+
+/* Fin Clases globales */ 
+
+
+/* Modal global */
+
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center; 
+}
+
+.modal.show {
+    display: flex; 
+    
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px 10px;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+    max-height: 90%;
+    overflow-y: auto;
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+}
+
+.close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#modal-title {
+    text-align: center;
+    padding-right: 18px;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+}
+
+.btn-guardar {
+    padding: 0.7rem 1.5rem;
+    background-color: #48e;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.form-error-modal {
+    background-color: red;
+    padding: 8px;
+    color: white;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    border-radius: 30px;
+    display: none;
+}
+
+#inputFeedback {
+    color: red;
+    text-align: center;
+}
+
+#seccion-asignaciones,#seccion-lugarTrabajo{
+    display: none;
+}
+
+/* Fin modal global */
+
+
+/* Parte de Lista de consultas */
+
+.box-tabla-consultas-medico{
+    margin-top: 20px;
+}
+
+.box-tabla-consultas-medico table{
+    width: 100%;
+}
+
+.box-tabla-consultas-medico thead{
+    background-color: #3498db;
+    color: white;    
+}
+
+.fila-consultas-medico{
+    background-color: #f4f4f1;
+    border-radius: 5px;
+}
+
+.fila-consultas-medico:hover{
+    outline: 1px solid #aaa;
+}
+
+.box-tabla-consultas-medico th{
+    padding: 12px 0;
+    text-align: center;
+    font-size: clamp(.8rem, 3dvw, .9rem);
+}
+
+.box-tabla-consultas-medico td{
+    padding: 5px;
+    text-align: center;
+    height: 60px;
+    font-size: clamp(.8rem, 3dvw, .9rem);
+}
+
+
+.btn-accion {
+    all: unset; /* Resetea TODOS los estilos por defecto del navegador */
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 0 3px;
+    min-height: 30px;
+    font-size: clamp(.9rem, 3dvw, 1rem);
+    font-family: inherit;
+    font-weight: 500; /* o normal, según tu diseño */
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    vertical-align: middle;
+    box-sizing: border-box;
+    align-content: center;
+    margin-bottom: 2px;
+}
+
+.btn-accion:hover {
+    background-color: #0056b3;
+}
+
+.empty-message {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+}
+
+
+@media (width <= 802px){
+    body:has(.sidebar.minimizado) .box-tabla-consultas-medico .th-diagnostico, body:has(.sidebar.minimizado) .box-tabla-consultas-medico .td-diagnostico{
+        display: table;
+    }
+    .box-tabla-consultas-medico .th-diagnostico,.box-tabla-consultas-medico .td-diagnostico{
+        display: none;
+    }
+}
+
+@media (width <= 540px){
+    .box-tabla-consultas-medico .th-diagnostico,.box-tabla-consultas-medico .td-diagnostico{
+        display: none;
+    }
+
+    .container-tabla-medico-global h1{
+        text-align: center;
+    }
+}
+
+@media (width <= 450px){
+    .box-tabla-consultas-medico .th-paciente,.box-tabla-consultas-medico .td-paciente, .turnos-section .th-estado,.turnos-section .td-estado{
+        display: none;
+    }
+}
+
+/* Fin parte Lista de consultas */
+
+
+/* Parte de Registro de consulta */
+
+.body-consultasMedico {
+    position: relative;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e6e6e6;
+    padding: 10px;
+}
+
+.container-consulta-medico {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    row-gap: 50px;
+    width: 100%;
+    align-items: center;
+}
+
+.container-consulta-medico h2 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.container-form-consulta {
+    background-color: #fff;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 900px;
+    width: 100%;
+}
+
+.seccion-nota-clinica {
+    margin-top: 15px;
+}
+
+.box-inputs-registro-consulta label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.box-inputs-registro-consulta textarea,
+.tabla-registro-consultas td textarea,
+.tabla-registro-consultas td select,
+.tabla-registro-consultas td input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 70px;
+    font-size: 14px;
+}
+
+.tabla-registro-consultas {
+    width: 100%;
+    margin-top: 5px;
+    font-family: Arial, sans-serif;
+    overflow-x: auto;
+}
+
+.tabla-registro-consultas th {
+    background-color: #3498db;
+    color: white;
+}
+
+.tabla-registro-consultas th,
+.tabla-registro-consultas td {
+    font-size: 14px;
+    padding: 10px;
+    text-align: left;
+    font-size: clamp(.3rem, 3dvw, .9rem);
+}
+
+.box-check-cancelar {
+    display: flex;
+    justify-content: center;
+}
+
+.box-check-cancelar input[type="checkbox"] {
+    transform: scale(1.5);
+    margin: 5px;
+}
+
+.btn-agregar,.btn {
+    padding: 10px 20px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-agregar:hover,.btn:hover {
+    opacity: 0.9;
+}
+
+.box-header-tabla-registro-consultas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+
+.containerUltimasConsultas {
+    padding: 15px;
+    width: clamp(300px, 100%, 1300px);
+    background-color: #fff;
+    overflow-x: auto;
+    border-radius: 6px;
+}
+
+.containerUltimasConsultas h2 {
+    text-align: center;
+    color: #2c3e50;
+}
+
+.containerUltimasConsultas #tablaHistorialConsultas {
+    width: 100%;
+}
+
+.containerUltimasConsultas #tablaHistorialConsultas thead{
+    background-color: #3498db;
+    color: white;
+}
+
+.containerUltimasConsultas #tablaHistorialConsultas th{
+    padding: 10px;
+    font-size: clamp(.3rem, 3dvw, .9rem);
+}
+
+
+@media (width <= 887px){
+    .th-observaciones,.td-observaciones{
+        display: none;
+    }
+}
+@media (max-width: 768px) {
+    .tabla-registro-consultas{
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .btn-agregar,.btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .box-header-tabla-registro-consultas {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+@media (width <= 725px){
+    .th-medicaciones,.td-medicaciones{
+        display: none;
+    }
+}
+@media (width <= 600px){
+    .th-estudio,.td-estudio{
+        display: none;
+    }
+
+    .tabla-registro-consultas td textarea,
+    .tabla-registro-consultas td select,
+    .tabla-registro-consultas td input[type="text"] {
+        min-height: 40px;
+    }
+
+    .tabla-registro-consultas,
+    .tabla-registro-consultas thead,
+    .tabla-registro-consultas tbody,
+    .tabla-registro-consultas tr,
+    .tabla-registro-consultas th,
+    .tabla-registro-consultas td {
+        display: block;
+        width: 100%;
+    }
+
+    .tabla-registro-consultas tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        padding: 0 10px;
+        border-radius: 6px;
+        background-color: #f9f9f9;
+    }
+
+    .tabla-registro-consultas td {
+        padding: 0;
+    }
+
+    .tabla-registro-consultas td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 4px;
+        color: #2c3e50;
+    }
+
+    .tabla-registro-consultas thead {
+        display: none;
+    }    
+}
+@media (max-width: 480px) {
+    .container-form-consulta {
+        padding: 15px 10px;
+    }
+
+    .btn-agregar,.btn {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+}
+@media (width <= 472px){
+    .th-diagnostico,.td-diagnostico{
+        display: none;
+    }
+    .td-fecha{
+        text-align: center;
+    }
+}
+
+
+.modal-content.modal-detalles-consulta{
+    width: clamp(310px, 95%, 1100px);
+} 
+
+.modal-detalles-consulta-item {
+    margin-bottom: 10px;
+}
+
+.modal-detalles-consulta-item pre {
+    background-color: #f4f4f4;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: pre-wrap;
+    font-family: 'Courier New', monospace;
+    max-height: 115px;
+    overflow-y: auto;
+}
+
+#modalEstudios{
+    line-height:20px
+}
+
+.btn-verEstudio{
+    background-color: #48e;
+    color: white;
+    border: none;
+    padding: 0 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* Fin Parte de registro de consulta */
+
+
+/* Parte del los turnos programados */ 
+
+.container-tabla-medico-global{
+    background-color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.container-tabla-medico-global h1{
+    font-size: clamp( 1.5rem,3dvw,2rem);
+}
+
+.turnos-section {
+    margin-top: 20px;
+}
+
+.turnos-section h2 {
+    color: #333;
+    font-size: 20px;
+    padding: 5px;
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    width: 100%;
+}
+
+.turnos-section table{
+    width: 100%;
+}
+
+.turnos-section thead{
+    background-color: #3498db;
+    color: white;
+}
+
+.turnos-section th{
+    padding: 12px 0;
+    text-align: center;
+}
+.turnos-section td{
+    padding: 5px;
+    text-align: center;
+    height: 60px;
+    font-size: clamp(.9rem, 3dvw, 1rem);
+}
+
+.empty-message {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+}
+
+
+.fila-turnos.estado-atendido {
+    background-color: #d1f7d1; 
+}
+
+.fila-turnos.estado-pendiente {
+    background-color: #f4f4f1; 
+}
+
+.fila-turnos.estado-cancelado {
+    background-color: #f8d7da; 
+}
+
+.fila-turnos.estado-reprogramado {
+    background-color: #d1ecf1; 
+}
+
+.fila-turnos.estado-noAsistio {
+    background-color: #e2e3e5; 
+}
+
+.fila-turnos{
+    min-height: 60px;
+}
+
+.fila-turnos:hover{
+    background-color: #f4f4f1;
+    outline: 1px solid #aaa;
+    border-radius: 5px;
+}
+
+
+@media (width <= 400px){
+    .turnos-section,
+    .turnos-section thead,
+    .turnos-section tbody,
+    .turnos-section tr,
+    .turnos-section th,
+    .turnos-section td {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: baseline;
+        width: 100%;
+    }
+
+    .turnos-section tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        padding: 0 10px;
+        border-radius: 6px;
+        background-color: #f9f9f9;
+    }
+
+    .turnos-section td {
+        padding: 7px;
+        height: fit-content;
+        border-bottom: 2px dotted #000;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .turnos-section td:last-child{
+        border-bottom: 0;
+    }
+
+    .turnos-section td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 4px;
+        color: #000;
+    }
+
+    .turnos-section thead {
+        display: none;
+    }   
+
+    .box-btns-td-acciones{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .turnos-section .empty-message{
+        justify-content: center;
+    }
+
+}
+/*  Fin Parte del los turnos programados */ 

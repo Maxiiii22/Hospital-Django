@@ -1,0 +1,86 @@
+{% extends 'layout/base-personal.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'estilos/styles_personal.css' %}">
+{% endblock %}
+
+{% block titulo %}
+    <title>Gestion de plantilla de estudios</title>
+{% endblock %}
+
+{% block contenido %}
+    <div class="container-global-superadmin">
+        <h1>Gestionar plantilla de estudios</h1>
+        <div class="box-btn-add">
+            <button class="btn-masDetalles" id="newPlantillaEstudio"><i class="hgi hgi-stroke hgi-plus-sign"></i> Añadir nueva plantilla de estudio</button>
+        </div>
+        <div class="box-tablas-superadmin">
+            <table id="tabla-plantilla-estudio">
+                <thead>
+                    {% if allPlantillas %}
+                    <tr>
+                        <th>ID</th>
+                        <th>Estudio</th>
+                        <th></th>
+                    </tr>
+                    {% endif %}
+                </thead>
+                <tbody>
+                    {% for plantilla in allPlantillas %}
+                    <tr class="fila">
+                        <td>{{plantilla.id}}</td>
+                        <td>{{plantilla.estudio.nombre_estudio}}</td>
+                        <td><button class="btn-masDetalles" data-id-plantilla-estudio="{{ plantilla.id }}">Mas detalles</button></td>  
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="empty-message">No hay plantillas registradas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal {% if abrir_modal_por_error %}show{% endif %}">
+        <div class="modal-content modal-plantilla-estudios">
+        <span id="closeEditModal" class="close">&times;</span>
+        <h2 id="modal-title">Editar plantilla de estudio</h2>
+        <form id="editForm" method="POST">
+            {% csrf_token %}
+            <input type="hidden" id="id_plantilla" name="id_plantilla">
+            
+            <div class="campo-input">
+                {{ form.estudio.label_tag }}
+                {{ form.estudio }}
+                {% if form.estudio.errors %}
+                    <div id="error_estudio" class="error-message">
+                        {% for error in form.estudio.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="campo-input">
+                {{ form.estructura.label_tag }}
+                {{ form.estructura }}
+                {% if form.estructura.errors %}
+                    <div id="error_estructura" class="error-message">
+                        {% for error in form.estructura.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn-guardar">Guardar</button>
+        </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts_js %} 
+    <script src="{% static 'js/modals_personal.js' %}"></script>
+{% endblock %}

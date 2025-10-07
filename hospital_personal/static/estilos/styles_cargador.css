@@ -1,0 +1,224 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+
+body{
+    background-color: #ccc;
+}
+
+
+/* Clases globales */
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.error-message p{
+    margin: 0;
+}
+
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #007bff;
+    text-decoration: none;
+    align-self: flex-start;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.btn-global{
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.btn-global:hover{
+    background-color: #0056b3;
+}
+
+.btn-accion {
+    all: unset; /* Resetea TODOS los estilos por defecto del navegador */
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 0 3px;
+    min-height: 30px;
+    font-size: clamp(.8rem, 3dvw, 1rem);
+    font-family: inherit;
+    font-weight: 500; /* o normal, según tu diseño */
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    vertical-align: middle;
+    box-sizing: border-box;
+    align-content: center;
+    margin-bottom: 2px;
+}
+
+.btn-accion:hover {
+    background-color: #0056b3;
+}
+
+
+.fila{
+    background-color: #f4f4f1;
+    border-radius: 5px;
+}
+
+.fila:hover{
+    background-color: #f4f4f1;
+    outline: 1px solid #aaa;
+}
+
+.empty-message {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+}
+
+/* Fin clases globales */
+
+
+/* Seccion estudios realizados */
+
+
+.container-lista-estudios{
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+
+#tabla-estudios{
+    width: 100%;
+}
+
+#tabla-estudios thead{
+    background-color: #3498db;
+    color: white;
+}
+
+#tabla-estudios th{
+    padding: 12px 0;
+    text-align: center;
+    font-size: clamp(.7rem, 3vw, 1rem);
+}
+
+#tabla-estudios td{
+    padding: 5px;
+    text-align: center;
+    height: 45px;
+    font-size: clamp(.8rem, 3vw, 1rem);
+}
+
+/* Fin Seccion estudios realizados */
+
+
+/* Seccion "Cargar resultados" */
+
+.container-cargador-resultados{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100dvh;
+}
+
+.box-form-cargar-resultados{
+    background-color: #fff;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px;
+    font-size: 1rem;
+    width: clamp(315px,98%,500px);
+    margin: 10px 0;
+}
+
+.datos-paciente{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+}
+
+.datos-paciente h2{
+    text-align: center;
+}
+
+#form-cargar-resultados{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.box-form-input{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.box-form-input label{
+    align-self: flex-start;
+}
+
+.box-form-input input{
+    width: 100%;
+    padding: 10px 5px;
+}
+
+.box-form-input textarea{
+    width: 100%;
+    resize: vertical;
+    padding: 10px 5px;
+    min-height: 97px;
+}
+
+.box-form-input-img{
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    padding: 5px;
+}
+
+.box-form-input-img:hover{
+    background-color: #dddadd;
+    border-color: #aaa;
+}
+
+.box-form-input-img input{
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.box-form-input-img input[type="file"]{
+    font-size: clamp(.8rem, 3vw, .9rem);
+    width: 100%;
+}
+
+.box-form-input-img input:hover{
+    background-color: #0056b3;
+}
+
+
+/* Fin Seccion "Cargar resultados" */

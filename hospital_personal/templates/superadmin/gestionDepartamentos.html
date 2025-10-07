@@ -1,0 +1,97 @@
+{% extends 'layout/base-personal.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'estilos/styles_personal.css' %}">
+{% endblock %}
+
+{% block titulo %}
+    <title>Gestion de departamentos</title>
+{% endblock %}
+
+{% block contenido %}
+    <div class="container-global-superadmin">
+        <h1>Gestionar Departamentos</h1>
+        <div class="box-btn-add">
+            <button class="btn-masDetalles" id="newDepartamento"><i class="hgi hgi-stroke hgi-plus-sign"></i> Añadir nuevo Departamento</button>
+        </div>
+        <div class="box-tablas-superadmin">
+            <table id="tabla-gestion-departamentos">
+                <thead>
+                    {% if allDepartamentos %}
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th></th>
+                    </tr>
+                    {% endif %}
+                </thead>
+                <tbody>
+                    {% for departamento in allDepartamentos %}
+                        <tr class="fila">
+                            <td>{{departamento.id}}</td>
+                            <td>{{departamento.nombre_departamento}}</td>
+                            <td><button class="btn-masDetalles" data-id-departamento="{{ departamento.id }}">Mas detalles</button></td>  
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="empty-message">No hay departamentos registrados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal {% if abrir_modal_por_error %}show{% endif %}">
+        <div class="modal-content">
+            <span id="closeEditModal" class="close">&times;</span>
+            <h2 id="modal-title">Editar departamento</h2>
+            <form id="editForm" method="POST" >
+                {% csrf_token %}
+                <input type="hidden" name="id_departamento" id="id_departamento" />
+                <div class="campo-input">
+                    {{ form.nombre_departamento.label_tag }}
+                    {{ form.nombre_departamento }}
+                    {% if form.nombre_departamento.errors %}
+                        <div id="error_nombre_departamento" class="error-message">
+                            {% for error in form.nombre_departamento.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="campo-input">
+                    {{ form.tipo.label_tag }}
+                    {{ form.tipo }}
+                    {% if form.tipo.errors %}
+                        <div id="error_tipo" class="error-message">
+                            {% for error in form.tipo.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}                
+                </div>
+                <div class="campo-input">
+                    {{ form.descripcion.label_tag }}
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <div id="error_descripcion" class="error-message">
+                            {% for error in form.descripcion.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}                
+                </div>
+                <button type="submit" class="btn-guardar">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts_js %} 
+    <script src="{% static 'js/modals_personal.js' %}"></script>
+{% endblock %}
+
+

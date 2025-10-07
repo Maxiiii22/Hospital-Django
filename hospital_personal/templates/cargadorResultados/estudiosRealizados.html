@@ -1,0 +1,47 @@
+{% extends 'layout/base-personal.html' %}
+{% load static %} 
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'estilos/styles_cargador.css' %}">
+{% endblock %}
+{% block titulo %}<title> Estudios Disponibles para Carga de Resultados</title>{% endblock %}
+
+{% block contenido %}
+    <div class="container-lista-estudios">
+        <h1>Turnos realizados</h1>
+        <div class="box-tabla-estudios">
+            <table id="tabla-estudios">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha turno</th>
+                        <th>N° orden</th>
+                        <th>Servicio de diagnostico</th>
+                        <th>Accion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for estudio in estudios %}
+                        <tr class="fila">
+                            <td>{{ estudio.id }}</td>
+                            <td>{{ estudio.fecha_turno|date:"d-m-Y"}}</td>
+                            <td>{{ estudio.orden.id }}</td>
+                            <td>{{estudio.servicio_diagnostico.nombre_servicio}}</td>
+                            <td><a href="{% url 'cargar_resultado' estudio.id %}" class="btn-accion">Cargar resultados</a></td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty-message">No hay estudios disponibles para cargar resultados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+
+
+{% block scripts_js %}  {% endblock %}

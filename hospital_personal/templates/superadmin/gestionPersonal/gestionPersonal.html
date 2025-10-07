@@ -1,0 +1,70 @@
+{% extends 'layout/base-personal.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'estilos/styles_personal.css' %}">
+{% endblock %}
+
+{% block titulo %}
+    <title>Gestion del personal</title>
+{% endblock %}
+
+{% block contenido %}
+    <div class="container-global-superadmin">
+        <h1>Gestion del personal</h1>
+        <div class="box-btn-add">
+            <a href="{% url 'altaPersonal' %}" class="btn-masDetalles"><i class="hgi hgi-stroke hgi-plus-sign"></i> Añadir nuevo personal</a>
+        </div>
+    
+        <table id="tabla-gestion-personal">
+            <thead>
+                {% if allPersonal %}
+                <tr>
+                    <th>ID</th>
+                    <th>N° Legajo hospitalario</th>
+                    <th>Tipo Usuario</th>
+                    <th class="columna-matricula">N° Matricula</th>
+                    <th class="columna-nombre">Nombre</th>
+                    <th class="columna-apellido">Apellido</th>
+                    <th class="columna-dni">DNI</th>
+                    <th class="columna-ultimoAcceso">Ultimo acceso</th>
+                    <th class="columna-estado">Estado</th>
+                    <th></th>
+                </tr>
+                {% endif %}
+            </thead>
+            <tbody>
+                {% for persona in allPersonal %}
+                <tr class="fila">
+                    <td data-label="ID:">{{persona.id}}</td>
+                    <td data-label="N° Legajo hospitalario:">{{persona.persona.login_id}}</td>
+                    <td data-label="Rol:">{{persona.tipoUsuario}}</td>
+                    <td data-label="N° Matricula:" class="columna-matricula">{% if persona.numero_matricula %}{{persona.numero_matricula}}{% else %}No aplica{% endif %}</td>
+                    <td data-label="Nombre:" class="columna-nombre">{{persona.persona.first_name}}</td>
+                    <td data-label="Apellido:" class="columna-apellido">{{persona.persona.last_name}}</td>
+                    <td data-label="DNI:" class="columna-dni">{{persona.persona.dni}}</td>
+                    <td data-label="Ultimo acceso:" class="columna-ultimoAcceso">{% if persona.persona.last_login %} {{persona.persona.last_login|date:"d-m-Y H:i"}} {% else %} Nunca accedió {% endif %}</td>
+                    <td data-label="Estado:" class="columna-estado">{% if persona.persona.is_active %} Activo {% else %} Inactivo {% endif %}</td>
+                    <td data-label="Acciones:">
+                        <div class="box-btns-td-acciones">
+                            <a href="{% url 'detalle_usuario' persona.id %}" class="btn-masDetalles" >Mas detalles</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10" class="empty-message">No hay personal registrado.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    
+    </div>
+ 
+{% endblock %}
+
+{% block scripts_js %} 
+    <script src="{% static 'js/modals_personal.js' %}"></script>
+{% endblock %}
+
+

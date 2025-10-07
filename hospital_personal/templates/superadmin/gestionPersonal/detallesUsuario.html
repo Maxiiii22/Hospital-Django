@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css" />
+    <link rel="stylesheet" href="{% static 'estilos/styles_personal.css' %}">
+    <title>Detalles del usuario</title>
+</head>
+<body>
+    <main class="container-detalles-usuario">
+        <div class="box-form-detalles-usuario">
+            <a href="{% url 'gestionDelPersonal' %}" class="back-link"><i class="hgi hgi-stroke hgi-arrow-left-02"></i> Volver atrás</a>    
+            <h2>Detalles del usuario {{usuario.persona.get_full_name}} - N° Legajo: {{usuario.persona.login_id}}</h2>  
+            <form action="" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="tipo_form" value="form_editarPersonal">
+                <div class="secciones">
+                    <div class="datos-personales">
+                        <span class="titulo">Datos personales</span>
+                        {% if formUsuario.persona_form.non_field_errors %}
+                            <ul class="form-errors">
+                                {% for error in formUsuario.persona_form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <div class="campos">
+                            <div class="campo-input">
+                                <label for="id_login_id">Numero legajo:</label>
+                                {{ formUsuario.persona_form.login_id }}
+                                {% if formUsuario.persona_form.login_id.errors %}
+                                    <div id="error_login_id" class="error-message">
+                                        {% for error in formUsuario.persona_form.login_id.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="campo-input">
+                                <label for="id_password">Contraseña:</label>
+                                {{ formUsuario.persona_form.password }}
+                                {% if formUsuario.persona_form.password.errors %}
+                                    <div id="error_password" class="error-message">
+                                        {% for error in formUsuario.persona_form.password.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="campo-input">
+                                {{ formUsuario.persona_form.dni.label_tag }}
+                                {{ formUsuario.persona_form.dni }}
+                                {% if formUsuario.persona_form.dni.errors %}
+                                    <div id="error_dni" class="error-message">
+                                        {% for error in formUsuario.persona_form.dni.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="campo-input">
+                                <label for="id_first_name">Nombre:</label>
+                                {{ formUsuario.persona_form.first_name }}
+                                {% if formUsuario.persona_form.first_name.errors %}
+                                    <div id="error_first_name" class="error-message">
+                                        {% for error in formUsuario.persona_form.first_name.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}       
+                            </div>
+                            
+                            <div class="campo-input">
+                                <label for="id_last_name">Apellido:</label>
+                                {{ formUsuario.persona_form.last_name }}
+                                {% if formUsuario.persona_form.last_name.errors %}
+                                    <div id="error_last_name" class="error-message">
+                                        {% for error in formUsuario.persona_form.last_name.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}                         
+                            </div>
+                            
+                            <div class="campo-input">
+                                {{ formUsuario.persona_form.sexo.label_tag }}
+                                {{ formUsuario.persona_form.sexo }}
+                                {% if formUsuario.persona_form.sexo.errors %}
+                                    <div id="error_sexo" class="error-message">
+                                        {% for error in formUsuario.persona_form.sexo.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}               
+                            </div>
+                            
+                            <div class="campo-input">
+                                {{ formUsuario.persona_form.telefono.label_tag }}
+                                {{ formUsuario.persona_form.telefono }}
+                                {% if formUsuario.persona_form.telefono.errors %}
+                                    <div id="error_telefono" class="error-message">
+                                        {% for error in formUsuario.persona_form.telefono.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}                              
+                            </div>
+                            
+                            <div class="campo-input">
+                                {{ formUsuario.persona_form.fecha_nacimiento.label_tag }}
+                                {{ formUsuario.persona_form.fecha_nacimiento }}
+                                {% if formUsuario.persona_form.fecha_nacimiento.errors %}
+                                    <div id="error_fecha_nacimiento" class="error-message">
+                                        {% for error in formUsuario.persona_form.fecha_nacimiento.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}                             
+                            </div>
+                            
+                            <div class="campo-input">
+                                <label for="id_email">Email:</label>
+                                {{ formUsuario.persona_form.email }}
+                                {% if formUsuario.persona_form.email.errors %}
+                                    <div id="error_email" class="error-message">
+                                        {% for error in formUsuario.persona_form.email.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}  
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="secciones">
+                    <div class="datos-personales">
+                        <span class="titulo">Datos de usuario</span>
+                        {% if formUsuario.usuario_form.non_field_errors %}
+                            <ul class="form-errors">
+                                {% for error in formUsuario.usuario_form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <div class="campos">
+                            <div class="campo-input">
+                                <label for="id_tipoUsuario">Tipo usuario:</label>
+                                {{ formUsuario.usuario_form.tipoUsuario }}
+                                {% if formUsuario.usuario_form.tipoUsuario.errors %}
+                                    <div id="error_tipoUsuario" class="error-message">
+                                        {% for error in formUsuario.usuario_form.tipoUsuario.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}                              
+                            </div>
+                            <div class="campo-input box-campo-matricula">
+                                {{ formUsuario.usuario_form.numero_matricula.label_tag }}
+                                {{ formUsuario.usuario_form.numero_matricula }}
+                                {% if formUsuario.usuario_form.numero_matricula.errors %}
+                                    <div id="error_numero_matricula" class="error-message">
+                                        {% for error in formUsuario.usuario_form.numero_matricula.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}  
+                            </div>
+                            
+                            <div class="campo-input">
+                                <label for="cambio_contraseña">Debe cambiar constraseña:</label>
+                                <input type="text" readonly value="{% if usuario.debe_cambiar_contraseña %} Si {% else %} No {% endif %}" id="cambio_contraseña">
+                            </div>
+                            <div class="campo-input">
+                                <label for="date_joined">Fecha de registro:</label>
+                                <input type="text" readonly value="{{usuario.persona.date_joined|date:"d-m-Y H:i"}}" id="date_joined">
+                            </div>
+                            <div class="campo-input">
+                                <label for="last_login">Ultimo inicio de sesion:</label>
+                                <input type="text" readonly value="{{usuario.persona.last_login|date:"d-m-Y H:i"}}" id="last_login">
+                            </div>
+                            <div class="campo-input">
+                                <label for="id_is_active">Usuario habilitado:</label>
+                                {{ formUsuario.persona_form.is_active }}
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+                <button type="submit" class="btn-global">Guardar cambios</button>
+    
+                {% if usuario.tipoUsuario.nombre_tipoUsuario != "Superadministrador" %}  {# Si el rol es cualquier otro diferente al de Superadmin #}
+                    <div class="secciones">
+                        <div class="datos-personales">
+                            <div class="box-header-datos">
+                                <span class="titulo">Lugares donde presta servicios</span>   
+                                <button  type="button" class="btn-masDetalles" id="newLugarTrabajo"><i class="hgi hgi-stroke hgi-plus-sign"></i> Asignar lugar de trabajo</button>
+                            </div>
+                            {% if departamentos_con_jornadas %}
+                                {% for departamento, asignaciones in departamentos_con_jornadas.items %}
+                                    <div class="box-lugar" id="boxLugar-{{ departamento.id }}" onclick="toggleLugar('{{ departamento.id }}')">
+                                        <div class="lugar-header">
+                                            <div>
+                                                <span><strong>Departamento: {{ departamento.nombre_departamento }}</strong></span>
+                                            </div>
+                                            <div>
+                                                <i class="hgi hgi-stroke hgi-arrow-down-01" id="icon-arrow-{{departamento.id}}"></i>
+                                            </div>
+                                        </div>
+                                        <div class="lugar-items hidden-linea" id="items-lugar-{{departamento.id}}">
+                                            {% for asignacion in asignaciones %}
+                                                <p class="item-lugar">{{ asignacion.info|safe }} </p> {# En el backend, usamos <strong> para rodear las partes del texto que deseamos en negrita. En el template, usamos |safe para renderizar el contenido HTML correctamente. #}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div>
+                                    <strong class="item-lugar">No hay departamentos asignados.</strong>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+    
+                {% if usuario.tipoUsuario.nombre_tipoUsuario == "Médico" or usuario.tipoUsuario.nombre_tipoUsuario == "Apoyo en Diagnóstico y Tratamiento"  %} 
+                    <div class="secciones">
+                        <div class="datos-personales">
+                            <div class="box-header-datos">
+                                <span class="titulo">Rol profesional</span>
+                                <button type="button" class="btn-masDetalles" id="newAsignaciones"><i class="hgi hgi-stroke hgi-plus-sign"></i> Asignar servicio</button>
+                            </div>                        
+                            <div class="campos">
+                                    <ul>
+                                        {% for usuario in especialidades %}
+                                            <li>{{usuario.usuario.tipoUsuario}} {{usuario.rol_profesional.nombre_rol_profesional}}</li>
+                                        {% empty %}
+                                            <li class="item-lugar">No tiene roles profesionales asignados</li>
+                                        {% endfor %}
+                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </main>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span id="closeEditModal" class="close">&times;</span>
+            <h2 id="modal-title">Editar rol</h2>
+            <div id="seccion-lugarTrabajo">
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="tipo_form" value="form_lugarTrabajo">
+                    <input type="hidden" name="id_usuario" value="{{usuario.id}}">
+                    <div class="campo-input">
+                        {{ formLugarTrabajo.lugar.label_tag }}
+                        {{ formLugarTrabajo.lugar }}
+                        {{ formLugarTrabajo.lugar.errors }}
+                    </div>
+                    <div class="campo-input">
+                        {{ formLugarTrabajo.jornada.label_tag }}
+                        {{ formLugarTrabajo.jornada }}
+                        {{ formLugarTrabajo.jornada.errors }}
+                    </div>
+                    <div class="campo-input">
+                        {{ formLugarTrabajo.departamento.label_tag }}
+                        {{ formLugarTrabajo.departamento }}
+                        {{ formLugarTrabajo.departamento.errors }}
+                    </div>
+                    <button type="submit" class="btn-guardar">Guardar</button>
+                </form>
+            </div>
+            <div id="seccion-asignaciones">
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="tipo_form" value="form_asignaciones">
+                    <input type="hidden" name="id_usuario" value="{{usuario.id}}">
+                    <div class="campo-input">
+                        {{ formAsignaciones.rol_profesional.label_tag }}
+                        {{ formAsignaciones.rol_profesional }}
+                        {{ formAsignaciones.rol_profesional.errors }}
+                    </div>
+                    <div class="campo-input">
+                        {{ formAsignaciones.especialidad.label_tag }}
+                        {{ formAsignaciones.especialidad }}
+                        {{ formAsignaciones.especialidad.errors }}
+                    </div>
+                    <button type="submit" class="btn-guardar">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/modals_personal.js' %}"></script>
+</body>
+</html>

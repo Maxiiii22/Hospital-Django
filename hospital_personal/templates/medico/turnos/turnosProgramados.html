@@ -1,0 +1,105 @@
+{% extends 'layout/base-personal.html' %}
+{% load static %} <!-- Cargamos la carpeta static que contiene el script.js y el css-->
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'estilos/styles_medico.css' %}">
+{% endblock %}
+
+{% block titulo %}
+    <title>Turnos programados</title>
+{% endblock %}
+
+{% block contenido %}
+    <div class="container-tabla-medico-global">
+        <h1>Turnos Programados para {{especialidad_actual_nombre}}</h1>
+
+        <div class="turnos-section">
+            <h2>Turnos del Día de Hoy</h2>
+            <table>
+            {% if turnos_hoy %}
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Paciente</th>
+                        <th>Asistió</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+            {% endif%}
+                <tbody>
+                    {% for turno in turnos_hoy %}
+                        <tr class="fila-turnos estado-{{ turno.estado }}">
+                            <td data-label="ID:">{{ turno.id }}</td>
+                            <td data-label="Paciente:">{{ turno.paciente.persona.get_full_name }} - DNI {{ turno.paciente.persona.dni }}</td>
+                            <td data-label="Asistió:">{% if turno.asistio %} Si {% else %} No {% endif %}</td>
+                            <td data-label="Estado:">{{ turno.get_estado_display }}</td>
+                            <td data-label="Acciones:" class="td-acciones">
+                                <div class="box-btns-td-acciones">
+                                    {% if turno.estado == "atendido" %}
+                                        {% for consulta in turno.consulta.all %}
+                                            {% if consulta.turno.id == turno.id %}
+                                                <a href="{% url 'editarConsulta' consulta.id %}" class="btn-accion">Editar</a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% elif turno.estado == "pendiente" %}
+                                        <a href="{% url 'registrarConsulta' turno.id %}" class="btn-accion">Comenzar consulta</a>
+                                        <button class="btn-accion">Reprogramar</button>
+                                        <button class="btn-accion">Cancelar</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="empty-message">No hay turnos para hoy.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    
+        <div class="turnos-section">
+            <h2>Turnos futuros</h2>
+            <table>
+            {% if turnos_otros_dias %}
+                <thead>
+                    <tr>
+                        <th>Fecha turno</th>
+                        <th>Paciente</th>
+                        <th class="th-estado">Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+            {% endif%}
+                <tbody>
+                    {% for turno in turnos_otros_dias %}
+                        <tr class="fila-turnos estado-{{ turno.estado }}">
+                            <td data-label="Fecha del turno:">{{ turno.fecha_turno|date:"d/m/Y"}}</td>
+                            <td data-label="Paciente:">{{ turno.paciente.persona.get_full_name }} - DNI {{ turno.paciente.persona.dni }}</td>
+                            <td data-label="Estado:" class="td-estado">{{ turno.get_estado_display }}</td>
+                            <td data-label="Acciones:">
+                                <div class="box-btns-td-acciones">                                    
+                                    {% if turno.estado == "pendiente" %}
+                                        <button class="btn-accion">Reprogramar</button>
+                                        <button class="btn-accion">Cancelar</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="empty-message">No hay otros turnos.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts_js %}  {% endblock %}
+
+
+

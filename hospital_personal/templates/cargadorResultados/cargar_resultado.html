@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar resultados</title>
+    <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css" />
+    <link rel="stylesheet" href="{% static 'estilos/styles_cargador.css' %}">
+</head>
+<body>
+    <main class="container-cargador-resultados">
+        <div class="box-form-cargar-resultados">
+          <a href="{% url 'verEstudios' %}" class="back-link"><i class="hgi hgi-stroke hgi-arrow-left-02"></i> Volver atrás</a>    
+          <div class="datos-paciente">
+            <h2>Cargar resultados</h2>
+            <p><strong>Estudio:</strong> {{ turno.orden.tipo_estudio.nombre_estudio }}</p>
+            <p><strong>N° Orden:</strong> {{ turno.orden.id }}</p>
+            <p><strong>Paciente:</strong> {{ turno.orden.consulta.turno.paciente.persona.get_full_name }} - <strong>DNI:</strong> {{ turno.orden.consulta.turno.paciente.persona.dni }}</p>
+
+          </div>
+  
+          <form method="post" id="form-cargar-resultados" enctype="multipart/form-data">
+            {% csrf_token %}
+        
+            {% if turno.orden.tipo_estudio.tipo_resultado == "lab" %}
+              <h3>Datos de Laboratorio</h3>
+              {% for field in form %}
+                {% if field.name != "informe" %}
+                  <div class="box-form-input">
+                    <label>{{ field.label }}:</label>
+                    {{ field }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+        
+            {% elif turno.orden.tipo_estudio.tipo_resultado == "fisio" %}
+              <h3>Datos Fisiológicos</h3>
+              {% for field in form %}
+                {% if field.name != "informe" %}
+                  <div class="box-form-input">
+                    <label>{{ field.label }}:</label>
+                    {{ field }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+        
+            {% elif turno.orden.tipo_estudio.tipo_resultado == "img" %}
+              <h3>Subir Imágenes</h3>
+              {{ formset.management_form }}
+              {% for f in formset %}
+                <div class="box-form-input-img">
+                  {{ f.imagen.label }}: {{ f.imagen }}
+                  {% if f.DELETE %} Cancelar: {{ f.DELETE }} {% endif %}
+                </div>
+              {% endfor %}
+              
+            {% elif turno.orden.tipo_estudio.tipo_resultado == "eval" %}
+              <h3>Informe de Evaluación Clínica</h3>
+              <!-- Solo muestra el textarea de informe -->
+            {% endif %}
+              
+            <div class="box-form-input">
+              <label for="{{ form.informe.id_for_label }}">Informe:</label>
+              {{ form.informe }}
+            </div>
+        
+            <button type="submit" class="btn-global">{% if turno.orden.tipo_estudio.tipo_resultado == "img"  %}Guardar y generar PDF{% else %}Guardar{% endif%}</button>
+          </form>
+        </div>
+    </main>
+
+</body>
+</html>
+
+
