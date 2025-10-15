@@ -9,9 +9,11 @@ from .models import UsuarioXDepartamentoXJornadaXLugar,UsuarioXEspecialidadXServ
 from controlUsuario.models import Usuario,TiposUsuarios,RolesProfesionales
 from hospital_pacientes.models import Paciente
 from controlUsuario.forms import FormularioRegistroDePersonal,FormularioActualizarPassword
-from .forms import FormEspecialidades,FormDepartamentos,FormTiposUsuarios,FormConsulta,MedicacionesFormSet,EstudiosFormSet,ResultadoEstudioForm,ResultadoImagenForm,FormularioAsignaciones,FormularioLugarTrabajo,FormRolesProfesionales,FormServiciosDiagnostico,FormEstudiosDiagnosticos,FormLugar,FormPlantillaEstudio
+from .forms import FormEspecialidades,FormDepartamentos,FormTiposUsuarios,FormConsulta,MedicacionesFormSet,EstudiosFormSet,ResultadoEstudioForm,ResultadoImagenForm,FormularioAsignaciones,FormularioLugarTrabajo,FormRolesProfesionales,FormServiciosDiagnostico,FormEstudiosDiagnosticos,FormLugar,FormPlantillaEstudio,FormularioEditarLugarTrabajo
 from django.forms import modelformset_factory
 from django.contrib.auth import update_session_auth_hash
+from hospital_pacientes.views import obtener_disponibilidad
+import datetime
 
 
 # Create your views here.
@@ -107,57 +109,163 @@ def detalle_usuario(request,id):
     if usuario != request.user.usuario and not request.user.is_staff: # Verificar si el turno pertenece al usuario actual o si el que intenta acceder es un superadmin
         return HttpResponseForbidden(render(request, "403.html"))
     
+    rolesProfesionales = UsuarioXEspecialidadXServicioXrolesProfesionales.objects.filter(usuario_id=id)
+    asignaciones = UsuarioXDepartamentoXJornadaXLugar.objects.filter(usuario_id=id).order_by('jornada')
+    
+    departamentos_con_jornadas = defaultdict(list)
+    for asignacion in asignaciones:
+        departamentos_con_jornadas[asignacion.departamento].append({
+            "id": f"{asignacion.id}",
+            "info": f"Los días <strong>{asignacion.jornada.get_dia_display()}</strong> en el turno: <strong>{asignacion.jornada.get_turno_display()}</strong> trabaja en el <strong>{asignacion.lugar.nombre} ({asignacion.lugar.codigo})</strong>"
+        })
+    
+    departamentos_con_jornadas = dict(departamentos_con_jornadas)
+    formUsuario = FormularioRegistroDePersonal(persona_instance=usuario.persona,usuario_instance=usuario)
+    
     if request.method == 'POST':
         tipo_form = request.POST.get("tipo_form")
         
-        if tipo_form == "form_asignaciones":
-            id_usuario = request.POST.get("id_usuario")
-            formAsignaciones = FormularioAsignaciones(request.POST ,user=usuario)
-            if formAsignaciones.is_valid():
-                asignacion = formAsignaciones.save(commit=False)
-                asignacion.usuario = Usuario.objects.get(id=id_usuario)
-                asignacion.save()
-                return redirect('detalle_usuario', id=id_usuario)  # Redirigir al detalle del usuario
-        elif tipo_form == "form_editarPersonal":
+        if tipo_form == "form_editarPersonal":
             formUsuario = FormularioRegistroDePersonal(
                 request.POST,
                 persona_instance=usuario.persona,
                 usuario_instance=usuario
             )
             if formUsuario.is_valid():
-                print(request.POST)
                 usuario_guardado = formUsuario.save(commit=True)  # Guarda tanto la persona como el usuario
                 return redirect('detalle_usuario', id=usuario_guardado.id)  # Redirigir al detalle del usuario
             
+        elif tipo_form == "form_asignaciones":
+            id_usuario = request.POST.get("id_usuario")      
+            asignacion_id = request.POST.get("id_instancia") 
+            
+            if asignacion_id:  # EDICIÓN
+                asignacion_existente = UsuarioXEspecialidadXServicioXrolesProfesionales.objects.get(id=asignacion_id)
+                formAsignaciones = FormularioAsignaciones(request.POST, user=usuario, instance=asignacion_existente)
+                titleModal = "Editar rol profesional"
+            else:  # ALTA
+                formAsignaciones = FormularioAsignaciones(request.POST, user=usuario)    
+                titleModal = "Asignar nuevo rol profesional"        
+
+            
+            if formAsignaciones.is_valid():
+                asignacion = formAsignaciones.save(commit=False)
+                asignacion.usuario = Usuario.objects.get(id=id_usuario)
+                asignacion.save()
+                return redirect('detalle_usuario', id=id_usuario)  # Redirigir al detalle del usuario
+            else:
+                return render(request, "superadmin/gestionPersonal/detallesUsuario.html",{
+                            "usuario":usuario,"rolesProfesionales":rolesProfesionales,"departamentos_con_jornadas": departamentos_con_jornadas,
+                            "formUsuario":formUsuario,
+                            "formAsignaciones": formAsignaciones,"formLugarTrabajo": FormularioLugarTrabajo(),
+                            "formEditarLugarTrabajo":FormularioEditarLugarTrabajo(),
+                            "errorFormAsignaciones": True,
+                            "titleModal":titleModal})  
+            
         elif tipo_form == "form_lugarTrabajo":
             id_usuario = request.POST.get("id_usuario")
-            formLugarTrabajo = FormularioLugarTrabajo(request.POST)
+            usuario = Usuario.objects.get(id=id_usuario)
+            
+            formLugarTrabajo = FormularioLugarTrabajo(request.POST, usuario=usuario)  
+            
             if formLugarTrabajo.is_valid():
-                lugarTrabajo = formLugarTrabajo.save(commit=False)
-                lugarTrabajo.usuario = Usuario.objects.get(id=id_usuario)
-                lugarTrabajo.save()
-                return redirect('detalle_usuario', id=id_usuario)  # Redirigir al detalle del usuario
-    else:
-        formUsuario = FormularioRegistroDePersonal(
-            persona_instance=usuario.persona,
-            usuario_instance=usuario
-        )
-        
-    especialidades = UsuarioXEspecialidadXServicioXrolesProfesionales.objects.filter(usuario_id=id)
-    asignaciones = UsuarioXDepartamentoXJornadaXLugar.objects.filter(usuario_id=id)
-    
-    departamentos_con_jornadas = defaultdict(list)
-    for asignacion in asignaciones:
-        departamento_nombre = asignacion.departamento.nombre_departamento  
-        departamentos_con_jornadas[asignacion.departamento].append({
-            "info": f"Los días <strong>{asignacion.jornada.get_dia_display()}</strong> en el turno: <strong>{asignacion.jornada.get_turno_display()}</strong> trabaja en el <strong>{asignacion.lugar.nombre} ({asignacion.lugar.codigo})</strong>"
-        })
-        
-    departamentos_con_jornadas = dict(departamentos_con_jornadas)
+                creados, omitidos = formLugarTrabajo.save()
+                
+                if omitidos:
+                    jornadas_texto = ", ".join(f"{j.get_dia_display()} - {j.get_turno_display()}" for j in omitidos)
+                    messages.info(request, f"Estas jornadas ya estaban asignadas y fueron omitidas: {jornadas_texto}")
+                
+                if creados:
+                    messages.success(request, f"Se asignaron correctamente {len(creados)} jornada(s) nuevas.")
+                    
+                return redirect('detalle_usuario', id=id_usuario)
+            else:
+                return render(request, "superadmin/gestionPersonal/detallesUsuario.html",{
+                            "usuario":usuario,"rolesProfesionales":rolesProfesionales,"departamentos_con_jornadas": departamentos_con_jornadas,
+                            "formUsuario":formUsuario,
+                            "formAsignaciones": FormularioAsignaciones(user=usuario),"formLugarTrabajo": formLugarTrabajo,
+                            "formEditarLugarTrabajo":FormularioEditarLugarTrabajo(),
+                            "errorFormLugarTrabajo": True,
+                            "titleModal":"Asignar nuevo lugar de trabajo"})  
+                
+        elif tipo_form == "form_editarLugarTrabajo":
+                id_instancia = request.POST.get('id_instancia')
+                instancia = get_object_or_404(UsuarioXDepartamentoXJornadaXLugar, pk=id_instancia)
+                form = FormularioEditarLugarTrabajo(request.POST, instance=instancia, usuario=instancia.usuario)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, "Lugar de trabajo actualizado correctamente.")
+                    return redirect('detalle_usuario', id=instancia.usuario.id)
+                else:
+                    return render(request, "superadmin/gestionPersonal/detallesUsuario.html",{
+                                "usuario":usuario,"rolesProfesionales":rolesProfesionales,"departamentos_con_jornadas": departamentos_con_jornadas,
+                                "formUsuario":formUsuario,
+                                "formAsignaciones": FormularioAsignaciones(user=usuario),"formLugarTrabajo": FormularioLugarTrabajo(),
+                                "formEditarLugarTrabajo":form,
+                                "errorFormEditarLugarTrabajo": True,
+                                "titleModal":"Editar lugar de trabajo"}) 
+                    
 
-    return render(request, "superadmin/gestionPersonal/detallesUsuario.html",{"usuario":usuario,"especialidades":especialidades,"departamentos_con_jornadas": departamentos_con_jornadas,
+    return render(request, "superadmin/gestionPersonal/detallesUsuario.html",{"usuario":usuario,"rolesProfesionales":rolesProfesionales,"departamentos_con_jornadas": departamentos_con_jornadas,
                     "formUsuario":formUsuario,
-                    "formAsignaciones": FormularioAsignaciones(user=usuario),"formLugarTrabajo": FormularioLugarTrabajo()  }) 
+                    "formAsignaciones": FormularioAsignaciones(user=usuario),"formLugarTrabajo": FormularioLugarTrabajo(), "formEditarLugarTrabajo":FormularioEditarLugarTrabajo()  }) 
+
+@personal_required
+@login_required
+def getLugarTrabajoORolProfesional(request):
+    if request.method == "GET" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        id_lugarTrabajo = request.GET.get('id_lugarTrabajo')
+        id_rolProfesional = request.GET.get('id_rolProfesional')
+        
+        if id_lugarTrabajo:
+            lugarTrabajo = get_object_or_404(UsuarioXDepartamentoXJornadaXLugar, id=id_lugarTrabajo)
+            data = {
+                "id_instancia": lugarTrabajo.id,
+                "id_lugar": lugarTrabajo.lugar.id,
+                "id_jornada": lugarTrabajo.jornada.id,            
+                "id_departamento": lugarTrabajo.departamento.id
+            }
+            return JsonResponse(data)
+        elif id_rolProfesional:
+            rolProfesional = get_object_or_404(UsuarioXEspecialidadXServicioXrolesProfesionales, id=id_rolProfesional)
+            data = {
+                "id_instancia": rolProfesional.id,
+                "id_especialidad": rolProfesional.especialidad.id,
+                "id_rolProfesional": getattr(rolProfesional.rol_profesional, 'id', None),            
+                "id_servicio_diagnostico": getattr(rolProfesional.servicio_diagnostico, 'id', None)
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({"error": "ID no proporcionado"}, status=400)
+
+@personal_required
+@login_required
+def deleteLugarTrabajo(request,id_lugarTrabajo):
+    if not request.user.is_staff: # si el que intenta acceder no es un superadmin
+        return HttpResponseForbidden(render(request, "403.html"))
+    
+    lugarTrabajo = get_object_or_404(UsuarioXDepartamentoXJornadaXLugar, id=id_lugarTrabajo)
+    if request.method == 'GET':
+        return redirect('detalle_usuario', id=lugarTrabajo.usuario.id)
+        
+    if request.method == 'POST':
+        lugarTrabajo.delete()
+        return redirect('detalle_usuario', id=lugarTrabajo.usuario.id)
+
+@personal_required
+@login_required
+def deleteRolProfesional(request,id_rolProfesional):
+    if not request.user.is_staff: # si el que intenta acceder no es un superadmin
+        return HttpResponseForbidden(render(request, "403.html"))
+    
+    rolProfesional = get_object_or_404(UsuarioXEspecialidadXServicioXrolesProfesionales, id=id_rolProfesional)
+    if request.method == 'GET':
+        return redirect('detalle_usuario', id=rolProfesional.usuario.id)
+        
+    if request.method == 'POST':
+        rolProfesional.delete()
+        return redirect('detalle_usuario', id=rolProfesional.usuario.id)
+
 
 @personal_required
 @login_required
@@ -517,6 +625,87 @@ def turnosProgramados(request):
         
     return render(request, "medico/turnos/turnosProgramados.html",{ "turnos_hoy": turnos_hoy,"turnos_otros_dias": turnos_otros_dias})
 
+
+@personal_required
+@login_required
+def reprogramarTurno(request, turno_id):
+    usuario_actual = request.user.usuario
+    
+    if request.method == "GET" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        id_turno = request.GET.get("id")
+        turno = get_object_or_404(Turno, id=id_turno)
+        
+        # Verificar si el turno pertenece al profesional actual 
+        if turno.profesional != usuario_actual:
+            print(turno_id)
+            return HttpResponseForbidden(render(request, "403.html"))
+        
+        if id_turno:
+            disponibilidad = obtener_disponibilidad(turno.profesional_id,turno.horario_turno)
+            dias_disponibles = [{
+                "profesional": turno.profesional_id,
+                "disponibilidad": disponibilidad
+            }]
+            return JsonResponse({
+                "id": id_turno,
+                "dias_disponibles": dias_disponibles
+            })
+        else:
+            return JsonResponse({"error": "ID no proporcionado"}, status=400)
+        
+    # Si es POST, procesar la reprogramación
+    if request.method == "POST":
+        turno = get_object_or_404(Turno, id=turno_id)
+        
+        # Verificar si el turno pertenece al profesional actual 
+        if turno.profesional != usuario_actual:
+            return HttpResponseForbidden(render(request, "403.html"))
+        
+        hoy = timezone.now()
+        fecha_seleccionada = request.POST.get("fecha_seleccionada") 
+        if fecha_seleccionada:  
+            fecha_turno = datetime.datetime.strptime(fecha_seleccionada, "%Y-%m-%d").date()
+            turno_reprogramado = Turno.objects.get(id=turno_id)
+            
+            try:
+                turno_reprogramado.fecha_creacion = hoy
+                turno_reprogramado.fecha_turno = fecha_turno
+                turno_reprogramado.save()
+                print("Turno reprogramado exitosamente.")
+                return redirect("turnosProgramados")
+            except Exception as e:
+                print(f"Error al reprogramar el turno: {e}")
+        else:
+            messages.error(request, "Por favor, seleccione una fecha")
+            return redirect("turnosProgramados")
+
+    
+    return HttpResponseForbidden(render(request, "403.html"))
+
+
+
+@personal_required
+@login_required
+def cancelarTurno(request, turno_id):
+    turno = get_object_or_404(Turno, id=turno_id)
+    usuario_actual = request.user.usuario
+    
+    # Verificar si el turno pertenece al profesional actual
+    if turno.profesional != usuario_actual:
+        return HttpResponseForbidden(render(request, "403.html"))
+    
+    if turno.profesional == usuario_actual:  # Si el turno es del profesional actual
+        if request.method == 'GET':
+            return redirect("turnosProgramados")
+        
+        if request.method == 'POST':
+            turno.estado = "cancelado"
+            turno.asistio = False
+            turno.save()
+            return redirect("turnosProgramados")
+
+
+
 @personal_required
 @login_required
 def registrarConsulta(request, id_turno):
@@ -681,59 +870,6 @@ def historialConsultas(request):
     consultas = Consultas.objects.filter(turno__profesional=request.user.usuario, turno__especialidad = especialidad).prefetch_related('estudios', 'medicaciones')  # trae todas las medicaciones y estudios asociados a las consultas que hayas filtrado
 
     return render(request, "medico/consultas/consultas.html",{"consultas":consultas})
-
-@personal_required
-@login_required
-def medicacionyestudios(request):    
-    if request.method == "GET" and request.headers.get("x-requested-with") == "XMLHttpRequest":
-        id_consulta = request.GET.get("id")
-        consulta = get_object_or_404(Consultas, id=id_consulta)
-        profesional_actual = request.user.usuario    
-        
-        if not id_consulta:
-            return JsonResponse({"error": "ID de consulta no proporcionado"}, status=400)
-            
-        # Verificar si el turno pertenece al profesional actual
-        if consulta.turno.profesional != profesional_actual:
-            return HttpResponseForbidden(render(request, "403.html"))
-        
-        medicamentos = Medicaciones.objects.filter(consulta_id=id_consulta)
-        estudios = OrdenEstudio.objects.filter(consulta_id=id_consulta)
-        
-        
-        data = {
-            "medicacion": [],
-            "estudio": []
-        }
-        
-        for medicamento in medicamentos:
-            data["medicacion"].append({
-                "medicamento": medicamento.medicamento,
-                "dosis": medicamento.dosis,
-                "frecuencia": medicamento.frecuencia,
-                "tiempo_uso": medicamento.tiempo_uso
-            })
-        
-        for estudio in estudios:
-            turno = TurnoEstudio.objects.filter(orden_id=estudio.id).first()  # Aseguramos obtener el primer turno
-            if turno:
-                resultado_estudio = ResultadoEstudio.objects.filter(turno_estudio=turno).first()
-                pdf_url = resultado_estudio.archivo_pdf.url if resultado_estudio and resultado_estudio.archivo_pdf else ''
-            else:
-                pdf_url = ''  
-            
-            data["estudio"].append({
-                "tipo_estudio": estudio.tipo_estudio.nombre_estudio,
-                "motivo_estudio": estudio.motivo_estudio,
-                "indicaciones": estudio.indicaciones,
-                "fecha_solicitud": estudio.fecha_solicitud.strftime('%d/%m/%Y %H:%M') if estudio.fecha_solicitud else '',
-                "estado": estudio.get_estado_display(),
-                "pdf": pdf_url
-            })
-        
-        return JsonResponse(data)
-    
-    # return HttpResponseNotFound(render(request, "404.html"))
 
 
 ### Fin seccion medico ###

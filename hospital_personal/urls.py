@@ -8,6 +8,9 @@ urlpatterns = [
     path("gestion-personal/", views.gestionDelPersonal, name="gestionDelPersonal"),
     path("gestion-personal/alta-personal", views.altaPersonal, name="altaPersonal"),
     path("detalles-usuario-<int:id>",views.detalle_usuario, name ="detalle_usuario"),
+    path("get-lugarTrabajoORolProfesional/",views.getLugarTrabajoORolProfesional, name ="getLugarTrabajoORolProfesional"), 
+    path("delete-lugarTrabajo/<int:id_lugarTrabajo>",views.deleteLugarTrabajo, name ="deleteLugarTrabajo"), 
+    path("delete-rolProfesional/<int:id_rolProfesional>",views.deleteRolProfesional, name ="deleteRolProfesional"), 
     path("gestion-departamentos/", views.gestionDeDepartamentos, name="gestionDeDepartamentos"),
     path("gestion-roles/", views.gestionDeRoles, name="gestionDeRoles"),
     path("gestion-especialidades/", views.gestionDeEspecialidades, name="gestionDeEspecialidades"),
@@ -19,10 +22,11 @@ urlpatterns = [
     path("lista-pacientes/turnos-paciente-<int:id>", views.turnosPaciente, name="turnosPaciente"),
     # Medico:
     path("turnos/", views.turnosProgramados, name="turnosProgramados"),
+    path("turnos/reprogramar/<int:turno_id>/", views.reprogramarTurno, name="reprogramarTurno"),
+    path("turnos/cancelar/<int:turno_id>/", views.cancelarTurno, name="cancelarTurno"),
     path("consultas/", views.historialConsultas, name="historialConsultas"),
     path("consultas/registrar/<int:id_turno>", views.registrarConsulta, name="registrarConsulta"),
     path("consultas/editar/<int:id_consulta>", views.editarConsulta, name="editarConsulta"),
-    path("consultas/medicacionyestudios/", views.medicacionyestudios, name="medicacionyestudios"),
     # Cargador de resultados:
     path("cargar-resultados/", views.verEstudios, name="verEstudios"),
     path("cargar-resultados/turno-estudio-<int:turno_id>", views.cargar_resultado, name="cargar_resultado")

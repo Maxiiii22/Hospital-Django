@@ -714,21 +714,68 @@ form .campos .campo-input{
 
 .section-turnos .encabezado-turnos h2,.section-turnosEstudios .encabezado-turnos h2 {
     margin: 0 auto;
-    font-size: clamp(1.5rem, 3dvw, 2rem);
+    font-size: clamp(1.2rem, 3dvw, 2rem);
 }
 
 .btn-toggle {
-    margin: 10px;
     padding: 10px;
     background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
     border-radius: 5px;
+    font-size: clamp(.7rem, 2dvw, 1rem);
+}
+
+.box-btns-td-acciones{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.box-btns-td-acciones form button{
+    width: 100%;
 }
 
 .btn-toggle:hover {
     background-color: #45a049;
+}
+
+.modal-reprogramar-turno{
+    background-color: #fff;
+    border: 1px solid #aaa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: clamp(303px, 95%, 350px);
+    transition: border-color 0.2s ease;
+}
+
+.modal-reprogramar-turno #closeEditModal{
+    align-self: flex-end;
+}
+
+.modal-reprogramar-turno h2{
+    margin-bottom: 5px;
+}
+
+.modal-reprogramar-turno .nav-buttons button{
+    padding: 5px 15px;
+    margin: 3px 10px 0;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}
+
+.modal-reprogramar-turno .btn-global{
+    padding: 10px;
 }
 
 .calendar {
@@ -745,6 +792,7 @@ form .campos .campo-input{
     border: 1px solid #ccc;
     cursor: pointer;
     background-color: white;
+    border: 2px solid transparent;
 }
 
 .calendar button:disabled {
@@ -804,6 +852,11 @@ form .campos .campo-input{
 
 
 @media (width <= 600px){
+    .box-btns-td-acciones{
+        display: flex;
+        flex-direction: column;
+    }
+
     .tablas-historial-turnos .columna-estado{
         display: flex;
     }

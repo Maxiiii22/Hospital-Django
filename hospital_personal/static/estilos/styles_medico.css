@@ -29,6 +29,20 @@
     text-decoration: underline;
 }
 
+.btn-global{
+    background-color: #007bff;
+    color: white;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.btn-global:hover{
+    background-color: #0056b3;
+}
+
+
 .btn-masDetalles{
     background-color: #48e;
     color: white;
@@ -44,6 +58,17 @@
 
 .btn-masDetalles:hover{
     background-color: #0056b3;
+}
+
+.box-btns-td-acciones{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.box-btns-td-acciones form button{
+    width: 100%;
 }
 
 /* Fin Clases globales */ 
@@ -583,6 +608,104 @@
 }
 
 
+.modal-reprogramar-turno{
+    background-color: #fff;
+    border: 1px solid #aaa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: clamp(303px, 95%, 350px);
+    transition: border-color 0.2s ease;
+}
+
+.modal-reprogramar-turno #closeEditModal{
+    align-self: flex-end;
+}
+
+.modal-reprogramar-turno h2{
+    margin-bottom: 5px;
+}
+
+
+.modal-reprogramar-turno .btn-global{
+    padding: 10px;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    max-width: 300px;
+    margin: 10px auto;
+}
+
+.calendar button {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    background-color: white;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    transition: color,border-color,background-color .3s;
+}
+
+.calendar button:disabled {
+    background-color: #ddd;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.calendar button.valid {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.calendar button:hover:not([disabled]) {
+    background-color: #f0f0f0;
+    color: #000;
+    border-color: #000;
+}
+
+.calendar button.seleccionado {
+    background-color: #000;
+    color: white;
+    font-weight: bold;
+    border-color: #000;
+}
+
+.header {
+    grid-column: span 7;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.modal-reprogramar-turno .nav-buttons button{
+    padding: 5px 15px;
+    margin: 3px 10px 0;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}
+
+.modal-reprogramar-turno .nav-buttons button:hover{
+    background-color: #0056b3;
+}
+
+
+
 @media (width <= 400px){
     .turnos-section,
     .turnos-section thead,
@@ -633,6 +756,7 @@
         display: flex;
         flex-direction: column;
     }
+
 
     .turnos-section .empty-message{
         justify-content: center;

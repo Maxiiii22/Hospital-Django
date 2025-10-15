@@ -29,6 +29,17 @@ function resaltarElementoDesdeHash() {
 }
 window.addEventListener('hashchange', resaltarElementoDesdeHash); // // Ejecutar también cuando el hash cambie sin recargar la página
 
+/* Esto es solo efecto de scroll */
+const scrollable = document.querySelector('.box-multipleCheck');
+if (scrollable){
+const fade = document.querySelector('.fade-bottom');
+scrollable.addEventListener('scroll', () => {
+    const scrolledToBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
+
+    fade.style.opacity = scrolledToBottom ? '0' : '1';
+});
+}
+
 
 function abrirDetalle(btn) {
     modal.classList.add("show");
@@ -46,19 +57,6 @@ function abrirDetalle(btn) {
     document.getElementById("modalUltimoAcceso").textContent = btn.dataset.ultimoAcceso;
     document.getElementById("modalEstado").textContent = btn.dataset.estado;
 }
-
-/* Esto es solo efecto de scroll */
-const scrollable = document.querySelector('.box-multipleCheck');
-if (scrollable){
-const fade = document.querySelector('.fade-bottom');
-scrollable.addEventListener('scroll', () => {
-    const scrolledToBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
-
-    fade.style.opacity = scrolledToBottom ? '0' : '1';
-});
-}
-
-
 
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('.btn-masDetalles').forEach(btn => {
@@ -103,7 +101,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
 
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -132,9 +131,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
-
                     
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -164,9 +163,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
-
                     
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -196,8 +195,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
 
-
-                } catch (err) {
+                }
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -222,20 +221,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("id_nombre_servicio").value = data.nombre_servicio;
                     document.getElementById("id_descripcion").value = data.descripcion_servicio;
                     document.getElementById("id_departamento").value = data.departamento_servicio;
-                    document.querySelector(".modal-content").style.width = "fit-content";
-                    const lugaresIds = data.lugar_servicio;
 
+                    const lugaresIds = data.lugar_servicio;
                     const checkboxes = document.querySelectorAll('input[name="lugar"]');
                     checkboxes.forEach((checkbox) => {
-                        checkbox.classList.add('selected'); // Marca como seleccionada
                         checkbox.checked = lugaresIds.includes(parseInt(checkbox.value));
                     });     
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
 
-
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -263,10 +260,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("id_tipo_resultado").value = data.tipo_resultado; 
 
                     const especialidadesIds = data.especialidad_estudio;
-
                     const checkboxes = document.querySelectorAll('input[name="especialidad"]');
                     checkboxes.forEach((checkbox) => {
-                        checkbox.classList.add('selected'); // Marca como seleccionada
                         checkbox.checked = especialidadesIds.includes(parseInt(checkbox.value));
                     });                    
 
@@ -274,8 +269,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
 
-
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -310,6 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     else{
                         document.getElementById("id_es_critico").checked = false;
                     }
+
                     if(data.isActivo_lugar){
                         document.getElementById("id_activo").checked = true;
                     }
@@ -320,8 +316,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
 
-
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -345,91 +341,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("id_plantilla").value = data.id_plantilla;
                     document.getElementById("id_estudio").value = data.estudio_plantilla;
                     document.getElementById("id_estructura").value = JSON.stringify(data.estructura_estudio, null, 2);
-
                     document.querySelector(".modal-content").style.width = "fit-content";
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
 
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
             }
-            else if (id_consulta) {
-                try {
-                    const response = await fetch(`/personal/consultas/medicacionyestudios/?id=${id_consulta}`, {
-                        headers: { "X-Requested-With": "XMLHttpRequest" }
-                    });
-            
-                    if (!response.ok) throw new Error("Error al obtener datos");
-            
-                    const data = await response.json();
-            
-                    let titulo = "Información";
-                    if (data.medicacion?.length && data.estudio?.length) {
-                        titulo = "Medicaciones y Estudios solicitados";
-                    } else if (data.medicacion?.length) {
-                        titulo = "Medicaciones";
-                    } else if (data.estudio?.length) {
-                        titulo = "Estudios solicitados";
-                    }
-                    document.getElementById("modal-title").textContent = titulo;
-            
-                    const medTbody = document.getElementById("modalMedicaciones");
-                    medTbody.innerHTML = ""; // limpiar
-                    if (data.medicacion?.length) {
-                        data.medicacion.forEach(med => {
-                            medTbody.innerHTML +=
-                            `<tr> 
-                                <td >
-                                    • <strong>Medicamento:</strong> ${med.medicamento || "-"}<br>` +
-                                    `• <strong>Dosis:</strong> ${med.dosis || "-"}<br>` +
-                                    `• <strong>Frecuencia:</strong> ${med.frecuencia || "-"}<br>` +
-                                    `• <strong>Tiempo de uso:</strong> ${med.tiempo_uso}
-                                </td>
-                            </tr>`;
-                        });
-                        document.getElementById("medicacion-section").style.display = "block";
-                    } else {
-                        document.getElementById("medicacion-section").style.display = "none";
-                    }
-            
-                    const estTbody = document.getElementById("modalEstudios");
-                    estTbody.innerHTML = ""; // limpiar
-                    if (data.estudio?.length) {
-                        data.estudio.forEach(est => {
-                            let rowContent = `
-                                <tr>
-                                    <td>
-                                        • <strong>Tipo de estudio:</strong> ${est.tipo_estudio || "-"}<br>
-                                        • <strong>Motivo:</strong> ${est.motivo_estudio || "-"}<br>
-                                        • <strong>Indicaciones:</strong> ${est.indicaciones || "-"}<br>
-                                        • <strong>Fecha de solicitud:</strong> ${est.fecha_solicitud || "-"}<br>
-                                        • <strong>Estado:</strong> ${est.estado || "-"}<br>
-                            `;
-                            if (est.pdf) {
-                                rowContent += `• <strong>PDF:</strong> <a href="${est.pdf}" target="_blank">Ver PDF</a><br>`;
-                            }
-                            rowContent += `</td></tr>`;
-                            estTbody.innerHTML += rowContent;
-                        });
-                        document.getElementById("estudio-section").style.display = "block";
-                    } 
-                    else {
-                        document.getElementById("estudio-section").style.display = "none";
-                    }
-            
-                    modal.classList.add("show");
-                    document.body.style.overflow = "hidden"; 
-                    document.documentElement.style.overflow = "hidden";
 
-
-                } catch (err) {
-                    alert("Error al cargar los datos");
-                    console.error(err);
-                }
-            }
         });
     });
 
@@ -451,7 +374,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelector("#editForm.formTipoUsuario").addEventListener("submit", function(event) {
             event.preventDefault();
     
-            // Limpiar errores previos
             document.querySelectorAll('.error-message').forEach(errorDiv => {
                 errorDiv.remove();
             });
@@ -475,7 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
     
                     errorDiv.innerHTML = `<p>${mensajeError}</p>`;
-                    input.parentElement.appendChild(errorDiv); // Agrega el mensaje de error debajo del campo
+                    input.parentElement.appendChild(errorDiv); 
                 }
             });
     
@@ -504,7 +426,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelector("#editForm.formRolProfesional").addEventListener("submit", function(event) {
             event.preventDefault();
     
-            // Limpiar errores previos
             document.querySelectorAll('.error-message').forEach(errorDiv => {
                 errorDiv.remove();
 
@@ -524,7 +445,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.log(input)
                     let mensajeError = '';
     
-                    // Verifica el campo y muestra un mensaje de error específico
                     if (input.id === 'id_nombre_rol_profesional') {
                         mensajeError = 'El nombre del rol profesional es obligatorio.';
                     } else if (input.id === 'id_tipoUsuario') {
@@ -532,7 +452,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
     
                     errorDiv.innerHTML = `<p>${mensajeError}</p>`;
-                    input.parentElement.appendChild(errorDiv); // Agrega el mensaje de error debajo del campo
+                    input.parentElement.appendChild(errorDiv); 
                 }
             });
     
@@ -555,21 +475,17 @@ document.addEventListener("DOMContentLoaded", function () {
             modal.classList.add("show");
             document.body.style.overflow = "hidden"; 
             document.documentElement.style.overflow = "hidden";
-
-
         })
 
         formDelModal.addEventListener("submit", function(event) {
             event.preventDefault();
     
-            // Limpiar errores previos
             document.querySelectorAll('.error-message').forEach(errorDiv => {
                 errorDiv.remove();
             });
     
             // Seleccionar todos los inputs, select y textarea
             const allinputsModal = document.querySelectorAll(".campo-input input,select,textarea");
-    
             let hayErrores = false;
     
             allinputsModal.forEach(input => {
@@ -590,7 +506,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
     
                     errorDiv.innerHTML = `<p>${mensajeError}</p>`;
-                    input.parentElement.appendChild(errorDiv); // Agrega el mensaje de error debajo del campo
+                    input.parentElement.appendChild(errorDiv); 
                 }
             });
     
@@ -614,8 +530,6 @@ document.addEventListener("DOMContentLoaded", function () {
             modal.classList.add("show");
             document.body.style.overflow = "hidden"; 
             document.documentElement.style.overflow = "hidden";
-
-
         })
 
         formDelModal.addEventListener("submit", function(event) {
@@ -679,21 +593,17 @@ document.addEventListener("DOMContentLoaded", function () {
             modal.classList.add("show");
             document.body.style.overflow = "hidden"; 
             document.documentElement.style.overflow = "hidden";
-
-
         })
 
         formDelModal.addEventListener("submit", function(event) {
             event.preventDefault();
     
-            // Limpiar errores previos
             document.querySelectorAll('.error-message').forEach(errorDiv => {
                 errorDiv.remove();
             });
     
             // Seleccionar todos los inputs, select y textarea
             const allinputsModal = document.querySelectorAll(".campo-input input,select,textarea");
-    
             let hayErrores = false;
     
             allinputsModal.forEach(input => {
@@ -719,7 +629,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
     
                     errorDiv.innerHTML = `<p>${mensajeError}</p>`;
-                    input.parentElement.appendChild(errorDiv); // Agrega el mensaje de error debajo del campo
+                    input.parentElement.appendChild(errorDiv); 
                 }
             });
     
@@ -742,7 +652,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const checkboxes = document.querySelectorAll('input[name="especialidad"]');
             checkboxes.forEach((checkbox) => {
-                checkbox.classList.remove('selected'); // Marca como seleccionada
                 checkbox.checked = false
             });  
 
@@ -755,7 +664,6 @@ document.addEventListener("DOMContentLoaded", function () {
         formDelModal.addEventListener("submit", function(event) {
             event.preventDefault();
     
-            // Limpiar errores previos
             document.querySelectorAll('.error-message').forEach(errorDiv => {
                 errorDiv.remove();
             });
@@ -788,7 +696,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
     
                     errorDiv.innerHTML = `<p>${mensajeError}</p>`;
-                    input.parentElement.appendChild(errorDiv); // Agrega el mensaje de error debajo del campo
+                    input.parentElement.appendChild(errorDiv);
                 }
             });
     
@@ -823,7 +731,6 @@ document.addEventListener("DOMContentLoaded", function () {
         formDelModal.addEventListener("submit", function(event) {
             event.preventDefault();
     
-            // Limpiar errores previos
             document.querySelectorAll('.error-message').forEach(errorDiv => {
                 errorDiv.remove();
             });
@@ -862,7 +769,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                     
                     errorDiv.innerHTML = `<p>${mensajeError}</p>`;
-                    input.parentElement.appendChild(errorDiv); // Agrega el mensaje de error debajo del campo
+                    input.parentElement.appendChild(errorDiv);
                 }
             });
     
@@ -917,7 +824,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                     
                     errorDiv.innerHTML = `<p>${mensajeError}</p>`;
-                    input.parentElement.appendChild(errorDiv); // Agrega el mensaje de error debajo del campo
+                    input.parentElement.appendChild(errorDiv); 
                 }
             });
     
@@ -928,10 +835,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (btnNewLugarTrabajo){
-        btnNewLugarTrabajo.addEventListener("click",() => {
+        btnNewLugarTrabajo.addEventListener("click",() => { 
+            document.querySelectorAll(".error-message").forEach(elemento => elemento.remove());
             document.getElementById("modal-title").textContent = "Asignar nuevo lugar de trabajo";
-            document.getElementById("seccion-lugarTrabajo").style.display ="block"
+            document.getElementById("seccion-editarLugarTrabajo").style.display ="none"
             document.getElementById("seccion-asignaciones").style.display ="none"
+            document.getElementById("seccion-lugarTrabajo").style.display ="block"
             modal.classList.add("show");
             document.body.style.overflow = "hidden"; 
             document.documentElement.style.overflow = "hidden";
@@ -941,9 +850,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (btnNewAsignacion){
         btnNewAsignacion.addEventListener("click",() => {
-            document.getElementById("modal-title").textContent = "Asignar nuevo servicio";
-            document.getElementById("seccion-asignaciones").style.display ="block"
+            document.getElementById("id_asignacion").value = "";
+            document.getElementById("id_rol_profesional").value = "";
+            document.getElementById("id_especialidad").value = "";
+            document.querySelectorAll(".error-message").forEach(elemento => elemento.remove());
+            document.getElementById("modal-title").textContent = "Asignar nuevo rol profesional";
+            document.getElementById("seccion-editarLugarTrabajo").style.display ="none"
             document.getElementById("seccion-lugarTrabajo").style.display ="none"
+            document.getElementById("seccion-asignaciones").style.display ="block"
             modal.classList.add("show");
             document.body.style.overflow = "hidden"; 
             document.documentElement.style.overflow = "hidden";
@@ -967,6 +881,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+
+
+    /*  #### Esto es parte de la seccion de "Alta de personal"  ###### */
     const tipoUsuarioSeleccionado = document.getElementById("id_tipoUsuario");
     const boxCampoMatricula = document.querySelector(".box-campo-matricula");
     const inputMatricula = document.getElementById("id_numero_matricula");
@@ -987,10 +904,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     toggleCampoMatricula();
     tipoUsuarioSeleccionado.addEventListener("change",toggleCampoMatricula);
-
+    /*  #### Fin parte de la seccion de "Alta de personal"  ###### */
 
 });
 
+
+/*  #### Esta funcion pertenece a la vista de "Editar Personal"  ###### */
 function toggleLugar(id) {
     const boxLugar = document.getElementById("boxLugar-" + id);
     const div = document.getElementById("items-lugar-" + id);
@@ -1009,9 +928,85 @@ function toggleLugar(id) {
         div.classList.add("hidden-linea");
         div.classList.remove("visible-linea");
         icon.classList.remove("darVuelta");
-
     }
 }
+
+async function modalEditarRolProfesional(id) {
+    document.querySelectorAll(".error-message").forEach(elemento => elemento.remove());
+    document.getElementById("modal-title").textContent = "Editar rol profesional";
+    document.getElementById("seccion-lugarTrabajo").style.display ="none"
+    document.getElementById("seccion-editarLugarTrabajo").style.display ="none"
+    document.getElementById("seccion-asignaciones").style.display ="block"
+
+    try {
+        const response = await fetch(`/personal/get-lugarTrabajoORolProfesional/?id_rolProfesional=${id}`, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (!response.ok) throw new Error("Error al obtener datos");
+
+        const data = await response.json();
+
+
+        document.getElementById("id_asignacion").value = data.id_instancia;
+        if(document.getElementById("id_especialidad")){
+            document.getElementById("id_especialidad").value = data.id_especialidad;
+        }
+        if(document.getElementById("id_servicio_diagnostico")){
+            document.getElementById("id_servicio_diagnostico").value = data.id_servicio_diagnostico;
+        }
+        
+        modal.classList.add("show");
+        document.body.style.overflow = "hidden"; 
+        document.documentElement.style.overflow = "hidden";
+        
+    } 
+    catch (err) {
+        alert("Error al cargar los datos");
+        console.error(err);
+    }
+
+}
+
+async function modalEditarLugarTrabajo(id) {
+    document.querySelectorAll(".error-message").forEach(elemento => elemento.remove());
+    document.getElementById("modal-title").textContent = "Editar lugar de trabajo";
+    document.getElementById("seccion-lugarTrabajo").style.display ="none"
+    document.getElementById("seccion-asignaciones").style.display ="none"
+    document.getElementById("seccion-editarLugarTrabajo").style.display ="block"
+
+    try {
+        const response = await fetch(`/personal/get-lugarTrabajoORolProfesional/?id_lugarTrabajo=${id}`, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (!response.ok) throw new Error("Error al obtener datos");
+
+        const data = await response.json();
+
+
+        document.getElementById("id_instancia").value = data.id_instancia;
+        document.getElementById("id_lugar_edit").value = data.id_lugar;
+        document.getElementById("id_jornada_edit").value = data.id_jornada;
+        document.getElementById("id_departamento_edit").value = data.id_departamento;
+
+        modal.classList.add("show");
+        document.body.style.overflow = "hidden"; 
+        document.documentElement.style.overflow = "hidden";
+        
+    } 
+    catch (err) {
+        alert("Error al cargar los datos");
+        console.error(err);
+    }
+
+}
+/*  #### Fin funcion que pertenece a la vista de "Editar Personal"  ###### */
+
 
 
 

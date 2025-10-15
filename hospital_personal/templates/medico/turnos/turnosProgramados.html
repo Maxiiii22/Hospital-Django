@@ -81,8 +81,11 @@
                             <td data-label="Acciones:">
                                 <div class="box-btns-td-acciones">                                    
                                     {% if turno.estado == "pendiente" %}
-                                        <button class="btn-accion">Reprogramar</button>
-                                        <button class="btn-accion">Cancelar</button>
+                                        <button type="button" data-id-turno="{{ turno.id }}" class="btn-modal btn-accion">Reprogramar</button>
+                                        <form method="POST" action="{% url 'cancelarTurno' turno.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-accion" onclick="return confirm('¿Estás seguro de que deseas cancelar este turno?')">Cancelar</button>
+                                        </form>
                                     {% endif %}
                                 </div>
                             </td>
@@ -97,9 +100,29 @@
         </div>
     </div>
 
+
+    <div id="editModal" class="modal">
+        <div class="modal-content modal-reprogramar-turno">
+            <span id="closeEditModal" class="close">&times;</span>
+            <h2 id="modal-title">Reprogramar turno</h2>
+            <form id="editForm" method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="fecha_seleccionada" id="fecha_seleccionada" value="">
+                <h3>Días disponibles:</h3>
+                <div class="nav-buttons">
+                    <button type="button" id="prevMonth" class="prevMonth">Mes Anterior</button>
+                    <button type="button" id="nextMonth" class="nextMonth">Mes Siguiente</button>
+                </div>
+                <div class="calendar" id="calendar"></div>
+                <button type="submit" class="btn-global">Reprogramar</button>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
-{% block scripts_js %}  {% endblock %}
+{% block scripts_js %}
+    <script src="{% static 'js/medicos.js' %}"></script>
+{% endblock %}
 
 
 

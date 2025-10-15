@@ -22,7 +22,6 @@ urlpatterns = [
     path("historial/<int:id_paciente>", views.suHistorial, name="suHistorial"),
     path("turnos/consultas/consulta-turno-<int:id_turno>", views.consultaEspecifica, name="consultaEspecifica"),
     path("turnos/estudios/estudio-turno-<int:id_turno>", views.resultadoEstudioEspecifico, name="resultadoEstudioEspecifico"),
-    path("consultas/medicacionyestudios/", views.medicacionyestudios, name="medicacionyestudios"),
     path("registro-menor/", views.registrarMenor, name="registrarMenor"),
     path("gestion-menor/", views.gestionMenores, name="gestionMenores")
 ]

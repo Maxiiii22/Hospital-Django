@@ -549,60 +549,11 @@ def resultadoEstudioEspecifico(request, id_turno):
 
 @paciente_required
 @login_required
-def medicacionyestudios(request):    
-    if request.method == "GET" and request.headers.get("x-requested-with") == "XMLHttpRequest":
-        id_consulta = request.GET.get("id")
-        consulta = get_object_or_404(Consultas, id=id_consulta)
-        paciente_actual = request.user.paciente    
-        
-        if not id_consulta:
-            return JsonResponse({"error": "ID de consulta no proporcionado"}, status=400)
-            
-        # Verificar si el turno pertenece al paciente actual o a uno de sus menores a cargo
-        if consulta.turno.paciente != paciente_actual and not paciente_actual.menores_a_cargo.filter(menor=consulta.turno.paciente).exists():
-            return HttpResponseForbidden(render(request, "403.html"))
-        
-        medicamentos = Medicaciones.objects.filter(consulta_id=id_consulta)
-        estudios = OrdenEstudio.objects.filter(consulta_id=id_consulta)
-        
-        data = {
-            "medicacion": [],
-            "estudio": []
-        }
-        
-        for medicamento in medicamentos:
-            data["medicacion"].append({
-                "medicamento": medicamento.medicamento,
-                "dosis": medicamento.dosis,
-                "frecuencia": medicamento.frecuencia,
-                "tiempo_uso": medicamento.tiempo_uso
-            })
-        
-        for estudio in estudios:
-            turno = TurnoEstudio.objects.filter(orden_id=estudio.id).first()  # Aseguramos obtener el primer turno
-            if turno:
-                resultado_estudio = ResultadoEstudio.objects.filter(turno_estudio=turno).first()
-                pdf_url = resultado_estudio.archivo_pdf.url if resultado_estudio and resultado_estudio.archivo_pdf else ''
-            else:
-                pdf_url = ''  
-            
-            data["estudio"].append({
-                "tipo_estudio": estudio.tipo_estudio.nombre_estudio,
-                "motivo_estudio": estudio.motivo_estudio,
-                "indicaciones": estudio.indicaciones,
-                "fecha_solicitud": estudio.fecha_solicitud.strftime('%d/%m/%Y %H:%M') if estudio.fecha_solicitud else '',
-                "estado": estudio.get_estado_display(),
-                "pdf": pdf_url
-            })
-        
-        return JsonResponse(data)
-
-
-@paciente_required
-@login_required
 def registrarMenor(request):
+    adulto = request.user.paciente
+    menores_relaciones = adulto.menores_a_cargo.select_related("menor__persona")
     if request.method == "GET":
-        return render(request, "gestionMenores/registroMenor.html",{"form":RegistrarMenorForm()})
+        return render(request, "gestionMenores/registroMenor.html",{"form":RegistrarMenorForm(),"haveMenores":menores_relaciones})
     
     if request.method == "POST":
         form = RegistrarMenorForm(request.POST, adulto=request.user.paciente)

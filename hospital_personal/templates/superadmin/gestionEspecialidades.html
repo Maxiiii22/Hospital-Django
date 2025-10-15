@@ -33,7 +33,7 @@
                     <tr class="fila">
                         <td data-label="ID:">{{especialidad.id}}</td>
                         <td data-label="Nombre:">{{especialidad.nombre_especialidad}}</td>
-                        <td data-label="Permite turno:">{{especialidad.permite_turno}}</td>
+                        <td data-label="Permite turno:">{% if especialidad.permite_turno %}Si{% else %}No{% endif %}</td>
                         <td data-label="Ubicado en el departamento de:" class="columna-ubicacion">{{especialidad.departamento.nombre_departamento}}</td>
                         <td data-label="Acciones:">
                             <div class="box-btns-td-acciones">
@@ -113,5 +113,5 @@
 {% endblock %}
 
 {% block scripts_js %} 
-    <script src="{% static 'js/modals_personal.js' %}"></script>
+    <script src="{% static 'js/superadmin.js' %}"></script>
 {% endblock %}

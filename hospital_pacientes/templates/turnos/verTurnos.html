@@ -44,22 +44,24 @@
                             </td>
                             <td class="columna-estado" data-label="Estado:">{{ turno.get_estado_display }}</td>
                             <td data-label="Accion:">
-                                {% if turno.estado == "pendiente" %}
-                                    <button type="button" data-id-turno="{{ turno.id }}" data-id-paciente="{{ turno.paciente.id }}" class="btn-modal btn-accion">Reprogramar</button>
-                                    <form method="POST" action="{% url 'cancelarTurno' turno.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-accion" onclick="return confirm('¿Estás seguro de que deseas cancelar este turno?')">Cancelar</button>
-                                    </form>
-                                {% elif turno.estado == "atendido" %}
-                                    {% for consulta in turno.consulta.all %}
-                                        {% if consulta.turno.id == turno.id %}
-                                            <form method="POST" action="{% url 'consultaEspecifica' consulta.turno.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn-global">Ver consulta</button>
-                                            </form>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %}
+                                <div class="box-btns-td-acciones">
+                                    {% if turno.estado == "pendiente" %}
+                                        <button type="button" data-id-turno="{{ turno.id }}" data-id-paciente="{{ turno.paciente.id }}" class="btn-modal btn-global">Reprogramar</button>
+                                        <form method="POST" action="{% url 'cancelarTurno' turno.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-global" onclick="return confirm('¿Estás seguro de que deseas cancelar este turno?')">Cancelar</button>
+                                        </form>
+                                    {% elif turno.estado == "atendido" %}
+                                        {% for consulta in turno.consulta.all %}
+                                            {% if consulta.turno.id == turno.id %}
+                                                <form method="POST" action="{% url 'consultaEspecifica' consulta.turno.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn-global">Ver consulta</button>
+                                                </form>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
@@ -99,16 +101,18 @@
                             </td>
                             <td class="columna-estado" data-label="Estado:">{{ turno.get_estado_display }}</td>
                             <td data-label="Accion:">
-                                {% if turno.estado == "atendido" %}
-                                    {% for consulta in turno.consulta.all %}
-                                        {% if consulta.turno.id == turno.id %}
-                                            <form method="POST" action="{% url 'consultaEspecifica' consulta.turno.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn-global">Ver consulta</button>
-                                            </form>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %}
+                                <div class="box-btns-td-acciones">
+                                    {% if turno.estado == "atendido" %}
+                                        {% for consulta in turno.consulta.all %}
+                                            {% if consulta.turno.id == turno.id %}
+                                                <form method="POST" action="{% url 'consultaEspecifica' consulta.turno.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn-global">Ver consulta</button>
+                                                </form>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
@@ -152,20 +156,22 @@
                             <td data-label="Fecha turno:">{{ turno.fecha_turno|date:"d-m-Y" }} - <strong>Horario:</strong> {% if turno.horario_turno == "dia" %} 7:00 a 15:00 {% endif %}</td>
                             <td class="columna-estado" data-label="Estado:">{{ turno.get_estado_display }}</td>
                             <td data-label="Accion:">
-                                {% if turno.estado == "pendiente" %}
-                                    <button type="button" data-id-turno-estudio="{{ turno.id }}" data-id-paciente="{{ turno.orden.consulta.turno.paciente.id }}" class="btn-modal">Reprogramar</button>
-                                    <form method="POST" action="{% url 'cancelarTurnoEstudio' turno.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-global" onclick="return confirm('¿Estás seguro de que deseas cancelar este turno?')">Cancelar</button>
-                                    </form>
-                                {% elif turno.estado == "atendido" %}
-                                    {% if turno.resultado %}
-                                        <form method="POST" action="{% url 'resultadoEstudioEspecifico' turno.id %}">  
+                                <div class="box-btns-td-acciones">
+                                    {% if turno.estado == "pendiente" %}
+                                        <button type="button" data-id-turno-estudio="{{ turno.id }}" data-id-paciente="{{ turno.orden.consulta.turno.paciente.id }}" class="btn-modal">Reprogramar</button>
+                                        <form method="POST" action="{% url 'cancelarTurnoEstudio' turno.id %}">
                                             {% csrf_token %}
-                                            <button type="submit" class="btn-global">Ver resultado</button>
+                                            <button type="submit" class="btn-global" onclick="return confirm('¿Estás seguro de que deseas cancelar este turno?')">Cancelar</button>
                                         </form>
+                                    {% elif turno.estado == "atendido" %}
+                                        {% if turno.resultado %}
+                                            <form method="POST" action="{% url 'resultadoEstudioEspecifico' turno.id %}">  
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn-global">Ver resultado</button>
+                                            </form>
+                                        {% endif %}
                                     {% endif %}
-                                {% endif %}
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
@@ -201,6 +207,7 @@
                             <td data-label="Fecha turno: ">{{ turno.fecha_turno|date:"d-m-Y" }} - Horario: {% if turno.horario_turno == "dia" %} 7:00 a 15:00 {% endif %}</td>
                             <td class="columna-estado" data-label="Estado: ">{{ turno.get_estado_display }}</td>
                                 {% if turno.estado == "realizado" %}
+                                <div class="box-btns-td-acciones">
                                     <td data-label="Accion:">
                                         {% if turno.resultado %}
                                             <form method="POST" action="{% url 'resultadoEstudioEspecifico' turno.id %}">  
@@ -209,6 +216,7 @@
                                             </form>
                                         {% endif %}
                                     </td>
+                                </div>
                                 {% endif %}
                         </tr>
                     {% empty %}
@@ -224,7 +232,7 @@
 
 
     <div id="editModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-reprogramar-turno">
             <span id="closeEditModal" class="close">&times;</span>
             <h2 id="modal-title">Reprogramar turno</h2>
             <form id="editForm" method="POST" action="">
@@ -236,7 +244,7 @@
                     <button type="button" id="nextMonth" class="nextMonth">Mes Siguiente</button>
                 </div>
                 <div class="calendar" id="calendar"></div>
-                <button type="submit" class="btn-guardar">Reprogramar</button>
+                <button type="submit" class="btn-global">Reprogramar</button>
             </form>
         </div>
     </div>

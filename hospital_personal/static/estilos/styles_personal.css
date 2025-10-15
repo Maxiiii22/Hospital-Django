@@ -114,6 +114,10 @@
     margin-bottom: 5px;
 }
 
+.box-multipleCheck label{
+    cursor: pointer;
+}
+
 .fade-bottom {
     position: absolute;
     bottom: 0;
@@ -208,7 +212,7 @@
     text-align: center;
 }
 
-#seccion-asignaciones,#seccion-lugarTrabajo{
+#seccion-asignaciones,#seccion-lugarTrabajo,#seccion-editarLugarTrabajo{
     display: none;
 }
 
@@ -454,7 +458,6 @@ form .campos .campo-input{
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 0 0 5px 5px;
-    cursor: pointer;
     transition: background-color 0.5s ease;
     background-color: #fff;
 }
@@ -475,6 +478,10 @@ form .campos .campo-input{
     font-weight: bold;
     display: flex;
     justify-content: space-between;
+}
+
+.hgi.hgi-stroke.hgi-arrow-down-01{
+    cursor: pointer;
 }
 
 .lugar-items{
@@ -499,7 +506,51 @@ form .campos .campo-input{
     padding: 5px;
     text-align: center;
     text-wrap: wrap;
+    width: clamp(253px, 100%, 810px);
+    transition: background-color .3s ease;
 }
+
+.item-lugar form{
+    display: initial;
+}
+
+.btn-edit-lugarTrabajo,
+.btn-delete-lugarTrabajo {
+    border: none;
+    background-color: transparent;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    font-size: 1.1rem;
+}
+
+.btn-edit-lugarTrabajo:hover,
+.btn-delete-lugarTrabajo:hover {
+    background-color: #ccc;
+    transform: scale(1.05);
+}
+
+.btn-edit-lugarTrabajo i {
+    color: #007bff; 
+}
+
+.btn-delete-lugarTrabajo i {
+    color: #dc3545; 
+}
+
+.btn-edit-lugarTrabajo:hover i {
+    color: #0056b3;
+}
+
+.btn-delete-lugarTrabajo:hover i {
+    color: #a71d2a;
+}
+
+.visible-linea .item-lugar:hover{
+    background-color: #fff;
+}
+
 
 .darVuelta{
     transform: rotate(180deg);
@@ -528,9 +579,64 @@ form .campos .campo-input{
     display: block;
 }
 
+.roles-profesionales{
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.rol-profesional-item{
+    display: flex;
+    justify-content: space-between;
+    transition: background-color .3s ease;
+    align-items: center;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.rol-profesional-item:hover{
+    background-color: #aaa;
+}
+
+.box-p-rol-profesional{
+    width: clamp(175px,75%,750px);
+}
+
+.box-p-rol-profesional p{
+    word-wrap: break-word;       
+    overflow-wrap: break-word;  
+    white-space: normal;         
+}
+
+.rol-profesional-btns-acciones{
+    display: flex;
+}
+
+.rol-profesional-btns-acciones button{
+    display: flex;
+    align-content: center;
+}
+
+.rol-profesional-btns-acciones form{
+    position: initial;
+    margin: 0;
+}
+
+
 .box-form-detalles-usuario form .btn-global{
     padding: 10px;
 }
+
+.modal-content.modal-detalles-usuario{
+    width: clamp(300px,90%,600px);
+}
+
+.modal-content.modal-detalles-usuario input[type="checkbox"] {
+    height: auto;
+}
+
 
 @media (width <=750px) {
     form .campos .campo-input{
@@ -839,6 +945,11 @@ form .campos .campo-input{
 
 .modal-plantilla-estudios{
     width: clamp(315px,98%,420px);
+}
+
+
+.modal-plantilla-estudios #id_estructura{
+    min-height: 330px;
 }
 
 /* Fin Seccion de "Plantilla de estudios" */

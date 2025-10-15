@@ -79,7 +79,7 @@ class UsuarioXDepartamentoXJornadaXLugar(models.Model):
         ]
     
     def __str__(self):
-        return f"El usuario ({self.usuario.id} - {self.usuario.persona.get_full_name()} - {self.usuario.rol} )  trabaja los dias {self.jornada.dia} en el Departamento: {self.departamento.nombre_departamento} en el horario: {self.jornada.turno}"
+        return f"El usuario ({self.usuario.id} - {self.usuario.persona.get_full_name()} - {self.usuario.tipoUsuario} )  trabaja los dias {self.jornada.dia} en el Departamento: {self.departamento.nombre_departamento} en el horario: {self.jornada.turno}"
 
 
 class ServicioDiagnostico(models.Model):
@@ -128,6 +128,11 @@ class UsuarioXEspecialidadXServicioXrolesProfesionales(models.Model):
     especialidad = models.ForeignKey(Especialidades, on_delete=models.CASCADE)
     servicio_diagnostico = models.ForeignKey(ServicioDiagnostico, on_delete=models.CASCADE, null=True,blank=True)
     rol_profesional = models.ForeignKey(RolesProfesionales, on_delete=models.CASCADE)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['usuario', 'rol_profesional'], name='unique_usuario_rol_profesional') # Con UniqueConstraint, nos aseguramos de que un mismo usuario no pueda estar asignado al mismo rol_profesional más de una vez.
+        ]
     
     def __str__(self):
         if (self.servicio_diagnostico):

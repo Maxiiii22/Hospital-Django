@@ -2,6 +2,7 @@ from django import forms
 from django.forms import modelformset_factory # permite trabajar con múltiples formularios del mismo tipo en una sola vista.
 from .models import Especialidades,Departamento,Consultas, OrdenEstudio, Medicaciones,EstudiosDiagnosticos,ResultadoEstudio,ResultadoImagen,UsuarioXDepartamentoXJornadaXLugar,UsuarioXEspecialidadXServicioXrolesProfesionales,Lugar,Jorna_laboral,ServicioDiagnostico,PlantillaEstudio
 from controlUsuario.models import TiposUsuarios,RolesProfesionales
+from django.contrib import messages
 
 
 class FormEspecialidades(forms.ModelForm): 
@@ -127,30 +128,96 @@ class FormRolesProfesionales(forms.ModelForm):
         }
 
 
-class FormularioLugarTrabajo(forms.ModelForm): 
-    class Meta:
-        model = UsuarioXDepartamentoXJornadaXLugar  
-        fields = [ # Acá ingresamos los campos que queremos que se muestren en el formulario.
-            'lugar',"jornada",'departamento'
-        ]
-        widgets = {
-            "lugar" : forms.Select(attrs={"class":"campos-modal"}),
-            "jornada" : forms.Select(attrs={"class":"campos-modal"}),
-            "departamento" : forms.Select(attrs={"class":"campos-modal"}),
-        }
-        
+class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelForm a Form Porque ModelForm espera que cada campo del modelo tenga correspondencia exacta en el formulario y en este caso eso no se cumple ya que vamos a manejar "jornada" como si fuera una relacion ManyToMany pese a que sea FK.
+    lugar = forms.ModelChoiceField(
+        queryset=Lugar.objects.all(),
+        widget=forms.Select(attrs={"class": "campos-modal"}),
+        label="Lugar"
+    )
+    jornada = forms.ModelMultipleChoiceField( # Seleccionar varias jornadas
+        queryset=Jorna_laboral.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "box-multipleCheck"}), # Seleccionar varias jornadas
+        label="Jornadas"
+    )
+    departamento = forms.ModelChoiceField(
+        queryset=Departamento.objects.all(),
+        widget=forms.Select(attrs={"class": "campos-modal"}),
+        label="Departamento"
+    )
+
     def __init__(self, *args, **kwargs):
+        self.usuario = kwargs.pop('usuario', None)  # Pasar usuario desde la vista
         super().__init__(*args, **kwargs)
 
-        # Personalizando los labels de los ForeignKey en el formulario
-        self.fields['lugar'].queryset = Lugar.objects.all()
-        self.fields['jornada'].queryset = Jorna_laboral.objects.all()
-        self.fields['departamento'].queryset = Departamento.objects.all()
+        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo})"
+        self.fields['jornada'].label_from_instance = lambda obj: f"{obj.get_dia_display()} - {obj.get_turno_display()}"
+        self.fields['departamento'].label_from_instance = lambda obj: f"{obj.nombre_departamento}"
 
-        # Cambiar el texto que aparece en el Select sin cambiar el __str__ del modelo
-        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo})" 
-        self.fields['jornada'].label_from_instance = lambda obj: f"{obj.get_dia_display()} - {obj.get_turno_display()}" 
-        self.fields['departamento'].label_from_instance = lambda obj: f"{obj.nombre_departamento}"  
+    def save(self):
+        lugar = self.cleaned_data['lugar']
+        departamento = self.cleaned_data['departamento']
+        jornadas = self.cleaned_data['jornada']
+
+        registros_creados = []
+        jornadas_omitidas = []
+        
+        for jornada in jornadas:
+            existe = UsuarioXDepartamentoXJornadaXLugar.objects.filter( # Validamos que el usuario no tenga asinado esa jornada
+                usuario=self.usuario,
+                jornada=jornada
+            ).exists()
+            
+            if not existe:
+                obj, creado = UsuarioXDepartamentoXJornadaXLugar.objects.get_or_create(
+                    usuario=self.usuario,
+                    lugar=lugar,
+                    departamento=departamento,
+                    jornada=jornada
+                )
+                if creado:
+                    registros_creados.append(obj)
+            else:
+                jornadas_omitidas.append(jornada)
+            
+        return registros_creados, jornadas_omitidas
+
+class FormularioEditarLugarTrabajo(forms.ModelForm):
+    class Meta:
+        model = UsuarioXDepartamentoXJornadaXLugar
+        fields = ['lugar', 'departamento', 'jornada']
+        widgets = {
+            "lugar": forms.Select(attrs={"class": "campos-modal", "id":"id_lugar_edit"}),
+            "departamento": forms.Select(attrs={"class": "campos-modal", "id":"id_departamento_edit"}),
+            "jornada": forms.Select(attrs={"class": "campos-modal", "id":"id_jornada_edit"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.usuario = kwargs.pop('usuario', None) 
+        super().__init__(*args, **kwargs)
+
+        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo})"
+        self.fields['departamento'].label_from_instance = lambda obj: f"{obj.nombre_departamento}"
+        self.fields['jornada'].label_from_instance = lambda obj: f"{obj.get_dia_display()} - {obj.get_turno_display()}"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        lugar = cleaned_data.get("lugar")
+        departamento = cleaned_data.get("departamento")
+        jornada = cleaned_data.get("jornada")
+
+        if self.instance.pk:  # Solo en edición
+            conflicto = UsuarioXDepartamentoXJornadaXLugar.objects.filter(
+                usuario=self.usuario,
+                jornada=jornada
+            ).exclude(pk=self.instance.pk).exists()
+
+            if conflicto:
+                raise forms.ValidationError("Este usuario ya tiene asignada esa jornada en otro lugar/departamento.")
+
+        return cleaned_data
+
+
+
 
 class FormularioAsignaciones(forms.ModelForm): 
     class Meta:
@@ -169,7 +236,13 @@ class FormularioAsignaciones(forms.ModelForm):
         super(FormularioAsignaciones, self).__init__(*args, **kwargs)
         
         tipo_usuario = self.user.tipoUsuario.id
+        
+        # Roles ya asignados al usuario
+        roles_asignados = UsuarioXEspecialidadXServicioXrolesProfesionales.objects.filter(usuario=self.user).values_list('rol_profesional_id', flat=True)
 
+        # Excluir los roles ya asignados
+        self.fields['rol_profesional'].queryset = RolesProfesionales.objects.filter(tipoUsuario_id=tipo_usuario).exclude(id__in=roles_asignados)
+        
         # Si el rol del usuario es el rol que no debería ver 'servicio_diagnostico', solo mostrar 'especialidad' y 'rol_profesional'
         if tipo_usuario == 5:  # Si el rol del usuario es "Apoyo en Diagnóstico y Tratamiento"
             self.fields['especialidad'].widget = forms.HiddenInput()
@@ -179,7 +252,6 @@ class FormularioAsignaciones(forms.ModelForm):
             self.fields['especialidad'].queryset = Especialidades.objects.all()
 
         # Filtramos el 'rol_profesional' según el tipo de usuario
-        self.fields['rol_profesional'].queryset = RolesProfesionales.objects.filter(tipoUsuario_id=self.user.tipoUsuario.id)
 
         # Personalizamos las etiquetas (labels) de los campos
         self.fields['especialidad'].label_from_instance = lambda obj: f"{obj.nombre_especialidad}"

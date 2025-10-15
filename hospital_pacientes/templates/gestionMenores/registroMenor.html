@@ -10,7 +10,7 @@
 </head>
 <body class="body-detallesPaciente">
     <div class="container-form-paciente">
-        <a href="{% url 'gestionMenores' %}" class="back-link"><i class="hgi hgi-stroke hgi-arrow-left-02"></i> Volver atrás</a>
+        <a {% if haveMenores %} href="{% url 'gestionMenores' %}" {% else %} href="#" onclick="history.back(); return false;"{% endif %}class="back-link"><i class="hgi hgi-stroke hgi-arrow-left-02"></i> Volver atrás</a>
         <h2>Registrar un menor a tu cargo</h2>
         
         <form action="" method="POST">

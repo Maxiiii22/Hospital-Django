@@ -232,7 +232,6 @@ document.addEventListener("DOMContentLoaded", function () {
                                     const fecha = document.getElementById("fecha_seleccionada");
                                     const fechaSeleccionada = `${fechaDia.getFullYear()}-${fechaDia.getMonth() + 1}-${fechaDia.getDate()}`;
                                     fecha.value = fechaSeleccionada;
-                                    alert(`Fecha seleccionada: ${fechaSeleccionada}`);
                                     botonDia.classList.add('seleccionado');
                                     botonSeleccionado = botonDia;
                                 });
