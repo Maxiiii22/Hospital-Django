@@ -9,6 +9,7 @@ urlpatterns = [
     path("gestion-personal/alta-personal", views.altaPersonal, name="altaPersonal"),
     path("detalles-usuario-<int:id>",views.detalle_usuario, name ="detalle_usuario"),
     path("get-lugarTrabajoORolProfesional/",views.getLugarTrabajoORolProfesional, name ="getLugarTrabajoORolProfesional"), 
+    path("get-lugarTrabajoDisponibilidad/",views.getLugarTrabajoDisponibilidad, name ="getLugarTrabajoDisponibilidad"), 
     path("delete-lugarTrabajo/<int:id_lugarTrabajo>",views.deleteLugarTrabajo, name ="deleteLugarTrabajo"), 
     path("delete-rolProfesional/<int:id_rolProfesional>",views.deleteRolProfesional, name ="deleteRolProfesional"), 
     path("gestion-departamentos/", views.gestionDeDepartamentos, name="gestionDeDepartamentos"),

@@ -24,7 +24,6 @@
                         <th>Nombre</th>
                         <th>Codigo</th>
                         <th>Piso</th>
-                        <th>Estado</th>
                         <th>Es critico</th>
                         <th>Capacidad</th>
                         <th class="columna-tipo">Tipo</th>
@@ -40,7 +39,6 @@
                         <td data-label="Nombre:">{{lugar.nombre}}</td>
                         <td data-label="Codigo:">{{lugar.codigo}}</td>
                         <td data-label="Ubicado en el piso:">N° {{lugar.piso}}</td>
-                        <td data-label="Estado:">{{lugar.get_estado_display}}</td>
                         <td data-label="Es critico:">{% if lugar.es_critico %} Si {% else %} No {% endif %}</td>
                         <td data-label="Capacidad:">{{lugar.capacidad}}</td>
                         <td data-label="Tipo:" class="columna-tipo">{{lugar.get_tipo_display}}</td>
@@ -119,11 +117,11 @@
             </div>
 
             <div class="campo-input">
-                {{ form.estado.label_tag }}
-                {{ form.estado }}
-                {% if form.estado.errors %}
-                    <div id="error_estado" class="error-message">
-                        {% for error in form.estado.errors %}
+                {{ form.capacidad.label_tag }}
+                {{ form.capacidad }}
+                {% if form.capacidad.errors %}
+                    <div id="error_capacidad" class="error-message">
+                        {% for error in form.capacidad.errors %}
                             <p>{{ error }}</p>
                         {% endfor %}
                     </div>
@@ -131,11 +129,11 @@
             </div>
 
             <div class="campo-input">
-                {{ form.capacidad.label_tag }}
-                {{ form.capacidad }}
-                {% if form.capacidad.errors %}
-                    <div id="error_capacidad" class="error-message">
-                        {% for error in form.capacidad.errors %}
+                {{ form.departamento.label_tag }}
+                {{ form.departamento }}
+                {% if form.departamento.errors %}
+                    <div class="error-message">
+                        {% for error in form.departamento.errors %}
                             <p>{{ error }}</p>
                         {% endfor %}
                     </div>

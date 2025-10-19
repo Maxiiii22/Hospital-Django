@@ -178,11 +178,11 @@
                             </div>
                             <div class="campo-input">
                                 <label for="date_joined">Fecha de registro:</label>
-                                <input type="text" readonly value="{{usuario.persona.date_joined|date:"d-m-Y H:i"}}" id="date_joined">
+                                <input type="text" readonly value="{{usuario.persona.date_joined|date:'d-m-Y H:i'}}" id="date_joined">
                             </div>
                             <div class="campo-input">
                                 <label for="last_login">Ultimo inicio de sesion:</label>
-                                <input type="text" readonly value="{{usuario.persona.last_login|date:"d-m-Y H:i"}}" id="last_login">
+                                <input type="text" readonly value="{% if usuario.persona.last_login %}{{usuario.persona.last_login|date:'d-m-Y H:i'}}{% else %}Nunca accedió{% endif %}" id="last_login">
                             </div>
                             <div class="campo-input">
                                 <label for="id_is_active">Usuario habilitado:</label>
@@ -192,6 +192,37 @@
                     </div>
                 </div>
                 <button type="submit" class="btn-global">Guardar cambios</button>
+
+                {% if usuario.tipoUsuario.nombre_tipoUsuario == "Médico" or usuario.tipoUsuario.nombre_tipoUsuario == "Apoyo en Diagnóstico y Tratamiento"  %} 
+                    <div class="secciones">
+                        <div class="datos-personales">
+                            <div class="box-header-datos">
+                                <span class="titulo">Rol profesional</span>
+                                <button type="button" class="btn-masDetalles" id="newAsignaciones"><i class="hgi hgi-stroke hgi-plus-sign"></i> Asignar rol profesional</button>
+                            </div>                        
+                            <div class="roles-profesionales">
+                                <ul>
+                                    {% for rolProfesional in rolesProfesionales %}
+                                        <li class="rol-profesional-item">
+                                            <div class="box-p-rol-profesional">
+                                                <p><strong>{{rolProfesional.usuario.tipoUsuario}} ({{rolProfesional.rol_profesional.nombre_rol_profesional}})</strong></p>
+                                            </div>
+                                            <div class="rol-profesional-btns-acciones">
+                                                <button type="button" class="btn-edit-lugarTrabajo" id="usuario-id-{{rolProfesional.id}}" onclick="modalEditarRolProfesional('{{ rolProfesional.id }}')"><i class="hgi hgi-stroke hgi-edit-03"></i></button>
+                                                <form method="POST" action="{% url 'deleteRolProfesional' rolProfesional.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn-delete-lugarTrabajo"><i class="hgi hgi-stroke hgi-delete-04"></i></button>
+                                                </form>
+                                            </div>
+                                        </li>
+                                    {% empty %}
+                                        <li class="item-noRol"><strong>No tiene roles profesionales asignados</strong></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}                
     
                 {% if usuario.tipoUsuario.nombre_tipoUsuario != "Superadministrador" %}  {# Si el rol es cualquier otro diferente al de Superadmin #}
                     <div class="secciones">
@@ -228,44 +259,14 @@
                                     </div>
                                 {% endfor %}
                             {% else %}
-                                <div>
-                                    <strong class="item-lugar">No hay departamentos asignados.</strong>
+                                <div class="container-noLugar">
+                                    <p class="item-noLugar"><strong>No hay lugares de trabajo asignados</strong></p>
                                 </div>
                             {% endif %}
                         </div>
                     </div>
                 {% endif %}
     
-                {% if usuario.tipoUsuario.nombre_tipoUsuario == "Médico" or usuario.tipoUsuario.nombre_tipoUsuario == "Apoyo en Diagnóstico y Tratamiento"  %} 
-                    <div class="secciones">
-                        <div class="datos-personales">
-                            <div class="box-header-datos">
-                                <span class="titulo">Rol profesional</span>
-                                <button type="button" class="btn-masDetalles" id="newAsignaciones"><i class="hgi hgi-stroke hgi-plus-sign"></i> Asignar servicio</button>
-                            </div>                        
-                            <div class="roles-profesionales">
-                                <ul>
-                                    {% for rolProfesional in rolesProfesionales %}
-                                        <li class="rol-profesional-item">
-                                            <div class="box-p-rol-profesional">
-                                                <p><strong>{{rolProfesional.usuario.tipoUsuario}} ({{rolProfesional.rol_profesional.nombre_rol_profesional}})</strong></p>
-                                            </div>
-                                            <div class="rol-profesional-btns-acciones">
-                                                <button type="button" class="btn-edit-lugarTrabajo" id="usuario-id-{{rolProfesional.id}}" onclick="modalEditarRolProfesional('{{ rolProfesional.id }}')"><i class="hgi hgi-stroke hgi-edit-03"></i></button>
-                                                <form method="POST" action="{% url 'deleteRolProfesional' rolProfesional.id %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn-delete-lugarTrabajo"><i class="hgi hgi-stroke hgi-delete-04"></i></button>
-                                                </form>
-                                            </div>
-                                        </li>
-                                    {% empty %}
-                                        <li class="item-lugar">No tiene roles profesionales asignados</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
             </form>
         </div>
     </main>
@@ -276,6 +277,13 @@
             <h2 id="modal-title">{% if titleModal %}{{titleModal}}{% endif %}</h2>
             <div id="seccion-lugarTrabajo" {% if errorFormLugarTrabajo %}style="display:block"{% endif %}>
                 <form method="POST" action="">
+                    {% if formLugarTrabajo.non_field_errors %}
+                        <ul class="error-message-main">
+                            {% for error in formLugarTrabajo.non_field_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                     {% csrf_token %}
                     <input type="hidden" name="tipo_form" value="form_lugarTrabajo">
                     <input type="hidden" name="id_usuario" value="{{usuario.id}}">
@@ -302,20 +310,10 @@
                         {% endfor %}
                     </div>
                     {% endif %}
-                    <div class="campo-input">
-                        {{ formLugarTrabajo.departamento.label_tag }}
-                        {{ formLugarTrabajo.departamento }}
-                        {% if formLugarTrabajo.departamento.errors %}
-                            <div class="error-message">
-                                {% for error in formLugarTrabajo.departamento.errors %}
-                                    <p>{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endif %}                     
-                    </div>
                     <button type="submit" class="btn-guardar">Guardar</button>
                 </form>
             </div>
+
             <div id="seccion-asignaciones" {% if errorFormAsignaciones %}style="display:block"{% endif %}>
                 <form method="POST" action="">
                     {% csrf_token %}
@@ -334,19 +332,13 @@
                         {% endif %}                     
                     </div>
                     <div class="campo-input">
-                        {{ formAsignaciones.especialidad.label_tag }}
-                        {{ formAsignaciones.especialidad }}
-                        {% if formAsignaciones.especialidad.errors %}
-                            <div class="error-message">
-                                {% for error in formAsignaciones.especialidad.errors %}
-                                    <p>{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endif %}  
+                        <label for="id_input-mostrar-dato" id="label-input-mostrar-dato"></label>
+                        <input class="campos-modal" type="text" id="id_input-mostrar-dato" value="" readonly>
                     </div>
                     <button type="submit" class="btn-guardar">Guardar</button>
                 </form>
             </div>
+            
             <div id="seccion-editarLugarTrabajo" {% if errorFormEditarLugarTrabajo %}style="display:block"{% endif %}>
                 <form method="POST" action="" id="form_editarLugarTrabajo">
                     {% csrf_token %}
@@ -374,17 +366,7 @@
                             </div>
                         {% endif %}
                     </div>
-                    <div class="campo-input">
-                        {{ formEditarLugarTrabajo.departamento.label_tag }}
-                        {{ formEditarLugarTrabajo.departamento }}
-                        {% if formEditarLugarTrabajo.departamento.errors %}
-                            <div class="error-message">
-                                {% for error in formEditarLugarTrabajo.departamento.errors %}
-                                    <p>{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endif %}                        
-                    </div>
+
                     <button type="submit" class="btn-guardar">Guardar</button>
                 </form>
             </div>

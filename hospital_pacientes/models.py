@@ -1,8 +1,7 @@
 from django.db import models
-from controlUsuario.models import Persona,TiposUsuarios
 
 class Paciente(models.Model):
-    persona = models.OneToOneField(Persona, on_delete=models.CASCADE)
+    persona = models.OneToOneField('controlUsuario.Persona', on_delete=models.CASCADE)
     direccion = models.CharField(max_length=255)
     
     @property

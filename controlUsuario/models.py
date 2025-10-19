@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser # AbstractUser es una clase 
                                                     # métodos predeterminados del modelo User , para asi permitirnos personalizar el modelo User.
                                                     # La clase User ya tiene sus campos predefinidos y no se pueden agregar otros , por eso usamos AbstractUser.
 # Campos de AbstractUser : username - first_name - last_name - email - password y demas . 
+from hospital_personal.models import Especialidades,ServicioDiagnostico
 
 # Create your models here.
 
@@ -45,9 +46,21 @@ class TiposUsuarios(models.Model):
 class RolesProfesionales(models.Model):  
     nombre_rol_profesional = models.CharField(max_length=255)
     tipoUsuario = models.ForeignKey(TiposUsuarios,on_delete=models.CASCADE)
+    especialidad = models.ForeignKey(Especialidades,on_delete=models.SET_NULL, blank=True, null=True)
+    servicio_diagnostico = models.ForeignKey(ServicioDiagnostico,on_delete=models.SET_NULL, blank=True, null=True)
     
     def __str__(self):
         return f"{self.nombre_rol_profesional}"
+    
+    def clean(self):
+        if self.especialidad and self.servicio_diagnostico:
+            raise ValidationError("Un rol profesional no puede estar asignado a una especialidad y a un servicio de diagnóstico al mismo tiempo.")
+        if not self.especialidad and not self.servicio_diagnostico:
+            raise ValidationError("Un rol profesional debe estar asignado a una especialidad o a un servicio de diagnóstico.")
+    
+    def save(self, *args, **kwargs):
+        self.clean()  
+        super().save(*args, **kwargs)
 
 
 class Persona(AbstractUser):

@@ -46,7 +46,7 @@ class TiposUsuariosAdmin(admin.ModelAdmin):
 
 # Admin personalizado para el modelo Roles Profesionales
 class RolesProfesionalesAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nombre_rol_profesional', 'tipoUsuario']
+    list_display = ['id', 'nombre_rol_profesional', 'tipoUsuario','especialidad','servicio_diagnostico']
 
 admin.site.register(Persona,PersonaAdmin)
 admin.site.register(Usuario, UsuarioAdmin)

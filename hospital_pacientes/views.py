@@ -3,7 +3,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required 
 from controlUsuario.decorators import paciente_required  # En controlUsuario.decorators creamos decoradores personalizados que verifiquen si el usuario tiene el atributo de paciente o usuario, y redirigirlo a una página de acceso denegado si intenta acceder a una vista que no le corresponde.
-from hospital_personal.models import Especialidades,UsuarioXEspecialidadXServicioXrolesProfesionales,UsuarioXDepartamentoXJornadaXLugar,Turno,Consultas,Medicaciones,OrdenEstudio,Jorna_laboral,TurnoEstudio,ServicioDiagnostico,Lugar,ResultadoEstudio
+from hospital_personal.models import Especialidades,UsuarioRolProfesionalAsignado,UsuarioLugarTrabajoAsignado,Turno,Consultas,Medicaciones,OrdenEstudio,Jorna_laboral,TurnoEstudio,ServicioDiagnostico,Lugar,ResultadoEstudio
 from controlUsuario.models import Usuario
 from controlUsuario.forms import FormularioRegistroPersonalizado
 from .models import Paciente,MenorACargoDePaciente
@@ -113,10 +113,10 @@ def sacarTurno(request, paciente_id):
         especialidad = Especialidades.objects.get(id=especialidad_id,permite_turno=True)
         
         # Filtrar los profesionales que están asociados con la especialidad seleccionada
-        profesionales = UsuarioXEspecialidadXServicioXrolesProfesionales.objects.filter(especialidad=especialidad)
+        profesionales = UsuarioRolProfesionalAsignado.objects.filter(especialidad=especialidad)
 
         # Filtrar los profesionales disponibles en el turno especificado
-        profesionales_disponibles = UsuarioXDepartamentoXJornadaXLugar.objects.filter(
+        profesionales_disponibles = UsuarioLugarTrabajoAsignado.objects.filter(
             usuario__in=profesionales.values('usuario'),
             jornada__turno=horario_turno
         ).values_list('usuario', flat=True).distinct()
@@ -235,7 +235,7 @@ def obtener_disponibilidad(profesional_id, horario):
     }
     
     # Paso 1: Obtener las jornadas laborales del profesional (usuario)
-    jornadas = UsuarioXDepartamentoXJornadaXLugar.objects.filter(usuario_id=profesional_id)
+    jornadas = UsuarioLugarTrabajoAsignado.objects.filter(usuario_id=profesional_id)
     
     # Paso 2: Iterar sobre los próximos 60 días
     for i in range(1, 61):  # Ver los próximos 60 días

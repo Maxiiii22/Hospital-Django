@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Especialidades,Departamento,Jorna_laboral,UsuarioXDepartamentoXJornadaXLugar,UsuarioXEspecialidadXServicioXrolesProfesionales,Turno,Consultas,Medicaciones,OrdenEstudio,TurnoEstudio,ResultadoEstudio,EstudiosDiagnosticos,Lugar,ServicioDiagnostico,PlantillaEstudio
+from .models import Especialidades,Departamento,Jorna_laboral,UsuarioLugarTrabajoAsignado,UsuarioRolProfesionalAsignado,Turno,Consultas,Medicaciones,OrdenEstudio,TurnoEstudio,ResultadoEstudio,EstudiosDiagnosticos,Lugar,ServicioDiagnostico,PlantillaEstudio
 
 # Register your models here.
 
@@ -10,11 +10,11 @@ class DepartamentoAdmin(admin.ModelAdmin):
 class EspecialidadesAdmin(admin.ModelAdmin):
     list_display = ['id', 'nombre_especialidad','permite_turno','departamento']
 
-class Jornada_loboralAdmin(admin.ModelAdmin):
+class Jornada_laboralAdmin(admin.ModelAdmin):
     list_display = ['id', 'dia','turno']
 
 class LugarAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nombre','tipo','piso','codigo','estado','capacidad','es_critico','activo']
+    list_display = ['id', 'nombre','tipo','piso','codigo','estado','capacidad','es_critico','activo',"departamento"]
 
 class MedicacionesAdmin(admin.ModelAdmin):
     list_display = ['id', 'medicamento','dosis','frecuencia','tiempo_uso','consulta','recetada_por']
@@ -28,14 +28,14 @@ class TurnoAdmin(admin.ModelAdmin):
 class TurnoEstudioAdmin(admin.ModelAdmin):
     list_display = ['id', 'fecha_creacion','fecha_turno','horario_turno','estado','orden','servicio_diagnostico','lugar','asistio']
 
-class UsuarioXEspecialidadXServicioXrolesProfesionalesAdmin(admin.ModelAdmin):
-    list_display = ['id', 'especialidad','rol_profesional','servicio_diagnostico','usuario']
+class UsuarioRolProfesionalAsignadoAdmin(admin.ModelAdmin):
+    list_display = ['id','rol_profesional','usuario']
 
 admin.site.register(Especialidades,EspecialidadesAdmin)
 admin.site.register(Departamento,DepartamentoAdmin)
-admin.site.register(Jorna_laboral,Jornada_loboralAdmin)
-admin.site.register(UsuarioXDepartamentoXJornadaXLugar)
-admin.site.register(UsuarioXEspecialidadXServicioXrolesProfesionales,UsuarioXEspecialidadXServicioXrolesProfesionalesAdmin)
+admin.site.register(Jorna_laboral,Jornada_laboralAdmin)
+admin.site.register(UsuarioLugarTrabajoAsignado)
+admin.site.register(UsuarioRolProfesionalAsignado,UsuarioRolProfesionalAsignadoAdmin)
 admin.site.register(Turno,TurnoAdmin)
 admin.site.register(Lugar,LugarAdmin)
 admin.site.register(Consultas)

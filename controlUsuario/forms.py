@@ -307,7 +307,7 @@ class FormularioUsuario(forms.ModelForm):
         model = Usuario
         fields = ['numero_matricula', 'tipoUsuario']
         widgets = {
-            "tipoUsuario": forms.Select(attrs={'required': ""}),
+            "tipoUsuario": forms.Select(attrs={'required': "", "id":"id_tipoUsuarioForm"}),
         }
         
     def clean(self):

@@ -95,14 +95,14 @@
                 <label for="id_especialidad">Especialidades que pueden solicitar este estudio:</label>
                 {{ form.especialidad }}
                 <div class="fade-bottom"></div>
-                {% if form.especialidad.errors %}
-                    <div id="error_especialidad" class="error-message">
-                        {% for error in form.especialidad.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
+            {% if form.especialidad.errors %}
+                <div id="error_especialidad" class="error-message">
+                    {% for error in form.especialidad.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
             <button type="submit" class="btn-guardar">Guardar</button>
         </form>

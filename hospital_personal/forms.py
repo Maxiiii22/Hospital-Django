@@ -1,8 +1,10 @@
 from django import forms
 from django.forms import modelformset_factory # permite trabajar con múltiples formularios del mismo tipo en una sola vista.
-from .models import Especialidades,Departamento,Consultas, OrdenEstudio, Medicaciones,EstudiosDiagnosticos,ResultadoEstudio,ResultadoImagen,UsuarioXDepartamentoXJornadaXLugar,UsuarioXEspecialidadXServicioXrolesProfesionales,Lugar,Jorna_laboral,ServicioDiagnostico,PlantillaEstudio
+from .models import Especialidades,Departamento,Consultas, OrdenEstudio, Medicaciones,EstudiosDiagnosticos,ResultadoEstudio,ResultadoImagen,UsuarioLugarTrabajoAsignado,UsuarioRolProfesionalAsignado,Lugar,Jorna_laboral,ServicioDiagnostico,PlantillaEstudio
 from controlUsuario.models import TiposUsuarios,RolesProfesionales
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+
 
 
 class FormEspecialidades(forms.ModelForm): 
@@ -71,19 +73,21 @@ class FormLugar(forms.ModelForm):
     class Meta:
         model = Lugar 
         fields = [ # Acá ingresamos los campos que queremos que se muestren en el formulario.
-            'nombre', 'tipo', 'piso',"codigo","estado","capacidad","descripcion","es_critico","activo"
+            'nombre', 'tipo', 'piso',"codigo","capacidad","departamento","descripcion","es_critico","activo"
         ]
         widgets = {
             "nombre" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el nombre del lugar"}),
             "tipo" : forms.Select(attrs={'class': "campos-modal"}),
             "piso" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el piso en el que esta ubicado el lugar"}),
             "codigo" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el codigo del lugar"}),
-            "estado" : forms.Select(attrs={'class': "campos-modal"}),
             "capacidad" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese la capacidad del lugar"}),
+            "departamento" : forms.Select(attrs={'class': "campos-modal"}),
             "descripcion" : forms.Textarea(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese una descripcion del lugar"}),
             "es_critico" : forms.CheckboxInput(attrs={'class': "campos-modal"}),
-            "activo" : forms.CheckboxInput(attrs={'class': "campos-modal"}),
+            "activo" : forms.CheckboxInput(attrs={'class': "campos-modal"})
         }
+        
+
 
 class FormPlantillaEstudio(forms.ModelForm): 
     class Meta:
@@ -120,12 +124,26 @@ class FormRolesProfesionales(forms.ModelForm):
     class Meta:
         model = RolesProfesionales  
         fields = [ # Acá ingresamos los campos que queremos que se muestren en el formulario.
-            'nombre_rol_profesional',"tipoUsuario"
+            'nombre_rol_profesional',"tipoUsuario","especialidad","servicio_diagnostico"
         ]
         widgets = {
             "nombre_rol_profesional" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el nombre del rol"}),
-            "tipoUsuario" : forms.Select(attrs={'class': "campos-modal"})
+            "tipoUsuario" : forms.Select(attrs={'class': "campos-modal"}),
+            "especialidad" : forms.Select(attrs={'class': "campos-modal"}),
+            "servicio_diagnostico" : forms.Select(attrs={'class': "campos-modal"})
         }
+        
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'especialidad' in self.fields:
+            self.fields['especialidad'].queryset = Especialidades.objects.all()
+            self.fields['especialidad'].label_from_instance = lambda obj: f"{obj.nombre_especialidad}"
+
+        if 'servicio_diagnostico' in self.fields:
+            self.fields['servicio_diagnostico'].queryset = ServicioDiagnostico.objects.all()
+            self.fields['servicio_diagnostico'].label_from_instance = lambda obj: f"{obj.nombre_servicio}"
+
 
 
 class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelForm a Form Porque ModelForm espera que cada campo del modelo tenga correspondencia exacta en el formulario y en este caso eso no se cumple ya que vamos a manejar "jornada" como si fuera una relacion ManyToMany pese a que sea FK.
@@ -139,39 +157,87 @@ class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelF
         widget=forms.CheckboxSelectMultiple(attrs={"class": "box-multipleCheck"}), # Seleccionar varias jornadas
         label="Jornadas"
     )
-    departamento = forms.ModelChoiceField(
-        queryset=Departamento.objects.all(),
-        widget=forms.Select(attrs={"class": "campos-modal"}),
-        label="Departamento"
-    )
+
 
     def __init__(self, *args, **kwargs):
         self.usuario = kwargs.pop('usuario', None)  # Pasar usuario desde la vista
         super().__init__(*args, **kwargs)
+        
+        if not self.usuario:
+            raise ValueError("Se requiere un usuario para inicializar el formulario.")
+        
+        tipo_usuario = self.usuario.tipoUsuario.id
+        
+        if tipo_usuario == 1:  # Superadmin
+            pass
+        elif tipo_usuario == 2:  # Admin
+            pass
+        elif tipo_usuario == 3: # Medicos
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="cons",activo=True) #Consultorios
+        elif tipo_usuario == 4: # Enfermeros
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="hab",activo=True)  # Habitaciones
+        elif tipo_usuario == 5: # Apoyo en Diagnóstico y Tratamiento
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="lab",activo=True)  # Laboratorios 
+        elif tipo_usuario == 6: # Cargador de resultados
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="oficina_resultados",activo=True)  # Oficinas de resultados
 
-        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo})"
+        
+        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo}) - Departamento: {obj.departamento}"
         self.fields['jornada'].label_from_instance = lambda obj: f"{obj.get_dia_display()} - {obj.get_turno_display()}"
-        self.fields['departamento'].label_from_instance = lambda obj: f"{obj.nombre_departamento}"
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        lugar = cleaned_data.get('lugar')
+        jornadas = cleaned_data.get('jornada')
+
+        if not lugar or not jornadas:
+            return cleaned_data
+
+        errores = []
+
+        for jornada in jornadas:
+            # Verificamos si el usuario ya tiene esa jornada asignada
+            ya_asignado = UsuarioLugarTrabajoAsignado.objects.filter(
+                usuario=self.usuario,
+                jornada=jornada
+            ).exists()
+
+            if ya_asignado:
+                continue  # No intentaremos asignarlo de nuevo
+
+            # Verificamos la cantidad de usuarios asignados a ese lugar en esa jornada
+            usuarios_en_jornada = UsuarioLugarTrabajoAsignado.objects.filter(
+                lugar=lugar,
+                jornada=jornada
+            ).count()
+            
+            if usuarios_en_jornada >= lugar.capacidad:
+                errores.append(
+                    f"El lugar '{lugar.nombre} ({lugar.codigo})' ya alcanzó su capacidad máxima ({lugar.capacidad}) de usuarios asignados en la jornada: {jornada.get_dia_display()} - {jornada.get_turno_display()}."
+                )
+
+        if errores:
+            raise forms.ValidationError(errores)
+
+        return cleaned_data
 
     def save(self):
         lugar = self.cleaned_data['lugar']
-        departamento = self.cleaned_data['departamento']
         jornadas = self.cleaned_data['jornada']
 
         registros_creados = []
         jornadas_omitidas = []
         
         for jornada in jornadas:
-            existe = UsuarioXDepartamentoXJornadaXLugar.objects.filter( # Validamos que el usuario no tenga asinado esa jornada
+            existe = UsuarioLugarTrabajoAsignado.objects.filter( # Validamos que el usuario no tenga asinado esa jornada
                 usuario=self.usuario,
                 jornada=jornada
             ).exists()
             
             if not existe:
-                obj, creado = UsuarioXDepartamentoXJornadaXLugar.objects.get_or_create(
+                obj, creado = UsuarioLugarTrabajoAsignado.objects.get_or_create(
                     usuario=self.usuario,
                     lugar=lugar,
-                    departamento=departamento,
                     jornada=jornada
                 )
                 if creado:
@@ -183,51 +249,78 @@ class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelF
 
 class FormularioEditarLugarTrabajo(forms.ModelForm):
     class Meta:
-        model = UsuarioXDepartamentoXJornadaXLugar
-        fields = ['lugar', 'departamento', 'jornada']
+        model = UsuarioLugarTrabajoAsignado
+        fields = ['lugar', 'jornada']
         widgets = {
             "lugar": forms.Select(attrs={"class": "campos-modal", "id":"id_lugar_edit"}),
-            "departamento": forms.Select(attrs={"class": "campos-modal", "id":"id_departamento_edit"}),
             "jornada": forms.Select(attrs={"class": "campos-modal", "id":"id_jornada_edit"}),
         }
 
     def __init__(self, *args, **kwargs):
         self.usuario = kwargs.pop('usuario', None) 
         super().__init__(*args, **kwargs)
+        
+        if not self.usuario:
+            raise ValueError("Se requiere un usuario para inicializar el formulario.")
+        
+        tipo_usuario = self.usuario.tipoUsuario.id
+        
+        if tipo_usuario == 1:  # Superadmin
+            pass
+        elif tipo_usuario == 2:  # Admin
+            pass
+        elif tipo_usuario == 3: # Medicos
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="cons") #Consultorios
+        elif tipo_usuario == 4: # Enfermeros
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="hab")  # Habitaciones
+        elif tipo_usuario == 5: # Apoyo en Diagnóstico y Tratamiento
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="lab")  # Laboratorios 
+        elif tipo_usuario == 6: # Cargador de resultados
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="oficina_resultados")  # Oficinas de resultados
 
-        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo})"
-        self.fields['departamento'].label_from_instance = lambda obj: f"{obj.nombre_departamento}"
+        
+        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo}) - Departamento: {obj.departamento}"
         self.fields['jornada'].label_from_instance = lambda obj: f"{obj.get_dia_display()} - {obj.get_turno_display()}"
 
     def clean(self):
         cleaned_data = super().clean()
         lugar = cleaned_data.get("lugar")
-        departamento = cleaned_data.get("departamento")
         jornada = cleaned_data.get("jornada")
 
-        if self.instance.pk:  # Solo en edición
-            conflicto = UsuarioXDepartamentoXJornadaXLugar.objects.filter(
+        if not lugar or not jornada:
+            return cleaned_data
+
+        # Validación de jornada duplicada
+        if self.instance.pk:
+            conflicto = UsuarioLugarTrabajoAsignado.objects.filter(
                 usuario=self.usuario,
                 jornada=jornada
             ).exclude(pk=self.instance.pk).exists()
 
             if conflicto:
-                raise forms.ValidationError("Este usuario ya tiene asignada esa jornada en otro lugar/departamento.")
+                self.add_error("jornada", "Este usuario ya tiene asignada esa jornada en otro lugar.")
+
+        # Validación de capacidad del lugar
+        asignaciones = UsuarioLugarTrabajoAsignado.objects.filter(lugar=lugar)
+        if self.instance.pk:
+            asignaciones = asignaciones.exclude(pk=self.instance.pk)
+
+        if asignaciones.count() >= lugar.capacidad:
+            self.add_error("lugar", f"El lugar '{lugar.nombre}' ya alcanzó su capacidad máxima de {lugar.capacidad} usuarios.")
 
         return cleaned_data
 
 
 
 
+
 class FormularioAsignaciones(forms.ModelForm): 
     class Meta:
-        model = UsuarioXEspecialidadXServicioXrolesProfesionales 
+        model = UsuarioRolProfesionalAsignado 
         fields = [ # Acá ingresamos los campos que queremos que se muestren en el formulario.
-            'especialidad',"servicio_diagnostico",'rol_profesional'
+            'rol_profesional'
         ]
         widgets = {
-            "especialidad" : forms.Select(attrs={"class":"campos-modal"}),
-            "servicio_diagnostico" : forms.Select(attrs={"class":"campos-modal"}),
             "rol_profesional" : forms.Select(attrs={"class":"campos-modal"}),
         }
     
@@ -238,24 +331,10 @@ class FormularioAsignaciones(forms.ModelForm):
         tipo_usuario = self.user.tipoUsuario.id
         
         # Roles ya asignados al usuario
-        roles_asignados = UsuarioXEspecialidadXServicioXrolesProfesionales.objects.filter(usuario=self.user).values_list('rol_profesional_id', flat=True)
+        roles_asignados = UsuarioRolProfesionalAsignado.objects.filter(usuario=self.user).values_list('rol_profesional_id', flat=True)
 
         # Excluir los roles ya asignados
         self.fields['rol_profesional'].queryset = RolesProfesionales.objects.filter(tipoUsuario_id=tipo_usuario).exclude(id__in=roles_asignados)
-        
-        # Si el rol del usuario es el rol que no debería ver 'servicio_diagnostico', solo mostrar 'especialidad' y 'rol_profesional'
-        if tipo_usuario == 5:  # Si el rol del usuario es "Apoyo en Diagnóstico y Tratamiento"
-            self.fields['especialidad'].widget = forms.HiddenInput()
-            self.fields['servicio_diagnostico'].queryset = ServicioDiagnostico.objects.all()
-        elif tipo_usuario == 3:  # Si el rol del usuario es "Medico"
-            self.fields['servicio_diagnostico'].widget = forms.HiddenInput()
-            self.fields['especialidad'].queryset = Especialidades.objects.all()
-
-        # Filtramos el 'rol_profesional' según el tipo de usuario
-
-        # Personalizamos las etiquetas (labels) de los campos
-        self.fields['especialidad'].label_from_instance = lambda obj: f"{obj.nombre_especialidad}"
-        self.fields['servicio_diagnostico'].label_from_instance = lambda obj: f"{obj.nombre_servicio}"
         self.fields['rol_profesional'].label_from_instance = lambda obj: f"{obj.nombre_rol_profesional}" 
 
 

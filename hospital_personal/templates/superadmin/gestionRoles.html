@@ -144,6 +144,31 @@
                             </div>
                         {% endif %}                      
                     </div>
+                    <div style="background-color: #e6f0ff; padding: 10px; border-left: 4px solid #3399ff; margin-bottom: 15px;">
+                        <strong>Importante:</strong> Este rol profesional debe estar relacionado con una <strong>especialidad médica</strong> <em>o</em> con un <strong>servicio de diagnóstico</strong>. Al seleccionar uno, el otro se desactivará automáticamente.
+                    </div>
+                    <div class="campo-input" id="seccion-especialidad">
+                        <label for="id_tipoUsuario">Especialidad medica:</label>
+                        {{ formRolesProfesionales.especialidad }}
+                        {% if formRolesProfesionales.especialidad.errors %}
+                            <div class="error-message">
+                                {% for error in formRolesProfesionales.especialidad.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}                      
+                    </div>
+                    <div class="campo-input" id="seccion-servicio_diagnostico">
+                        <label for="id_tipoUsuario">Servicio de diagnostico:</label>
+                        {{ formRolesProfesionales.servicio_diagnostico }}
+                        {% if formRolesProfesionales.servicio_diagnostico.errors %}
+                            <div class="error-message">
+                                {% for error in formRolesProfesionales.servicio_diagnostico.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}                      
+                    </div>
                     <button type="submit" class="btn-guardar">Guardar</button>
                 </form>
             </div>
