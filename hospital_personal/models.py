@@ -33,30 +33,45 @@ class Jorna_laboral(models.Model):
     dia = models.CharField(max_length=20, choices=DIAS_CHOICES)
     turno = models.CharField(max_length=10, choices=TURNOS_CHOICES)
     
+    def jornadaDisponible(self, usuario, lugar):
+        """
+        Me fijo si el usuario tiene esta jornada ocupada o disponible
+        """
+        asignacion = UsuarioLugarTrabajoAsignado.objects.filter(
+            jornada=self,
+            usuario=usuario
+        ).first()
+
+        if asignacion:
+            if asignacion.lugar.id == lugar.id:
+                return "Este usuario ya tiene asignada esta jornada en este lugar"
+            else:
+                return "Este usuario ya tiene asignada esta jornada en otro lugar"
+        
+        return None 
+    
     def __str__(self):
         return f"Los dias {self.get_dia_display()} trabaja en el turno: {self.get_turno_display()} de este departamento"
 
 class Lugar(models.Model):
-    ESTADOS_CHOICES = [
-        ('disponible', 'Disponible'),
-        ('ocupado', 'Ocupado'),
-        ('mantenimiento', 'En mantenimiento'),
-        ('fuera_servicio', 'Fuera de servicio')
-    ]
     TIPO_CHOICES = [
-        ('lab', 'Laboratorio'),
-        ('hab', 'Habitación'),
-        ('qui', 'Quirófano'),
         ('cons', 'Consultorio'),
-        ('oficina_resultados', 'Oficina de Resultados')
+        ('lab', 'Laboratorio'),
+        ('img', 'Sala de imagenología'), # Espacio equipado con tecnología para obtener imágenes del cuerpo con fines diagnósticos. (Sala de Rayos X, Sala de Resonancia Magnética, Sala de Tomografía (TAC), Sala de Ecografía, Sala de Mamografía, etc)
+        ('diag_func', 'Sala de diagnóstico funcional'),  # Área donde se evalúan funciones fisiológicas del organismo mediante estudios no invasivos o mínimamente (Sala de Electrocardiogramas, Sala de Espirometría, Sala de Endoscopía, Sala de Electroencefalograma,etc)
+        ('unidad_atenc', 'Unidad de atención'), # Áreas hospitalarias especializadas en la atención continua y crítica de pacientes, con personal y equipamiento permanente. (Unidad de Cuidados Intensivos (UCI), Unidad Neonatal, Unidad de Recuperación Post-Anestésica, Unidad de Cuidados Neurocríticos,etc)
+        ('qui', 'Quirófano'),
+        ('proc', 'Sala de procedimiento no quirúrgico'),  # Espacio donde se realizan procedimientos médicos o terapéuticos sin necesidad de cirugía o anestesia general. (Sala de Hemodiálisis, Sala de Quimioterapia, Sala de Infiltraciones o Curaciones,etc)
+        ('hab', 'Habitación'),
+        ('area_apoyo', 'Área de apoyo') # Espacios que brindan soporte operativo, logístico o educativo al funcionamiento del hospital.
     ]
     
     nombre = models.CharField(max_length=100)
     tipo = models.CharField(max_length=50,choices=TIPO_CHOICES)
-    piso = models.IntegerField()
-    codigo = models.CharField(max_length=20, unique=True)
-    estado = models.CharField(max_length=20,choices=ESTADOS_CHOICES,default='disponible')  # Eliminar este campo al completar la BD
-    capacidad = models.IntegerField(default=1)  # Luego cambar a interger positivo 
+    piso = models.IntegerField() # Cambiar a PositiveIntegerField al terminar la BD
+    sala = models.PositiveIntegerField(unique=True)  
+    abreviacion = models.CharField(max_length=20) 
+    capacidad = models.PositiveIntegerField(default=1)  
     descripcion = models.TextField(blank=True, null=True)
     es_critico = models.BooleanField(default=False)
     activo = models.BooleanField(default=True) 
@@ -76,14 +91,31 @@ class Lugar(models.Model):
     
     def __str__(self):
         if self.activo:
-            return f"{self.nombre} ({self.codigo}) - Estado: {self.estado}"
+            return f"{self.nombre} ({self.abreviacion}-{self.sala})"
         else:
-            return f"{self.nombre} ({self.codigo}) - INACTIVO"
+            return f"{self.nombre} ({self.abreviacion}-{self.sala})"
+
+class UsuarioRolProfesionalAsignado(models.Model):
+    usuario = models.ForeignKey('controlUsuario.Usuario', on_delete=models.CASCADE,related_name="especialidadesUsuario")
+    rol_profesional = models.ForeignKey('controlUsuario.RolesProfesionales', on_delete=models.CASCADE)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['usuario', 'rol_profesional'], name='unique_usuario_rol_profesional') # Con UniqueConstraint, nos aseguramos de que un mismo usuario no pueda estar asignado al mismo rol_profesional más de una vez.
+        ]
+    
+    def __str__(self):
+        if (self.rol_profesional.servicio_diagnostico):
+            return f"Usuario: {self.usuario.persona.get_full_name()} (N° Legajo: {self.usuario.persona.login_id}) - Servicio en el que  trabaja: {self.rol_profesional.servicio_diagnostico.nombre_servicio}"
+        else:
+            return f"Usuario: {self.usuario.persona.get_full_name()} (N° Legajo: {self.usuario.persona.login_id}) - Especialidad en que trabaja: {self.rol_profesional.especialidad.nombre_especialidad}"
+
 
 class UsuarioLugarTrabajoAsignado(models.Model):
     lugar = models.ForeignKey(Lugar, on_delete=models.CASCADE)
     usuario = models.ForeignKey('controlUsuario.Usuario', on_delete=models.CASCADE, related_name="UsuariosAsignadosAEsteLugar")
     jornada = models.ForeignKey(Jorna_laboral, on_delete=models.CASCADE)
+    rolProfesionalAsignado = models.ForeignKey(UsuarioRolProfesionalAsignado, on_delete=models.SET_NULL, null=True)
     
     class Meta:
         constraints = [
@@ -91,8 +123,9 @@ class UsuarioLugarTrabajoAsignado(models.Model):
         ]
         
     def __str__(self):
-        return f"El usuario (ID:{self.usuario.id} - {self.usuario.persona.get_full_name()} - {self.usuario.tipoUsuario} )  trabaja los dias {self.jornada.get_dia_display()} en el lugar '{self.lugar.nombre} ({self.lugar.codigo})' en el horario: {self.jornada.get_turno_display()}"
-    
+        return (
+            f"El usuario (ID:{self.usuario.id} - {self.usuario.persona.get_full_name()} - {self.usuario.tipoUsuario}) trabaja los días {self.jornada.get_dia_display()} en el lugar '{self.lugar.nombre} ({self.lugar.abreviacion})' en el horario: {self.jornada.get_turno_display()} como {self.rolProfesionalAsignado.rol_profesional.nombre_rol_profesional} (En {getattr(self.rolProfesionalAsignado.rol_profesional.especialidad, 'nombre_especialidad', getattr(self.rolProfesionalAsignado.rol_profesional.servicio_diagnostico, 'nombre_servicio', 'Sin asignar'))})"
+        )    
     def clean(self):
         if self.lugar:
             if not self.lugar.activo:
@@ -154,21 +187,6 @@ class PlantillaEstudio(models.Model):
         return f"El estudio '{self.estudio.nombre_estudio}' tiene la estructura {self.estructura}"
 
 
-class UsuarioRolProfesionalAsignado(models.Model):
-    usuario = models.ForeignKey('controlUsuario.Usuario', on_delete=models.CASCADE,related_name="especialidadesUsuario")
-    rol_profesional = models.ForeignKey('controlUsuario.RolesProfesionales', on_delete=models.CASCADE)
-    
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['usuario', 'rol_profesional'], name='unique_usuario_rol_profesional') # Con UniqueConstraint, nos aseguramos de que un mismo usuario no pueda estar asignado al mismo rol_profesional más de una vez.
-        ]
-    
-    def __str__(self):
-        if (self.rol_profesional.servicio_diagnostico):
-            return f"Usuario: {self.usuario.persona.get_full_name()} - N° Legajo: {self.usuario.persona.login_id} - N° Matricula: {self.usuario.numero_matricula} - Servicio en el trabaja: {self.rol_profesional.servicio_diagnostico.nombre_servicio}"
-        else:
-            return f"Usuario: {self.usuario.persona.get_full_name()} - N° Legajo: {self.usuario.persona.login_id} - Especialidad: {self.rol_profesional.especialidad.nombre_especialidad} - N° Matricula: {self.usuario.numero_matricula}"
-
 class Turno(models.Model):
     ESTADOS_CHOICES = [
         ('pendiente', 'Pendiente'),
@@ -189,10 +207,11 @@ class Turno(models.Model):
     profesional = models.ForeignKey('controlUsuario.Usuario', on_delete=models.CASCADE)
     fecha_creacion = models.DateTimeField(auto_now_add=True) 
     fecha_turno = models.DateField() 
-    horario_turno = models.CharField(max_length=10, choices=TURNOS_CHOICES, default="dia")
+    horario_turno = models.CharField(max_length=10, choices=TURNOS_CHOICES, default="dia")  # Luego quitar el default al terminar a BD
     estado = models.CharField(max_length=20, choices=ESTADOS_CHOICES, default="pendiente")
     motivo = models.TextField(blank=True, null=False)
     asistio = models.BooleanField(default=False)
+    lugar = models.ForeignKey(Lugar,on_delete=models.SET_NULL,null=True,blank=False)
     
     # Método para obtener la hora de inicio y fin del turno
     def obtener_rango_turno(self):

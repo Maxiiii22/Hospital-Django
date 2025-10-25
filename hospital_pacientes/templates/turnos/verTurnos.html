@@ -26,6 +26,7 @@
                         <th>Especialidad</th>
                         <th>Profesional</th>
                         <th>Fecha turno</th>
+                        <th>Lugar</th>
                         <th class="columna-estado">Estado</th>
                         <th></th>
                     </tr>
@@ -42,6 +43,7 @@
                                 {% elif turno.horario_turno == "tarde" %} 15:00 a 23:00 
                                 {% endif %}
                             </td>
+                            <td data-label="Lugar">{{turno.lugar.nombre}} (Piso: {{turno.lugar.piso}} - N° sala: {{turno.lugar.sala}})</td>
                             <td class="columna-estado" data-label="Estado:">{{ turno.get_estado_display }}</td>
                             <td data-label="Accion:">
                                 <div class="box-btns-td-acciones">
@@ -152,7 +154,7 @@
                         <tr class="fila-turnos-paciente">
                             <td data-label="ID del turno:">{{ turno.id }}</td>
                             <td data-label="Estudio:">{{ turno.orden.tipo_estudio.nombre_estudio }}</td>
-                            <td data-label="Lugar:">{{ turno.lugar.nombre }} ({{ turno.lugar.get_tipo_display }}) - <strong>Piso:</strong> {{ turno.lugar.piso }} - <strong>Codigo:</strong> {{ turno.lugar.codigo }}</td>
+                            <td data-label="Lugar:">{{ turno.lugar.nombre }} (Piso: {{ turno.lugar.piso }} - N° Sala:{{ turno.lugar.sala }})</td>
                             <td data-label="Fecha turno:">{{ turno.fecha_turno|date:"d-m-Y" }} - <strong>Horario:</strong> {% if turno.horario_turno == "dia" %} 7:00 a 15:00 {% endif %}</td>
                             <td class="columna-estado" data-label="Estado:">{{ turno.get_estado_display }}</td>
                             <td data-label="Accion:">
@@ -203,7 +205,7 @@
                         <tr class="fila-turnos-paciente">
                             <td data-label="ID del turno: ">{{ turno.id }}</td>
                             <td data-label="Especialidad: ">{{ turno.orden.tipo_estudio.nombre_estudio }}</td>
-                            <td data-label="Lugar: ">{{ turno.lugar.nombre }} ({{ turno.lugar.get_tipo_display }}) - Piso: {{ turno.lugar.piso }} - Codigo: {{ turno.lugar.codigo }}</td>
+                            <td data-label="Lugar:">{{ turno.lugar.nombre }} (Piso: {{ turno.lugar.piso }} - N° Sala:{{ turno.lugar.sala }})</td>
                             <td data-label="Fecha turno: ">{{ turno.fecha_turno|date:"d-m-Y" }} - Horario: {% if turno.horario_turno == "dia" %} 7:00 a 15:00 {% endif %}</td>
                             <td class="columna-estado" data-label="Estado: ">{{ turno.get_estado_display }}</td>
                                 {% if turno.estado == "realizado" %}
@@ -244,7 +246,7 @@
                     <button type="button" id="nextMonth" class="nextMonth">Mes Siguiente</button>
                 </div>
                 <div class="calendar" id="calendar"></div>
-                <button type="submit" class="btn-global">Reprogramar</button>
+                <button type="submit" disabled class="btn-global" id="btn-form-reprogramar">Reprogramar</button>
             </form>
         </div>
     </div>

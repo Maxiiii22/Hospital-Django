@@ -11,7 +11,7 @@
 
 {% block contenido %}
     <div class="container-tabla-medico-global">
-        <h1>Turnos Programados para {{especialidad_actual_nombre}}</h1>
+        <h1>Turnos Programados {% if especialidad_actual_nombre %}para {{especialidad_actual_nombre}}{% endif %}</h1>
 
         <div class="turnos-section">
             <h2>Turnos del Día de Hoy</h2>

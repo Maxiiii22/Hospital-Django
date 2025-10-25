@@ -14,7 +14,7 @@ class Jornada_laboralAdmin(admin.ModelAdmin):
     list_display = ['id', 'dia','turno']
 
 class LugarAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nombre','tipo','piso','codigo','estado','capacidad','es_critico','activo',"departamento"]
+    list_display = ['id', 'nombre','tipo','piso','sala','abreviacion','capacidad','es_critico','activo',"departamento"]
 
 class MedicacionesAdmin(admin.ModelAdmin):
     list_display = ['id', 'medicamento','dosis','frecuencia','tiempo_uso','consulta','recetada_por']

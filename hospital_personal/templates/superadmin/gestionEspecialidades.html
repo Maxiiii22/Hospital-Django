@@ -22,7 +22,6 @@
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
-                        <th>Permite turno</th>
                         <th class="columna-ubicacion">Ubicado en el departamento de</th>
                         <th></th>
                     </tr>
@@ -33,7 +32,6 @@
                     <tr class="fila">
                         <td data-label="ID:">{{especialidad.id}}</td>
                         <td data-label="Nombre:">{{especialidad.nombre_especialidad}}</td>
-                        <td data-label="Permite turno:">{% if especialidad.permite_turno %}Si{% else %}No{% endif %}</td>
                         <td data-label="Ubicado en el departamento de:" class="columna-ubicacion">{{especialidad.departamento.nombre_departamento}}</td>
                         <td data-label="Acciones:">
                             <div class="box-btns-td-acciones">

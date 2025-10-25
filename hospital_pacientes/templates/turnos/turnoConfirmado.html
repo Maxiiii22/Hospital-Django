@@ -17,18 +17,17 @@
                 <h2>¡Tu turno ha sido confirmado con éxito!</h2>
             {% endif %}
     
-            <p><strong>Fecha creacion:</strong> {{ datos_turno.fecha_creacion|date:"d/m/Y H:i" }}</p>
+            <p><strong>Fecha creacion:</strong> {{ datos_turno.fecha_creacion|date:"d/m/Y H:i A" }}</p>
             <p><strong>Fecha del turno:</strong> {{ datos_turno.fecha_turno|date:"d/m/Y" }} 
             <p><strong>Horario:</strong> {% if datos_turno.horario_turno == "dia" %} 7:00 a 15:00 {% elif datos_turno.horario_turno == "tarde" %} 15:00 a 23:00 {% endif %}</p>
+            <p><strong>Atención en:</strong> {{ datos_turno.lugar.nombre }} <strong>(Piso: {{ datos_turno.lugar.piso }} - N° de sala: {{ datos_turno.lugar.sala }})</strong></p>   
             {% if turnoEstudio %}
                 <p><strong>Estudio:</strong> {{ datos_turno.orden.tipo_estudio.nombre_estudio }}</p>
                 <p><strong>Realizado por:</strong> {{ datos_turno.orden.tipo_estudio.servicio_diagnostico.nombre_servicio }}</p>
-                <p><strong>Lugar:</strong> {{ datos_turno.lugar.nombre }} ({{ datos_turno.lugar.get_tipo_display }}) - <strong>Piso</strong> {{ datos_turno.lugar.piso }} - <strong>Codigo</strong> {{ datos_turno.lugar.codigo }}</p>   
             {% else %}
-                <p><strong>Profesional:</strong> {{ datos_turno.profesional.persona.get_full_name }} - DNI: {{datos_turno.profesional.persona.dni}} - N° Matricula: {{datos_turno.profesional.numero_matricula}}</p>
+                <p><strong>Profesional:</strong> {{ datos_turno.profesional.persona.get_full_name }} - <strong>DNI:</strong> {{datos_turno.profesional.persona.dni}} - <strong>N° Matricula:</strong> {{datos_turno.profesional.numero_matricula}}</p>
                 <p><strong>Especialidad:</strong> {{ datos_turno.especialidad.nombre_especialidad }}</p>
                 <p><strong>Motivo:</strong> {{ datos_turno.motivo }}</p>
-            
             {% endif %}
             
     

@@ -100,6 +100,7 @@ function toggleTurnosEstudios() {
     mostrandoEstudiosFuturos = !mostrandoEstudiosFuturos;
 }
 
+
 // mostrar futuros por defecto
 if(document.getElementById("turnos-futuros")){
     document.getElementById("turnos-futuros").style.display = "block";
@@ -140,7 +141,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -156,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (!response.ok) throw new Error("Error al obtener datos");
         
                     const data = await response.json();
-        
+                    
                     let currentDate = new Date();
                     let monthOffset = 0;
             
@@ -164,35 +166,35 @@ document.addEventListener("DOMContentLoaded", function () {
                     const fechasDisponibles = data.dias_disponibles.flatMap(profesional => 
                         profesional.disponibilidad.map(dia => dia.fecha)
                     );
-            
-            
-                    const nombreMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
-                                       "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            
-                    let botonSeleccionado = null;
-            
-                    // Función para crear el calendario con todos los días del mes
-                    function crearCalendario() {
+
+                    function crearCalendario(fechas) { // Función para crear el calendario con todos los días del mes
+                    
+                        const nombreMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                    
+                        let botonSeleccionado = null;
+                    
+                    
                         const calendar = document.getElementById('calendar');
                         calendar.innerHTML = '';  // Limpiar el calendario antes de volver a generarlo
-            
+                    
                         // Fecha de inicio (primer día del mes)
                         const fechaInicio = new Date(currentDate);
                         fechaInicio.setMonth(currentDate.getMonth() + monthOffset);
                         fechaInicio.setDate(1);
-            
+                    
                         // Fecha límite (último día del mes)
                         const fechaLimite = new Date(fechaInicio);
                         fechaLimite.setMonth(fechaInicio.getMonth() + 1);
                         fechaLimite.setDate(0);
-            
+                    
                         // Mostrar el nombre del mes actual
                         const mesActual = nombreMes[fechaInicio.getMonth()];
                         const header = document.createElement('div');
                         header.classList.add('header');
                         header.textContent = `${mesActual} ${fechaInicio.getFullYear()}`;
                         calendar.appendChild(header);
-            
+                    
                         // Generar celdas para los días de la semana
                         const diasDeLaSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
                         for (let i = 0; i < 7; i++) {
@@ -201,29 +203,26 @@ document.addEventListener("DOMContentLoaded", function () {
                             diaSemana.style.fontWeight = 'bold';
                             calendar.appendChild(diaSemana);
                         }
-            
+                    
                         // Generar los días del mes
                         const diaDeLaSemanaInicio = fechaInicio.getDay();
                         let dia = 1;
-            
-                        // Rellenar con días vacíos al principio
-                        for (let i = 0; i < diaDeLaSemanaInicio; i++) {
+                    
+                        for (let i = 0; i < diaDeLaSemanaInicio; i++) {     // Rellenar con días vacíos al principio
                             const diaVacio = document.createElement('button');
                             diaVacio.disabled = true;
                             calendar.appendChild(diaVacio);
                         }
-            
-                        // Mostrar todos los días del mes
-                        while (dia <= fechaLimite.getDate()) {
+                    
+                        while (dia <= fechaLimite.getDate()) {  // Mostrar todos los días del mes
                             const botonDia = document.createElement('button');
                             botonDia.type = "button";
                             botonDia.textContent = dia;
-            
+                    
                             const fechaDia = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), dia);
                             const fechaFormateada = fechaDia.toISOString().split('T')[0];  // Obtener la fecha en formato YYYY-MM-DD
-            
-                            // Verificar si el día está en la lista de días disponibles
-                            if (fechasDisponibles.includes(fechaFormateada)) {
+                    
+                            if (fechas.includes(fechaFormateada)) { // Verificar si el día está en la lista de días disponibles
                                 botonDia.classList.add('valid');
                                 botonDia.addEventListener('click', function() {
                                     if (botonSeleccionado) {
@@ -234,16 +233,19 @@ document.addEventListener("DOMContentLoaded", function () {
                                     fecha.value = fechaSeleccionada;
                                     botonDia.classList.add('seleccionado');
                                     botonSeleccionado = botonDia;
+                                    const btnFormReprogramar= document.getElementById("btn-form-reprogramar");
+                                    btnFormReprogramar.disabled = false;
                                 });
-                            } else {
+                            } 
+                            else {
                                 botonDia.disabled = true;
                                 botonDia.classList.add('no-seleccionable');
                             }
-            
+                    
                             calendar.appendChild(botonDia);
                             dia++;
                         }
-            
+                    
                         // Rellenar con días vacíos al final si es necesario
                         const diaDeLaSemanaFin = fechaLimite.getDay();
                         if (diaDeLaSemanaFin !== 6) {
@@ -253,22 +255,22 @@ document.addEventListener("DOMContentLoaded", function () {
                                 calendar.appendChild(diaVacio);
                             }
                         }
-                    }
-            
+                    }                    
+
                     // Función para ir al mes anterior
                     document.getElementById('prevMonth').addEventListener('click', function() {
                         monthOffset--;
-                        crearCalendario();
+                        crearCalendario(fechasDisponibles);
                     });
             
                     // Función para ir al mes siguiente
                     document.getElementById('nextMonth').addEventListener('click', function() {
                         monthOffset++;
-                        crearCalendario();
+                        crearCalendario(fechasDisponibles);
                     });
             
                     // Inicializar el calendario
-                    crearCalendario();        
+                    crearCalendario(fechasDisponibles);        
                     
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
@@ -277,7 +279,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     document.getElementById("editForm").action = `/pacientes/turnos/reprogramar/${id_turno}/`;
                     
-                } catch (err) {
+                } 
+                catch (err) {
                     alert("Error al cargar los datos");
                     console.error(err);
                 }
@@ -293,122 +296,28 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (!response.ok) throw new Error("Error al obtener datos");
         
                     const data = await response.json();
-        
-                    let currentDate = new Date();
-                    let monthOffset = 0;
             
                     // Convertir las fechas disponibles a un array de fechas para fácil comparación
                     const fechasDisponibles = data.dias_disponibles.map(d => d.fecha);;
                             
-                    const nombreMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
-                                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
-                    let botonSeleccionado = null;
-
-                    // Función para crear el calendario con todos los días del mes
-                    function crearCalendario() {
-                        const calendar = document.getElementById('calendar');
-                        calendar.innerHTML = '';  // Limpiar el calendario antes de volver a generarlo
-
-                        // Fecha de inicio (primer día del mes)
-                        const fechaInicio = new Date(currentDate);
-                        fechaInicio.setMonth(currentDate.getMonth() + monthOffset);
-                        fechaInicio.setDate(1);
-
-                        // Fecha límite (último día del mes)
-                        const fechaLimite = new Date(fechaInicio);
-                        fechaLimite.setMonth(fechaInicio.getMonth() + 1);
-                        fechaLimite.setDate(0);
-
-                        // Mostrar el nombre del mes actual
-                        const mesActual = nombreMes[fechaInicio.getMonth()];
-                        const header = document.createElement('div');
-                        header.classList.add('header');
-                        header.textContent = `${mesActual} ${fechaInicio.getFullYear()}`;
-                        calendar.appendChild(header);
-
-                        // Generar celdas para los días de la semana
-                        const diasDeLaSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-                        for (let i = 0; i < 7; i++) {
-                            const diaSemana = document.createElement('div');
-                            diaSemana.textContent = diasDeLaSemana[i];
-                            diaSemana.style.fontWeight = 'bold';
-                            calendar.appendChild(diaSemana);
-                        }
-
-                        // Generar los días del mes
-                        const diaDeLaSemanaInicio = fechaInicio.getDay();
-                        let dia = 1;
-
-                        // Rellenar con días vacíos al principio
-                        for (let i = 0; i < diaDeLaSemanaInicio; i++) {
-                            const diaVacio = document.createElement('button');
-                            diaVacio.disabled = true;
-                            calendar.appendChild(diaVacio);
-                        }
-
-                        // Mostrar todos los días del mes
-                        while (dia <= fechaLimite.getDate()) {
-                            const botonDia = document.createElement('button');
-                            botonDia.type = "button";
-                            botonDia.textContent = dia;
-
-                            const fechaDia = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), dia);
-                            const fechaFormateada = fechaDia.toISOString().split('T')[0];  // Obtener la fecha en formato YYYY-MM-DD
-
-                            // Verificar si el día está en la lista de días disponibles
-                            if (fechasDisponibles.includes(fechaFormateada)) {
-                                botonDia.classList.add('valid');
-                                botonDia.addEventListener('click', function() {
-                                    if (botonSeleccionado) {
-                                        botonSeleccionado.classList.remove('seleccionado');
-                                    }
-                                    const fecha = document.getElementById("fecha_seleccionada");
-                                    const fechaSeleccionada = `${fechaDia.getFullYear()}-${fechaDia.getMonth() + 1}-${fechaDia.getDate()}`;
-                                    fecha.value = fechaSeleccionada;
-                                    alert(`Fecha seleccionada: ${fechaSeleccionada}`);
-                                    botonDia.classList.add('seleccionado');
-                                    botonSeleccionado = botonDia;
-                                });
-                            } else {
-                                botonDia.disabled = true;
-                                botonDia.classList.add('no-seleccionable');
-                            }
-
-                            calendar.appendChild(botonDia);
-                            dia++;
-                        }
-
-                        // Rellenar con días vacíos al final si es necesario
-                        const diaDeLaSemanaFin = fechaLimite.getDay();
-                        if (diaDeLaSemanaFin !== 6) {
-                            for (let i = diaDeLaSemanaFin + 1; i < 7; i++) {
-                                const diaVacio = document.createElement('button');
-                                diaVacio.disabled = true;
-                                calendar.appendChild(diaVacio);
-                            }
-                        }
-                    }
-
                     // Función para ir al mes anterior
                     document.getElementById('prevMonth').addEventListener('click', function() {
                         monthOffset--;
-                        crearCalendario();
+                        crearCalendario(fechasDisponibles);
                     });
 
                     // Función para ir al mes siguiente
                     document.getElementById('nextMonth').addEventListener('click', function() {
                         monthOffset++;
-                        crearCalendario();
+                        crearCalendario(fechasDisponibles);
                     });
 
                     // Inicializar el calendario
-                    crearCalendario();        
+                    crearCalendario(fechasDisponibles);        
 
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
-
 
                     document.getElementById("editForm").action = `/pacientes/turnos/reprogramar-estudio/${id_turnoEstudio}/`;
 
@@ -423,7 +332,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll('.box-estudio').forEach(box => {
         box.addEventListener("click", async () => {
-            console.log("je")
             const id_orden = box.dataset.idOrden; 
             const id_paciente = box.dataset.idPaciente; 
             try {
@@ -446,138 +354,160 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("estudio").innerHTML = `<strong>Estudio:</strong> ${data.nombre_estudio}`;
                 document.getElementById("horario").innerHTML = `<strong>Horario:</strong> ${data.horario}`;
 
-
-                let currentDate = new Date();
-                let monthOffset = 0;
         
                 // Convertir las fechas disponibles a un array de fechas para fácil comparación
                 const fechasDisponibles = data.dias_disponibles.map(d => d.fecha);;
         
-                const nombreMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
-                                   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        
-                let botonSeleccionado = null;
-        
-                // Función para crear el calendario con todos los días del mes
-                function crearCalendario() {
-                    const calendar = document.getElementById('calendar');
-                    calendar.innerHTML = '';  // Limpiar el calendario antes de volver a generarlo
-        
-                    // Fecha de inicio (primer día del mes)
-                    const fechaInicio = new Date(currentDate);
-                    fechaInicio.setMonth(currentDate.getMonth() + monthOffset);
-                    fechaInicio.setDate(1);
-        
-                    // Fecha límite (último día del mes)
-                    const fechaLimite = new Date(fechaInicio);
-                    fechaLimite.setMonth(fechaInicio.getMonth() + 1);
-                    fechaLimite.setDate(0);
-        
-                    // Mostrar el nombre del mes actual
-                    const mesActual = nombreMes[fechaInicio.getMonth()];
-                    const header = document.createElement('div');
-                    header.classList.add('header');
-                    header.textContent = `${mesActual} ${fechaInicio.getFullYear()}`;
-                    calendar.appendChild(header);
-        
-                    // Generar celdas para los días de la semana
-                    const diasDeLaSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-                    for (let i = 0; i < 7; i++) {
-                        const diaSemana = document.createElement('div');
-                        diaSemana.textContent = diasDeLaSemana[i];
-                        diaSemana.style.fontWeight = 'bold';
-                        calendar.appendChild(diaSemana);
-                    }
-        
-                    // Generar los días del mes
-                    const diaDeLaSemanaInicio = fechaInicio.getDay();
-                    let dia = 1;
-        
-                    // Rellenar con días vacíos al principio
-                    for (let i = 0; i < diaDeLaSemanaInicio; i++) {
-                        const diaVacio = document.createElement('button');
-                        diaVacio.disabled = true;
-                        calendar.appendChild(diaVacio);
-                    }
-        
-                    // Mostrar todos los días del mes
-                    while (dia <= fechaLimite.getDate()) {
-                        const botonDia = document.createElement('button');
-                        botonDia.type = "button";
-                        botonDia.textContent = dia;
-        
-                        const fechaDia = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), dia);
-                        const fechaFormateada = fechaDia.toISOString().split('T')[0];  // Obtener la fecha en formato YYYY-MM-DD
-        
-                        // Verificar si el día está en la lista de días disponibles
-                        if (fechasDisponibles.includes(fechaFormateada)) {
-                            botonDia.classList.add('valid');
-                            botonDia.addEventListener('click', function() {
-                                if (botonSeleccionado) {
-                                    botonSeleccionado.classList.remove('seleccionado');
-                                }
-                                const fecha = document.getElementById("fecha_seleccionada");
-                                const fechaSeleccionada = `${fechaDia.getFullYear()}-${fechaDia.getMonth() + 1}-${fechaDia.getDate()}`;
-                                fecha.value = fechaSeleccionada;
-                                alert(`Fecha seleccionada: ${fechaSeleccionada}`);
-                                botonDia.classList.add('seleccionado');
-                                botonSeleccionado = botonDia;
-                            });
-                        } else {
-                            botonDia.disabled = true;
-                            botonDia.classList.add('no-seleccionable');
-                        }
-        
-                        calendar.appendChild(botonDia);
-                        dia++;
-                    }
-        
-                    // Rellenar con días vacíos al final si es necesario
-                    const diaDeLaSemanaFin = fechaLimite.getDay();
-                    if (diaDeLaSemanaFin !== 6) {
-                        for (let i = diaDeLaSemanaFin + 1; i < 7; i++) {
-                            const diaVacio = document.createElement('button');
-                            diaVacio.disabled = true;
-                            calendar.appendChild(diaVacio);
-                        }
-                    }
-                }
-        
                 // Función para ir al mes anterior
                 document.getElementById('prevMonth').addEventListener('click', function() {
                     monthOffset--;
-                    crearCalendario();
+                    crearCalendario(fechasDisponibles);
                 });
         
                 // Función para ir al mes siguiente
                 document.getElementById('nextMonth').addEventListener('click', function() {
                     monthOffset++;
-                    crearCalendario();
+                    crearCalendario(fechasDisponibles);
                 });
         
                 // Inicializar el calendario
-                crearCalendario();        
+                crearCalendario(fechasDisponibles);        
                 
                 modal.classList.add("show");
                 document.body.style.overflow = "hidden";
                 document.documentElement.style.overflow = "hidden";
 
- 
                 
-            } catch (err) {
+            } 
+            catch (err) {
                 alert("Error al cargar los datos");
                 console.error(err);
             }
         })
     })
 
+    const boxProfesionales = document.querySelector(".box-cards-profesionales");
+    if(boxProfesionales){
+        const diasDisponiblesProfesional = JSON.parse(document.getElementById('diasDisponibles').textContent);
+        // Almacenar las fechas disponibles por profesional
+        const fechasDisponiblesPorProfesional = {};
+        diasDisponiblesProfesional.forEach(profesional => {
+            fechasDisponiblesPorProfesional[profesional.profesional] = profesional.disponibilidad.map(dia => dia.fecha);
+        });
+    
+        const nombreMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                           "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    
+        const currentDate = new Date();
+        const monthOffsetPorProfesional = {};  // Offset por profesional
+    
+        function crearCalendarioProfesionales(idProfesional) {
+            if (!(idProfesional in monthOffsetPorProfesional)) {
+                monthOffsetPorProfesional[idProfesional] = 0;
+            }
+            let offset = monthOffsetPorProfesional[idProfesional];
+    
+            const calendar = document.getElementById('calendar_' + idProfesional);
+            const prevMonthButton = document.querySelector('.prevMonth_' + idProfesional);
+            const nextMonthButton = document.querySelector('.nextMonth_' + idProfesional);           
+            calendar.innerHTML = '';  // Limpiar el calendario
+    
+            const fechaInicio = new Date(currentDate);
+            fechaInicio.setMonth(currentDate.getMonth() + offset);
+            fechaInicio.setDate(1);
+    
+            const fechaLimite = new Date(fechaInicio);
+            fechaLimite.setMonth(fechaInicio.getMonth() + 1);
+            fechaLimite.setDate(0);
+    
+            const mesActual = nombreMes[fechaInicio.getMonth()];
+            const header = document.createElement('div');
+            header.classList.add('header');
+            header.textContent = `${mesActual} ${fechaInicio.getFullYear()}`;
+            calendar.appendChild(header);
+    
+            const diasDeLaSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            for (let i = 0; i < 7; i++) {
+                const diaSemana = document.createElement('div');
+                diaSemana.textContent = diasDeLaSemana[i];
+                diaSemana.style.fontWeight = 'bold';
+                calendar.appendChild(diaSemana);
+            }
+    
+            const diaDeLaSemanaInicio = fechaInicio.getDay();
+            let dia = 1;
+    
+            for (let i = 0; i < diaDeLaSemanaInicio; i++) {
+                const diaVacio = document.createElement('button');
+                diaVacio.disabled = true;
+                calendar.appendChild(diaVacio);
+            }
+    
+            while (dia <= fechaLimite.getDate()) {
+                const botonDia = document.createElement('button');
+                botonDia.type = "button";
+                botonDia.textContent = dia;
+    
+                const fechaDia = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), dia);
+                const fechaFormateada = fechaDia.toISOString().split('T')[0];
+    
+                if (fechasDisponiblesPorProfesional[idProfesional].includes(fechaFormateada)) {
+                    botonDia.classList.add('valid');
+                    botonDia.addEventListener('click', function() {
+                        document.querySelectorAll(`#calendar_${idProfesional} .seleccionado`).forEach(btn => btn.classList.remove('seleccionado'));
+                        const inputFecha = document.getElementById("fecha_seleccionada_" + idProfesional);
+                        inputFecha.value = fechaFormateada;
+                        botonDia.classList.add('seleccionado');
+                        const botones = document.querySelectorAll(`.btn-form-seleccionar-profesional`);
+                        botones.forEach(btn => {btn.disabled = true; });
+                        const btnFormProfesionalSeleccionado = document.getElementById("btn-form-profesional-id_"+idProfesional);
+                        btnFormProfesionalSeleccionado.disabled = false;
+                    });
+                } else {
+                    botonDia.disabled = true;
+                    botonDia.classList.add('no-seleccionable');
+                }
+    
+                calendar.appendChild(botonDia);
+                dia++;
+            }
+    
+            const diaDeLaSemanaFin = fechaLimite.getDay();
+            if (diaDeLaSemanaFin !== 6) {
+                for (let i = diaDeLaSemanaFin + 1; i < 7; i++) {
+                    const diaVacio = document.createElement('button');
+                    diaVacio.disabled = true;
+                    calendar.appendChild(diaVacio);
+                }
+            }
+    
+            // Actualizar botones de navegación
+            prevMonthButton.onclick = function () {
+                monthOffsetPorProfesional[idProfesional]--;
+                crearCalendarioProfesionales(idProfesional);
+            };
+    
+            nextMonthButton.onclick = function () {
+                monthOffsetPorProfesional[idProfesional]++;
+                crearCalendarioProfesionales(idProfesional);
+            };
+        }
+    
+        // Inicializar los calendarios
+        diasDisponiblesProfesional.forEach(profesional => {
+            crearCalendarioProfesionales(profesional.profesional);
+        });
+    }
 
-    closeModalBtn.addEventListener("click", () => {
-        modal.classList.remove("show");
-        document.body.style.overflow = "auto";
-        document.documentElement.style.overflow = "auto";
 
-    });
+
+    if(closeModalBtn){
+        closeModalBtn.addEventListener("click", () => {
+            modal.classList.remove("show");
+            document.body.style.overflow = "auto";
+            document.documentElement.style.overflow = "auto";
+        });
+    }
 
     window.addEventListener("click", (e) => {
         if (e.target === modal) {

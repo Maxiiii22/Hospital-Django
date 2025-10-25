@@ -11,7 +11,7 @@
 .error-message {
     color: red;
     font-size: 0.9em;
-    margin-top: 5px;
+    margin: 5px 0;
 }
 
 .error-message p{
@@ -692,7 +692,7 @@ form .campos .campo-input{
 }
 
 .modal-content.modal-detalles-usuario{
-    width: clamp(300px,90%,600px);
+    width: clamp(300px,90%,700px);
 }
 
 .modal-content.modal-detalles-usuario input[type="checkbox"] {

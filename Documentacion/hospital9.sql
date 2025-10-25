@@ -2762,178 +2762,202 @@ CREATE TABLE IF NOT EXISTS `hospital_personal_lugar` (
   UNIQUE KEY `codigo` (`codigo`),
   KEY `hospital_personal_lu_departamento_id_3c6f2ef0_fk_hospital_` (`departamento_id`),
   CONSTRAINT `hospital_personal_lu_departamento_id_3c6f2ef0_fk_hospital_` FOREIGN KEY (`departamento_id`) REFERENCES `hospital_personal_departamento` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8mb4 COLLATE=UTF8MB4_GENERAL_CI;
+
+
+
+## mi tabla ## 
+INSERT INTO `hospital_personal_lugar` (`id`, `nombre`, `tipo`, `piso`, `sala`,`abreviacion`, `capacidad`, `descripcion`, `es_critico`, `activo`, `departamento_id`) VALUES
+(1, 'Sala de Urgencias 1', 'hab', 0, 10,'URG', 4, 'Sala de atención inmediata para emergencias médicas.', 1, 1, 1),
+(2, 'Sala de Urgencias 2', 'hab', 0, 11,'URG', 4, 'Sala equipada con camillas y monitores de emergencia.', 1, 1, 1),
+(3, 'Consultorio de Urgencias 1', 'cons', 0, 12, 'CONS-URG', 1, 'Consultorio de primera atención de emergencias.', 1, 1, 1),
+(4, 'Quirófano de Trauma 1', 'qui', 3, 300, 'QUI-TRA', 1, 'Quirófano para intervenciones urgentes por trauma.', 1, 1, 3),
+(5, 'Quirófano de Trauma 2', 'qui', 3, 301, 'QUI-TRA', 1, 'Quirófano preparado para cirugía de urgencia.', 1, 1, 3),
+(6, 'Sala de Reanimación 1', 'hab', 0, 13, 'REA', 2, 'Sala para reanimación post-trauma y emergencias quirúrgicas.', 1, 1, 1),
+(7, 'Consultorio de Medicina General 1', 'cons', 1, 100, 'CONS-MG', 1, 'Consultorio para consultas generales.', 0, 1, 2),
+(8, 'Consultorio de Medicina General 2', 'cons', 1, 101, 'CONS-MG', 1, 'Consultorio destinado a chequeos médicos básicos.', 0, 1, 2),
+(9, 'Consultorio de Medicina General 3', 'cons', 1, 102, 'CONS-MG', 1, 'Consultorio de diagnóstico y tratamiento general.', 0, 1, 2),
+(10, 'Consultorio de Pediatría 1', 'cons', 2, 200, 'CONS-PED', 1, 'Consultorio especializado en atención pediátrica.', 0, 1, 9),
+(11, 'Consultorio de Pediatría 2', 'cons', 2, 201, 'CONS-PED', 1, 'Consultorio para seguimiento del crecimiento y vacunas.', 0, 1, 9),
+(12, 'Sala de Internación Pediátrica 1', 'hab', 2, 202, 'HAB-PED', 2, 'Habitación compartida para niños hospitalizados.', 1, 1, 9),
+(13, 'Consultorio de Ginecología 1', 'cons', 2, 203, 'CONS-GIN', 1, 'Consultorio de control ginecológico.', 0, 1, 10),
+(14, 'Consultorio de Obstetricia 1', 'cons', 2, 204, 'CONS-OBS', 1, 'Consultorio de control prenatal.', 0, 1, 10),
+(15, 'Sala de Partos 1', 'hab', 2, 205, 'SAL-PAR', 1, 'Sala destinada a la atención del parto.', 1, 1, 10),
+(16, 'Consultorio de Dermatología 1', 'cons', 1, 103, 'CONS-DER', 1, 'Consultorio para diagnóstico de enfermedades cutáneas.', 0, 1, 11),
+(17, 'Consultorio de Dermatología 2', 'cons', 1, 104, 'CONS-DER', 1, 'Consultorio para tratamientos dermatológicos.', 0, 1, 11),
+(18, 'Consultorio de Dermatología Estética', 'cons', 1, 105, 'CONS-DER', 1, 'Consultorio para tratamientos estéticos de la piel.', 0, 1, 11),
+(19, 'Quirófano de Cirugía General 1', 'qui', 3, 302, 'QUI-CG', 1, 'Quirófano para cirugías abdominales y generales.', 1, 1, 3),
+(20, 'Quirófano de Cirugía General 2', 'qui', 3, 303, 'QUI-CG', 1, 'Quirófano para operaciones de rutina.', 1, 1, 3),
+(21, 'Sala Preoperatoria Cirugía General', 'hab', 3, 304, 'PRE-CG', 2, 'Sala para preparación de pacientes quirúrgicos.', 1, 1, 3),
+(22, 'Quirófano Oncológico 1', 'qui', 3, 305, 'QUI-ONC', 1, 'Quirófano para resección de tumores.', 1, 1, 3),
+(23, 'Quirófano Oncológico 2', 'qui', 3, 306, 'QUI-ONC', 1, 'Quirófano para cirugía oncológica compleja.', 1, 1, 3),
+(24, 'Sala de Recuperación Oncológica', 'hab', 2, 206, 'REC-ONC', 2, 'Sala para postoperatorio oncológico.', 1, 1, 18),
+(25, 'Quirófano Vascular 1', 'qui', 3, 307, 'QUI-VAS', 1, 'Quirófano especializado en cirugía de vasos sanguíneos.', 1, 1, 3),
+(26, 'Quirófano Vascular 2', 'qui', 3, 308, 'QUI-VAS', 1, 'Quirófano para bypass y reparaciones vasculares.', 1, 1, 3),
+(27, 'Sala de Recuperación Vascular', 'hab', 2, 207, 'REC-VAS', 2, 'Sala postoperatoria para pacientes de cirugía vascular.', 1, 1, 18),
+(28, 'Unidad de Cuidados Intensivos 1', 'hab', 4, 400, 'UCI', 1, 'Habitación de monitoreo intensivo.', 1, 1, 4),
+(29, 'Unidad de Cuidados Intensivos 2', 'hab', 4, 401, 'UCI', 1, 'Habitación con soporte vital avanzado.', 1, 1, 4),
+(30, 'Unidad de Cuidados Intensivos 3', 'hab', 4, 402, 'UCI', 1, 'Habitación con monitoreo multiparámetro.', 1, 1, 4),
+(31, 'Sala de Anestesia 1', 'lab', 3, 309, 'ANE', 2, 'Sala de preparación anestésica previa a cirugía.', 1, 1, 19),
+(32, 'Sala de Anestesia 2', 'lab', 3, 310, 'ANE', 2, 'Sala de recuperación anestésica postoperatoria.', 1, 1, 19),
+(33, 'Consultorio de Manejo del Dolor', 'cons', 3, 311, 'CONS-ANE', 1, 'Consultorio para control y manejo del dolor.', 0, 1, 19),
+(34, 'Sala de Rayos X 1', 'lab', 0, 14, 'RX', 2, 'Sala de radiología para estudios generales.', 0, 1, 5),
+(35, 'Sala de Rayos X 2', 'lab', 0, 15, 'RX', 2, 'Sala de diagnóstico por imagen.', 0, 1, 5),
+(36, 'Sala de Radiología de Emergencias', 'lab', 0, 16, 'RX', 2, 'Radiología rápida para pacientes críticos.', 1, 1, 5),
+(37, 'Sala de Radiología Pediátrica 1', 'lab', 2, 208, 'RX-PED', 1, 'Sala de rayos X adaptada a niños.', 0, 1, 5),
+(38, 'Sala de Radiología Pediátrica 2', 'lab', 2, 209, 'RX-PED', 1, 'Radiología infantil con equipos de baja radiación.', 0, 1, 5),
+(39, 'Sala de Radiología Pediátrica 3', 'lab', 2, 210, 'RX-PED', 1, 'Diagnóstico radiológico en pediatría.', 0, 1, 5),
+(40, 'Laboratorio de Patología 1', 'lab', 0, 17, 'LAB-PAT', 4, 'Laboratorio de anatomía patológica.', 0, 1, 20),
+(41, 'Laboratorio de Patología 2', 'lab', 0, 18, 'LAB-PAT', 4, 'Sala de procesamiento de muestras patológicas.', 0, 1, 20),
+(42, 'Laboratorio de Patología 3', 'lab', 0, 19, 'LAB-PAT', 3, 'Laboratorio para análisis histológicos.', 0, 1, 20),
+(43, 'Laboratorio de Microbiología 1', 'lab', 0, 20, 'LAB-MIC', 5, 'Laboratorio para análisis de muestras bacteriológicas.', 0, 1, 14),
+(44, 'Laboratorio de Microbiología 2', 'lab', 0, 21, 'LAB-MIC', 5, 'Sala para diagnóstico de infecciones.', 0, 1, 14),
+(45, 'Laboratorio de Microbiología 3', 'lab', 0, 22, 'LAB-MIC', 4, 'Laboratorio con cabinas de bioseguridad.', 0, 1, 14),
+(46, 'Consultorio de Farmacia Clínica 1', 'cons', 1, 105, 'CONS-FAR', 1, 'Consultorio para asesoría farmacéutica.', 0, 1, 7),
+(47, 'Consultorio de Farmacia Clínica 2', 'cons', 1, 106, 'CONS-FAR', 1, 'Asesoramiento sobre uso de medicamentos.', 0, 1, 7),
+(48, 'Laboratorio de Farmacia Clínica', 'lab', 0, 23, 'LAB-FAR', 3, 'Laboratorio de control de medicamentos hospitalarios.', 0, 1, 7),
+(49, 'Consultorio de Oncología Médica 1', 'cons', 2, 211, 'CONS-ONC', 1, 'Consultorio para control de pacientes con cáncer.', 0, 1, 8),
+(50, 'Consultorio de Oncología Médica 2', 'cons', 2, 212, 'CONS-ONC', 1, 'Atención y seguimiento de tratamientos oncológicos.', 0, 1, 8),
+(51, 'Sala de Quimioterapia 1', 'hab', 2, 213, 'QUI-ONC', 5, 'Sala de administración de quimioterapia.', 1, 1, 8),
+(52, 'Consultorio de Oncología Ginecológica 1', 'cons', 2, 214, 'CONS-ONG', 1, 'Consultorio para control de cáncer ginecológico.', 0, 1, 10),
+(53, 'Consultorio de Oncología Ginecológica 2', 'cons', 2, 215, 'CONS-ONG', 1, 'Consultorio de diagnóstico oncológico femenino.', 0, 1, 10),
+(54, 'Sala de Tratamientos Oncológicos Ginecológicos', 'hab', 2, 216, 'SAL-ONG', 2, 'Sala para procedimientos oncológicos ginecológicos.', 1, 1, 10),
+(55, 'Unidad Neonatal 1', 'hab', 2, 217,'NEO', 2, 'Unidad para recién nacidos prematuros.', 1, 1, 9),
+(56, 'Unidad Neonatal 2', 'hab', 2, 218,'NEO', 2, 'Habitación equipada con incubadoras.', 1, 1, 9),
+(57, 'Unidad Neonatal 3', 'hab', 2, 219,'NEO', 2, 'Sala de cuidados intensivos neonatales.', 1, 1, 9),
+(58, 'Consultorio de Pediatría General 1','cons', 2, 220, 'CONS-PEDG', 1, 'Consultorio de atención pediátrica ambulatoria.', 0, 1, 9),
+(59, 'Consultorio de Pediatría General 2', 'cons', 2, 221,'CONS-PEDG', 1, 'Atención general para niños y adolescentes.', 0, 1, 9),
+(60, 'Sala de Internación Pediátrica General', 'hab', 2, 222,'HAB-PEDG', 3, 'Habitación compartida para pacientes pediátricos.', 1, 1, 9),
+(61, 'Consultorio de Cardiología 1', 'cons', 4, 404,'CONS-CAR', 1, 'Consultorio especializado en enfermedades cardíacas.', 0, 1, 12),
+(62, 'Consultorio de Cardiología 2', 'cons', 4, 405,'CONS-CAR', 1, 'Control y seguimiento de pacientes cardíacos.', 0, 1, 12),
+(63, 'Sala de Electrocardiogramas', 'lab', 4, 406,'LAB-CAR', 2, 'Sala equipada para estudios de electrocardiograma.', 0, 1, 12),
+(64, 'Consultorio de Neumología 1', 'cons', 3, 312,'CONS-NEU', 1, 'Consultorio para diagnóstico de enfermedades respiratorias.', 0, 1, 15),
+(65, 'Consultorio de Neumología 2', 'cons', 3, 313,'CONS-NEU', 1, 'Atención de pacientes con enfermedades pulmonares.', 0, 1, 15),
+(66, 'Laboratorio de Función Pulmonar', 'lab', 3, 314,'LAB-NEU', 2, 'Sala equipada para espirometrías y estudios respiratorios.', 0, 1, 15),
+(67, 'Consultorio de Nefrología 1', 'cons', 3, 315,'CONS-NEF', 1, 'Consultorio para enfermedades renales.', 0, 1, 21),
+(68, 'Consultorio de Nefrología 2', 'cons', 3, 316,'CONS-NEF', 1, 'Atención de pacientes con insuficiencia renal.', 0, 1, 21),
+(69, 'Sala de Hemodiálisis 1', 'lab', 3, 317,'LAB-NEF', 4, 'Sala equipada con máquinas de hemodiálisis.', 1, 1, 21),
+(70, 'Consultorio de Gastroenterología 1', 'cons', 3,318, 'CONS-GAS', 1, 'Consultorio para enfermedades digestivas.', 0, 1, 22),
+(71, 'Consultorio de Gastroenterología 2', 'cons', 3, 319,'CONS-GAS', 1, 'Atención de pacientes con patologías gastrointestinales.', 0, 1, 22),
+(72, 'Sala de Endoscopia 1', 'lab', 3, 320,'LAB-GAS', 2, 'Sala equipada para endoscopias digestivas.', 1, 1, 22),
+(73, 'Consultorio de Dermatología 1', 'cons', 1, 107,'CONS-DER', 1, 'Consultorio de diagnóstico de enfermedades de la piel.', 0, 1, 11),
+(74, 'Consultorio de Dermatología 2', 'cons', 1, 108,'CONS-DER', 1, 'Atención de tratamientos dermatológicos.', 0, 1, 11),
+(75, 'Sala de Fototerapia', 'lab', 1, 109,'LAB-DER', 2, 'Sala equipada con lámparas UV para tratamientos.', 0, 1, 9),
+(76, 'Consultorio de Reumatología 1', 'cons', 2, 223,'CONS-REU', 1, 'Consultorio para enfermedades autoinmunes.', 0, 1, 23),
+(77, 'Consultorio de Reumatología 2', 'cons', 2, 224,'CONS-REU', 1, 'Atención de pacientes con artritis y lupus.', 0, 1, 23),
+(78, 'Sala de Infusión Reumatológica', 'hab', 2, 225,'HAB-REU', 3, 'Sala para administración de terapias intravenosas.', 0, 1, 23),
+(79, 'Consultorio de Endocrinología 1', 'cons', 2, 226,'CONS-END', 1, 'Consultorio para enfermedades hormonales.', 0, 1, 13),
+(80, 'Consultorio de Endocrinología 2', 'cons', 2, 227,'CONS-END', 1, 'Control de pacientes con diabetes y tiroides.', 0, 1, 13),
+(81, 'Sala de Educación Diabética', 'hab', 2, 228,'HAB-END', 5, 'Sala destinada a la enseñanza del autocontrol de la diabetes.', 0, 1, 13),
+(82, 'Consultorio de Neurología 1', 'cons', 3, 321,'CONS-NRL', 1, 'Consultorio para enfermedades neurológicas.', 0, 1, 17),
+(83, 'Consultorio de Neurología 2', 'cons', 3, 322,'CONS-NRL', 1, 'Atención de pacientes con epilepsia y migraña.', 0, 1, 17),
+(84, 'Sala de Electroencefalogramas', 'lab', 3, 323,'LAB-NRL', 2, 'Sala para estudios de actividad cerebral.', 0, 1, 17),
+(85, 'Consultorio de Psiquiatría 1', 'cons', 2, 229,'CONS-PSQ', 1, 'Consultorio de evaluación psiquiátrica.', 0, 1, 24),
+(86, 'Consultorio de Psiquiatría 2', 'cons', 2, 230,'CONS-PSQ', 1, 'Seguimiento de pacientes con trastornos mentales.', 0, 1, 24),
+(87, 'Sala de Terapias Grupales', 'hab', 2, 231,'HAB-PSQ', 8, 'Sala acondicionada para terapias grupales.', 0, 1, 24),
+(88, 'Quirófano de Cirugía General 1', 'qui', 4, 407,'QUI-CG', 1, 'Quirófano para procedimientos generales.', 1, 1, 3),
+(89, 'Quirófano de Cirugía General 2', 'qui', 4, 408,'QUI-CG', 1, 'Quirófano equipado para cirugías abdominales.', 1, 1, 3),
+(90, 'Sala de Recuperación Cirugía General', 'hab', 4, 409,'REC-CG', 4, 'Sala postoperatoria de pacientes de cirugía general.', 1, 1, 18),
+(91, 'Quirófano de Oncología 1', 'qui', 4, 410,'QUI-ONC', 1, 'Quirófano especializado en procedimientos oncológicos.', 1, 1, 3),
+(92, 'Quirófano de Oncología 2', 'qui', 4, 411,'QUI-ONC', 1, 'Preparado para cirugía de tumores complejos.', 1, 1, 3),
+(93, 'Sala de Recuperación Oncológica', 'hab', 4, 412,'REC-ONC', 3, 'Sala postoperatoria para pacientes oncológicos.', 1, 1, 18),
+(94, 'Quirófano de Cirugía Vascular 1', 'qui', 4, 413,'QUI-CV', 1, 'Quirófano para procedimientos en vasos sanguíneos.', 1, 1, 3),
+(95, 'Quirófano de Cirugía Vascular 2', 'qui', 4, 414,'QUI-CV', 1, 'Preparado para bypass y aneurismas.', 1, 1, 3),
+(96, 'Sala de Recuperación Vascular', 'hab', 4, 415,'REC-CV', 2, 'Área de recuperación postquirúrgica vascular.', 1, 1, 18),
+(97, 'Quirófano de Cirugía Torácica 1', 'qui', 4, 416,'QUI-CT', 1, 'Quirófano para operaciones de tórax y pulmones.', 1, 1, 3),
+(98, 'Quirófano de Cirugía Torácica 2', 'qui', 4, 417,'QUI-CT', 1, 'Preparado para cirugía de pleura y pulmones.', 1, 1, 3),
+(99, 'Sala de Cuidados Post-Torácicos', 'hab', 4, 418,'REC-CT', 3, 'Sala de recuperación para cirugía torácica.', 1, 1, 4),
+(100, 'Quirófano de Cirugía Plástica 1', 'qui', 4, 419,'QUI-CP', 1, 'Quirófano para cirugía reconstructiva y estética.', 1, 1, 3),
+(101, 'Quirófano de Cirugía Plástica 2', 'qui', 4, 420,'QUI-CP', 1, 'Preparado para cirugías faciales y corporales.', 1, 1, 3), -- Piso 3
+(102, 'Sala de Recuperación Estética', 'hab', 4, 421,'REC-CP', 4, 'Área de cuidados postoperatorios en cirugía estética.', 0, 1, 4), -- Piso 4
+(103, 'Quirófano de Ortopedia 1', 'qui', 3, 324,'QUI-ORT', 1, 'Quirófano para cirugía traumatológica y ortopédica.', 1, 1, 3), -- Piso 3
+(104, 'Quirófano de Ortopedia 2', 'qui', 3, 325,'QUI-ORT', 1, 'Preparado para implantes y prótesis.', 1, 1, 3), -- Piso 3
+(105, 'Sala de Rehabilitación Ortopédica', 'hab', 2, 232,'HAB-ORT', 6, 'Sala para recuperación de pacientes traumatológicos.', 0, 1, 2), -- Piso 2
+(106, 'Sala de Anestesia 3', 'lab', 3, 326,'LAB-ANE', 2,'Preparación anestésica para cirugías.', 1, 1, 3), -- Piso 3
+(107, 'Sala de Anestesia 4', 'lab', 3, 327,'LAB-ANE', 2, 'Área para control de anestesia intraoperatoria.', 1, 1, 3), -- Piso 3
+(108, 'Unidad de Recuperación Anestésica', 'hab', 4, 422,'REC-ANE', 4, 'Monitoreo postanestesia inmediato.', 1, 1, 4), -- Piso 4
+(109, 'Unidad de Cuidados Intensivos 4', 'hab', 4, 423,'UCI', 6, 'Área crítica para pacientes graves.', 1, 1, 4), -- Piso 4
+(110, 'Unidad de Cuidados Intensivos 5', 'hab', 4, 424,'UCI', 6, 'Soporte vital avanzado.', 1, 1, 4), -- Piso 4
+(111, 'Unidad de Cuidados Intensivos 6', 'hab', 4, 425,'UCI', 6, 'Atención 24h para pacientes críticos.', 1, 1, 4), -- Piso 4
+(112, 'Unidad de Cuidados Neurocríticos 1', 'hab', 4, 426,'UCN-NCR', 4, 'Manejo de pacientes con patologías neurológicas críticas.', 1, 1, 4), -- Piso 4
+(113, 'Unidad de Cuidados Neurocríticos 2', 'hab', 4, 427,'UCN-NCR', 4, 'Atención a traumatismos craneoencefálicos.', 1, 1, 4), -- Piso 4
+(114, 'Sala de Monitoreo Neurológico', 'lab', 3, 328,'LAB-NCR', 2, 'Monitoreo avanzado de la actividad cerebral.', 1, 1, 3), -- Piso 3
+(115, 'Sala de Radiología 1', 'lab', 0, 24,'LAB-RAD', 2, 'Diagnóstico por rayos X y TAC.', 0, 1, 0), -- Piso 0
+(116, 'Sala de Radiología 2', 'lab', 0,25,'LAB-RAD', 2, 'Exámenes de radiografía y fluoroscopía.', 0, 1, 0), -- Piso 0
+(117, 'Sala de Resonancia Magnética', 'lab', 0, 26,'LAB-RAD', 1, 'Equipo de RMN de alto campo.', 0, 1, 0), -- Piso 0
+(118, 'Consultorio de Cuidados Paliativos 1', 'cons', 2, 232,'CONS-CPAL', 1, 'Atención integral a pacientes terminales.', 0, 1, 2), -- Piso 2
+(119, 'Consultorio de Cuidados Paliativos 2', 'cons', 2, 233,'CONS-CPAL', 1, 'Apoyo clínico y psicológico.', 0, 1, 2), -- Piso 2
+(120, 'Sala de Cuidados Paliativos', 'hab', 2, 234,'HAB-CPAL', 3, 'Área para internación de pacientes en cuidados paliativos.', 0, 1, 2), -- Piso 2
+(121, 'Sala de Rayos X de Emergencia 1', 'lab', 0, 27,'LAB-RX', 1, 'Radiología rápida para emergencias.', 1, 1, 0), -- Piso 0
+(122, 'Sala de Rayos X de Emergencia 2', 'lab', 0, 28,'LAB-RX', 1, 'Radiografía de tórax y huesos en urgencias.', 1, 1, 0), -- Piso 0
+(123, 'Sala de Ecografía de Emergencia', 'lab', 0, 29,'LAB-ECO', 1, 'Ultrasonido rápido en emergencias.', 1, 1, 0), -- Piso 0
+(124, 'Sala TAC de Emergencia', 'lab', 0, 30,'LAB-TAC', 1, 'Tomógrafo para diagnóstico rápido en trauma.', 1, 1, 0), -- Piso 0
+(125, 'Laboratorio Clínico Central', 'lab', 0, 31,'LAB-CLI', 10, 'Análisis de sangre, orina y bioquímica.', 0, 1, 0), -- Piso 0
+(126, 'Laboratorio Clínico Secundario', 'lab', 0, 32'LAB-CLI', 6, 'Soporte para análisis de guardia.', 0, 1, 0), -- Piso 0
+(127, 'Sala de Electrocardiogramas', 'lab', 0, 33,'LAB-ECG', 2, 'Equipos para estudios de ritmo cardíaco.', 0, 1, 0), -- Piso 0
+(128, 'Sala de Espirometría', 'lab', 0, 34,'LAB-PUL', 2, 'Evaluación de la función respiratoria.', 0, 1, 0), -- Piso 0
+(129, 'Sala de Endoscopia 2', 'lab', 3, 329,'LAB-END', 2, 'Examen de tubo digestivo superior e inferior.', 1, 1, 3), -- Piso 3
+(130, 'Sala de Audiometría', 'lab', 1, 110,'LAB-AUD', 1, 'Cabina insonorizada para exámenes auditivos.', 0, 1, 1), -- Piso 1
+(131, 'Sala de Exámenes Visuales', 'cons', 1, 111,'CONS-OFT', 1, 'Pruebas de visión y salud ocular.', 0, 1, 1), -- Piso 1
+(132, 'Sala de Pruebas de Alergia', 'cons', 1, 112,'CONS-ALR', 2, 'Pruebas cutáneas y diagnósticos alérgicos.', 0, 1, 1), -- Piso 1
+(133, 'Radiología Quirúrgica 1', 'lab', 3, 328,'LAB-RQ', 1, 'Imagenología en quirófano.', 1, 1, 3), -- Piso 3
+(134, 'Sala TAC Central', 'lab', 0, 35,'LAB-TAC', 1, 'Tomógrafo multicorte de alta resolución.', 1, 1, 0), -- Piso 0
+(135, 'Sala de Resonancia Magnética 1', 'lab', 0, 36,'LAB-RM', 1, 'Resonancia para neurología y ortopedia.', 1, 1, 0), -- Piso 0
+(136, 'Sala de Resonancia Magnética 2', 'lab', 0, 37,'LAB-RM', 1, 'Resonancia de cuerpo completo.', 1, 1, 0), -- Piso 0
+(137, 'Unidad de Monitoreo Cardíaco', 'hab', 4, 428,'HAB-MON', 4, 'Monitoreo continuo de pacientes críticos.', 1, 1, 4), -- Piso 4
+(138, 'Sala de Oxigenoterapia', 'hab', 2, 235,'HAB-OXI', 3, 'Aplicación terapéutica de oxígeno.', 1, 1, 2), -- Piso 2
+(139, 'Sala EEG 1', 'lab', 3, 329,'LAB-EEG', 1, 'Estudios de actividad eléctrica cerebral.', 0, 1, 3), -- Piso 3
+(140, 'Sala de Mamografía', 'lab', 0, 38'LAB-MAM', 1, 'Diagnóstico de cáncer de mama.', 0, 1, 0), -- Piso 0
+(141, 'Sala de Extracciones de Sangre', 'lab', 0, 39,'LAB-SANG', 5, 'Extracción y procesamiento de muestras.', 0, 1, 0), -- Piso 0
+(142, 'Sala de Análisis de Orina', 'lab', 0, 40,'LAB-ORI', 2, 'Procesamiento de muestras de orina.', 0, 1, 0), -- Piso 0
+(143, 'Laboratorio de Biología Molecular', 'lab', 0, 41,'LAB-BIO', 3, 'PCR, genética y virología.', 1, 1, 0), -- Piso 0
+(144, 'Sala de Asesoría Farmacéutica', 'cons', 1, 113,'CONS-FAR', 1, 'Atención de pacientes sobre medicamentos.', 0, 1, 1), -- Piso 1
+(145, 'Sala de Biopsias', 'lab', 3, 330,'LAB-BIOP', 1, 'Obtención de muestras para análisis oncológico.', 1, 1, 3), -- Piso 3
+(146, 'Sala de Radioterapia 1', 'lab', 4, 429,'LAB-RADT', 1, 'Tratamiento con radiación contra tumores.', 1, 1, 4), -- Piso 4
+(147, 'Sala de Radioterapia 2', 'lab', 4, 430,'LAB-RADT', 1, 'Unidad de acelerador lineal.', 1, 1, 4), -- Piso 4
+(148, 'Unidad Neonatal 3', 'lab', 2, 236,'NEO', 2, 'Pruebas metabólicas y cardíacas en neonatos.', 0, 1, 2), -- Piso 2
+(149, 'Sala de Ecografía Pediátrica', 'lab', 2, 237,'LAB-ECO', 1, 'Ecografía adaptada para niños.', 0, 1, 2), -- Piso 2
+(150, 'Sala de Ecografía Ginecológica', 'lab', 2, 238,'LAB-ECO', 1, 'Ecografía transvaginal y obstétrica.', 0, 1, 2),-- Piso 2
+	(151, 'Sala de Pruebas de Fertilidad', 'lab', 2, 239,'LAB-FER', 1, 'Estudios de fertilidad masculina y femenina.', 0, 1, 10), -- Piso 2
+	(152, 'Sala de Dermatoscopia', 'cons', 1, 'CONS-DER', 1, 114,'Estudio detallado de lesiones cutáneas.', 0, 1, 11), -- Piso 1
+	(153, 'Sala de Pruebas de Alergia Dermatológica', 'cons', 1, 115,'CONS-ALRDER', 1, 'Diagnóstico de dermatitis y eccemas.', 0, 1, 11), -- Piso 1
+	(154, 'Oficina de Laboratorio', 'oficina_resultados', 2, 240,'OFI-LAB', 10, 'Oficina de carga de resultados sobre análisis de laboratorio', 0, 1, 29), -- Piso 2
+	(155, 'Laboratorio de Endocrinología', 'lab', 2, 241,'LAB-END', 8, 'Análisis especializado de perfiles hormonales y metabólicos...', 0, 1, 13), -- Piso 2
+	(156, 'Laboratorio de Bacteriología', 'lab', 0, 42,'LAB-BAC', 12, 'Análisis microbiológicos especializados para la identificación...', 0, 1, 14), -- Piso 0
+	(157, 'Área de Diagnostico Funcional cardiológico', 'cons', 3, 331,'DIA-CAR', 3, 'Área especializada en la realización de estudios funcionales del sistema cardiovascular...', 0, 1, 12), -- Piso 3
+	(158, 'Laboratorio de Bioquímica Clínica', 'lab', 0, 43,'LAB-BIOQUI', 8, 'Unidad especializada dedicada al análisis químico de muestras biológicas...', 0, 1, 6), -- Piso 0
+	(159, 'Laboratorio de Inmunología', 'lab', 0, 44,'LAB-INMU', 8, '', 0, 1, 6), -- Piso 0
+	(160, 'Laboratorio de Banco de Sangre', 'lab', 0, 45,'LAB-BSAN', 5, '', 0, 1, 30), -- Piso 0
+	(161, 'Laboratorio de Ecocardiografía', 'lab', 3, 332,'LAB-ECOCAR', 3, '', 0, 1, 12), -- Piso 3
+	(162, 'Laboratorio de Función Pulmonar', 'lab', 3, 333,'LAB-FPUL', 5, '', 0, 1, 12), -- Piso 3
+	(163, 'Consultorio de Neumología 3', 'cons', 3, 334,'CONS-NEU', 2, '', 0, 1, 15), -- Piso 3
+	(164, 'Consultorio de Neumología 4', 'cons', 3, 335,'CONS-NEU', 2, '', 0, 1, 15), -- Piso 3
+	(165, 'Laboratorio de Hormonas', 'lab', 2, 242,'LAB-HOR', 10, '', 0, 1, 6), -- Piso 2
+	(166, 'Sala de Mamografía', 'lab', 0, 46,'LAB-MAMO', 5, '', 0, 1, 5), -- Piso 0
+	(167, 'Laboratorio en Histotecnología', 'lab', 0, 47,'LAB-HIST', 5, '', 0, 1, 20), -- Piso 0
+	(168, 'Laboratorios Dermatocosméticos', 'lab', 1, 115,'LAB-DERCOS', 3, '', 0, 1, 11); -- Piso 1
+
 
 -- Volcando datos para la tabla hospitalbd.hospital_personal_lugar: ~168 rows (aproximadamente)
-INSERT INTO `hospital_personal_lugar` (`id`, `nombre`, `tipo`, `piso`, `codigo`, `estado`, `capacidad`, `descripcion`, `es_critico`, `activo`, `departamento_id`) VALUES
-	(1, 'Sala de Urgencias 1', 'hab', 1, 'URG-101', 'disponible', 4, 'Sala de atención inmediata para emergencias médicas.', 1, 1, 1),
-	(2, 'Sala de Urgencias 2', 'hab', 1, 'URG-102', 'disponible', 4, 'Sala equipada con camillas y monitores de emergencia.', 1, 1, 1),
-	(3, 'Consultorio de Urgencias 1', 'cons', 1, 'CONS-URG-103', 'disponible', 1, 'Consultorio de primera atención de emergencias.', 1, 1, 1),
-	(4, 'Quirófano de Trauma 1', 'qui', 2, 'QUI-TRA-201', 'disponible', 1, 'Quirófano para intervenciones urgentes por trauma.', 1, 1, 3),
-	(5, 'Quirófano de Trauma 2', 'qui', 2, 'QUI-TRA-202', 'disponible', 1, 'Quirófano preparado para cirugía de urgencia.', 1, 1, 3),
-	(6, 'Sala de Reanimación 1', 'hab', 2, 'REA-203', 'disponible', 2, 'Sala para reanimación post-trauma y emergencias quirúrgicas.', 1, 1, 1),
-	(7, 'Consultorio de Medicina General 1', 'cons', 1, 'CONS-MG-101', 'disponible', 1, 'Consultorio para consultas generales.', 0, 1, 2),
-	(8, 'Consultorio de Medicina General 2', 'cons', 1, 'CONS-MG-102', 'disponible', 1, 'Consultorio destinado a chequeos médicos básicos.', 0, 1, 2),
-	(9, 'Consultorio de Medicina General 3', 'cons', 1, 'CONS-MG-103', 'disponible', 1, 'Consultorio de diagnóstico y tratamiento general.', 0, 1, 2),
-	(10, 'Consultorio de Pediatría 1', 'cons', 2, 'CONS-PED-201', 'disponible', 1, 'Consultorio especializado en atención pediátrica.', 0, 1, 9),
-	(11, 'Consultorio de Pediatría 2', 'cons', 2, 'CONS-PED-202', 'disponible', 1, 'Consultorio para seguimiento del crecimiento y vacunas.', 0, 1, 9),
-	(12, 'Sala de Internación Pediátrica 1', 'hab', 2, 'HAB-PED-203', 'disponible', 2, 'Habitación compartida para niños hospitalizados.', 1, 1, 9),
-	(13, 'Consultorio de Ginecología 1', 'cons', 2, 'CONS-GIN-201', 'disponible', 1, 'Consultorio de control ginecológico.', 0, 1, 10),
-	(14, 'Consultorio de Obstetricia 1', 'cons', 2, 'CONS-OBS-202', 'disponible', 1, 'Consultorio de control prenatal.', 0, 1, 10),
-	(15, 'Sala de Partos 1', 'hab', 2, 'SAL-PAR-203', 'disponible', 1, 'Sala destinada a la atención del parto.', 1, 1, 10),
-	(16, 'Consultorio de Dermatología 1', 'cons', 3, 'CONS-DER-301', 'disponible', 1, 'Consultorio para diagnóstico de enfermedades cutáneas.', 0, 1, 11),
-	(17, 'Consultorio de Dermatología 2', 'cons', 3, 'CONS-DER-302', 'disponible', 1, 'Consultorio para tratamientos dermatológicos.', 0, 1, 11),
-	(18, 'Consultorio de Dermatología Estética', 'cons', 3, 'CONS-DER-303', 'disponible', 1, 'Consultorio para tratamientos estéticos de la piel.', 0, 1, 11),
-	(19, 'Quirófano de Cirugía General 1', 'qui', 2, 'QUI-CG-201', 'disponible', 1, 'Quirófano para cirugías abdominales y generales.', 1, 1, 3),
-	(20, 'Quirófano de Cirugía General 2', 'qui', 2, 'QUI-CG-202', 'disponible', 1, 'Quirófano para operaciones de rutina.', 1, 1, 3),
-	(21, 'Sala Preoperatoria Cirugía General', 'hab', 2, 'PRE-CG-203', 'disponible', 2, 'Sala para preparación de pacientes quirúrgicos.', 1, 1, 3),
-	(22, 'Quirófano Oncológico 1', 'qui', 2, 'QUI-ONC-204', 'disponible', 1, 'Quirófano para resección de tumores.', 1, 1, 3),
-	(23, 'Quirófano Oncológico 2', 'qui', 2, 'QUI-ONC-205', 'disponible', 1, 'Quirófano para cirugía oncológica compleja.', 1, 1, 3),
-	(24, 'Sala de Recuperación Oncológica', 'hab', 2, 'REC-ONC-206', 'disponible', 2, 'Sala para postoperatorio oncológico.', 1, 1, 18),
-	(25, 'Quirófano Vascular 1', 'qui', 2, 'QUI-VAS-207', 'disponible', 1, 'Quirófano especializado en cirugía de vasos sanguíneos.', 1, 1, 3),
-	(26, 'Quirófano Vascular 2', 'qui', 2, 'QUI-VAS-208', 'disponible', 1, 'Quirófano para bypass y reparaciones vasculares.', 1, 1, 3),
-	(27, 'Sala de Recuperación Vascular', 'hab', 2, 'REC-VAS-209', 'disponible', 2, 'Sala postoperatoria para pacientes de cirugía vascular.', 1, 1, 18),
-	(28, 'Unidad de Cuidados Intensivos 1', 'hab', 3, 'UCI-301', 'disponible', 1, 'Habitación de monitoreo intensivo.', 1, 1, 4),
-	(29, 'Unidad de Cuidados Intensivos 2', 'hab', 3, 'UCI-302', 'disponible', 1, 'Habitación con soporte vital avanzado.', 1, 1, 4),
-	(30, 'Unidad de Cuidados Intensivos 3', 'hab', 3, 'UCI-303', 'disponible', 1, 'Habitación con monitoreo multiparámetro.', 1, 1, 4),
-	(31, 'Sala de Anestesia 1', 'lab', 2, 'ANE-201', 'disponible', 2, 'Sala de preparación anestésica previa a cirugía.', 1, 1, 19),
-	(32, 'Sala de Anestesia 2', 'lab', 2, 'ANE-202', 'disponible', 2, 'Sala de recuperación anestésica postoperatoria.', 1, 1, 19),
-	(33, 'Consultorio de Manejo del Dolor', 'cons', 2, 'CONS-ANE-203', 'disponible', 1, 'Consultorio para control y manejo del dolor.', 0, 1, 19),
-	(34, 'Sala de Rayos X 1', 'lab', 1, 'RX-101', 'disponible', 2, 'Sala de radiología para estudios generales.', 0, 1, 5),
-	(35, 'Sala de Rayos X 2', 'lab', 1, 'RX-102', 'disponible', 2, 'Sala de diagnóstico por imagen.', 0, 1, 5),
-	(36, 'Sala de Radiología de Emergencias', 'lab', 1, 'RX-103', 'disponible', 2, 'Radiología rápida para pacientes críticos.', 1, 1, 5),
-	(37, 'Sala de Radiología Pediátrica 1', 'lab', 2, 'RX-PED-201', 'disponible', 1, 'Sala de rayos X adaptada a niños.', 0, 1, 5),
-	(38, 'Sala de Radiología Pediátrica 2', 'lab', 2, 'RX-PED-202', 'disponible', 1, 'Radiología infantil con equipos de baja radiación.', 0, 1, 5),
-	(39, 'Sala de Radiología Pediátrica 3', 'lab', 2, 'RX-PED-203', 'disponible', 1, 'Diagnóstico radiológico en pediatría.', 0, 1, 5),
-	(40, 'Laboratorio de Patología 1', 'lab', 1, 'LAB-PAT-101', 'disponible', 4, 'Laboratorio de anatomía patológica.', 0, 1, 20),
-	(41, 'Laboratorio de Patología 2', 'lab', 1, 'LAB-PAT-102', 'disponible', 4, 'Sala de procesamiento de muestras patológicas.', 0, 1, 20),
-	(42, 'Laboratorio de Patología 3', 'lab', 1, 'LAB-PAT-103', 'disponible', 3, 'Laboratorio para análisis histológicos.', 0, 1, 20),
-	(43, 'Laboratorio de Microbiología 1', 'lab', 1, 'LAB-MIC-101', 'disponible', 5, 'Laboratorio para análisis de muestras bacteriológicas.', 0, 1, 14),
-	(44, 'Laboratorio de Microbiología 2', 'lab', 1, 'LAB-MIC-102', 'disponible', 5, 'Sala para diagnóstico de infecciones.', 0, 1, 14),
-	(45, 'Laboratorio de Microbiología 3', 'lab', 1, 'LAB-MIC-103', 'disponible', 4, 'Laboratorio con cabinas de bioseguridad.', 0, 1, 14),
-	(46, 'Consultorio de Farmacia Clínica 1', 'cons', 1, 'CONS-FAR-101', 'disponible', 1, 'Consultorio para asesoría farmacéutica.', 0, 1, 7),
-	(47, 'Consultorio de Farmacia Clínica 2', 'cons', 1, 'CONS-FAR-102', 'disponible', 1, 'Asesoramiento sobre uso de medicamentos.', 0, 1, 7),
-	(48, 'Laboratorio de Farmacia Clínica', 'lab', 1, 'LAB-FAR-103', 'disponible', 3, 'Laboratorio de control de medicamentos hospitalarios.', 0, 1, 7),
-	(49, 'Consultorio de Oncología Médica 1', 'cons', 2, 'CONS-ONC-201', 'disponible', 1, 'Consultorio para control de pacientes con cáncer.', 0, 1, 8),
-	(50, 'Consultorio de Oncología Médica 2', 'cons', 2, 'CONS-ONC-202', 'disponible', 1, 'Atención y seguimiento de tratamientos oncológicos.', 0, 1, 8),
-	(51, 'Sala de Quimioterapia 1', 'hab', 2, 'QUI-ONC-203', 'disponible', 5, 'Sala de administración de quimioterapia.', 1, 1, 8),
-	(52, 'Consultorio de Oncología Ginecológica 1', 'cons', 2, 'CONS-ONG-201', 'disponible', 1, 'Consultorio para control de cáncer ginecológico.', 0, 1, 10),
-	(53, 'Consultorio de Oncología Ginecológica 2', 'cons', 2, 'CONS-ONG-202', 'disponible', 1, 'Consultorio de diagnóstico oncológico femenino.', 0, 1, 10),
-	(54, 'Sala de Tratamientos Oncológicos Ginecológicos', 'hab', 2, 'SAL-ONG-203', 'disponible', 2, 'Sala para procedimientos oncológicos ginecológicos.', 1, 1, 10),
-	(55, 'Unidad Neonatal 1', 'hab', 3, 'NEO-301', 'disponible', 2, 'Unidad para recién nacidos prematuros.', 1, 1, 9),
-	(56, 'Unidad Neonatal 2', 'hab', 3, 'NEO-302', 'disponible', 2, 'Habitación equipada con incubadoras.', 1, 1, 9),
-	(57, 'Unidad Neonatal 3', 'hab', 3, 'NEO-303', 'disponible', 2, 'Sala de cuidados intensivos neonatales.', 1, 1, 9),
-	(58, 'Consultorio de Pediatría General 1', 'cons', 2, 'CONS-PEDG-201', 'disponible', 1, 'Consultorio de atención pediátrica ambulatoria.', 0, 1, 9),
-	(59, 'Consultorio de Pediatría General 2', 'cons', 2, 'CONS-PEDG-202', 'disponible', 1, 'Atención general para niños y adolescentes.', 0, 1, 9),
-	(60, 'Sala de Internación Pediátrica General', 'hab', 2, 'HAB-PEDG-203', 'disponible', 3, 'Habitación compartida para pacientes pediátricos.', 1, 1, 9),
-	(61, 'Consultorio de Cardiología 1', 'cons', 3, 'CONS-CAR-301', 'disponible', 1, 'Consultorio especializado en enfermedades cardíacas.', 0, 1, 12),
-	(62, 'Consultorio de Cardiología 2', 'cons', 3, 'CONS-CAR-302', 'disponible', 1, 'Control y seguimiento de pacientes cardíacos.', 0, 1, 12),
-	(63, 'Sala de Electrocardiogramas', 'lab', 3, 'LAB-CAR-303', 'disponible', 2, 'Sala equipada para estudios de electrocardiograma.', 0, 1, 12),
-	(64, 'Consultorio de Neumología 1', 'cons', 3, 'CONS-NEU-301', 'disponible', 1, 'Consultorio para diagnóstico de enfermedades respiratorias.', 0, 1, 15),
-	(65, 'Consultorio de Neumología 2', 'cons', 3, 'CONS-NEU-302', 'disponible', 1, 'Atención de pacientes con enfermedades pulmonares.', 0, 1, 15),
-	(66, 'Laboratorio de Función Pulmonar', 'lab', 3, 'LAB-NEU-303', 'disponible', 2, 'Sala equipada para espirometrías y estudios respiratorios.', 0, 1, 15),
-	(67, 'Consultorio de Nefrología 1', 'cons', 3, 'CONS-NEF-301', 'disponible', 1, 'Consultorio para enfermedades renales.', 0, 1, 21),
-	(68, 'Consultorio de Nefrología 2', 'cons', 3, 'CONS-NEF-302', 'disponible', 1, 'Atención de pacientes con insuficiencia renal.', 0, 1, 21),
-	(69, 'Sala de Hemodiálisis 1', 'lab', 3, 'LAB-NEF-303', 'disponible', 4, 'Sala equipada con máquinas de hemodiálisis.', 1, 1, 21),
-	(70, 'Consultorio de Gastroenterología 1', 'cons', 3, 'CONS-GAS-301', 'disponible', 1, 'Consultorio para enfermedades digestivas.', 0, 1, 22),
-	(71, 'Consultorio de Gastroenterología 2', 'cons', 3, 'CONS-GAS-302', 'disponible', 1, 'Atención de pacientes con patologías gastrointestinales.', 0, 1, 22),
-	(72, 'Sala de Endoscopia 1', 'lab', 3, 'LAB-GAS-303', 'disponible', 2, 'Sala equipada para endoscopias digestivas.', 1, 1, 22),
-	(73, 'Consultorio de Dermatología 1', 'cons', 2, 'CONS-DER-201', 'disponible', 1, 'Consultorio de diagnóstico de enfermedades de la piel.', 0, 1, 11),
-	(74, 'Consultorio de Dermatología 2', 'cons', 2, 'CONS-DER-202', 'disponible', 1, 'Atención de tratamientos dermatológicos.', 0, 1, 11),
-	(75, 'Sala de Fototerapia', 'lab', 2, 'LAB-DER-203', 'disponible', 2, 'Sala equipada con lámparas UV para tratamientos.', 0, 1, 9),
-	(76, 'Consultorio de Reumatología 1', 'cons', 2, 'CONS-REU-201', 'disponible', 1, 'Consultorio para enfermedades autoinmunes.', 0, 1, 23),
-	(77, 'Consultorio de Reumatología 2', 'cons', 2, 'CONS-REU-202', 'disponible', 1, 'Atención de pacientes con artritis y lupus.', 0, 1, 23),
-	(78, 'Sala de Infusión Reumatológica', 'hab', 2, 'HAB-REU-203', 'disponible', 3, 'Sala para administración de terapias intravenosas.', 0, 1, 23),
-	(79, 'Consultorio de Endocrinología 1', 'cons', 2, 'CONS-END-201', 'disponible', 1, 'Consultorio para enfermedades hormonales.', 0, 1, 13),
-	(80, 'Consultorio de Endocrinología 2', 'cons', 2, 'CONS-END-202', 'disponible', 1, 'Control de pacientes con diabetes y tiroides.', 0, 1, 13),
-	(81, 'Sala de Educación Diabética', 'hab', 2, 'HAB-END-203', 'disponible', 5, 'Sala destinada a la enseñanza del autocontrol de la diabetes.', 0, 1, 13),
-	(82, 'Consultorio de Neurología 1', 'cons', 3, 'CONS-NRL-301', 'disponible', 1, 'Consultorio para enfermedades neurológicas.', 0, 1, 17),
-	(83, 'Consultorio de Neurología 2', 'cons', 3, 'CONS-NRL-302', 'disponible', 1, 'Atención de pacientes con epilepsia y migraña.', 0, 1, 17),
-	(84, 'Sala de Electroencefalogramas', 'lab', 3, 'LAB-NRL-303', 'disponible', 2, 'Sala para estudios de actividad cerebral.', 0, 1, 17),
-	(85, 'Consultorio de Psiquiatría 1', 'cons', 2, 'CONS-PSQ-201', 'disponible', 1, 'Consultorio de evaluación psiquiátrica.', 0, 1, 24),
-	(86, 'Consultorio de Psiquiatría 2', 'cons', 2, 'CONS-PSQ-202', 'disponible', 1, 'Seguimiento de pacientes con trastornos mentales.', 0, 1, 24),
-	(87, 'Sala de Terapias Grupales', 'hab', 2, 'HAB-PSQ-203', 'disponible', 8, 'Sala acondicionada para terapias grupales.', 0, 1, 24),
-	(88, 'Quirófano de Cirugía General 1', 'qui', 4, 'QUI-CG-401', 'disponible', 1, 'Quirófano para procedimientos generales.', 1, 1, 3),
-	(89, 'Quirófano de Cirugía General 2', 'qui', 4, 'QUI-CG-402', 'disponible', 1, 'Quirófano equipado para cirugías abdominales.', 1, 1, 3),
-	(90, 'Sala de Recuperación Cirugía General', 'hab', 4, 'REC-CG-403', 'disponible', 4, 'Sala postoperatoria de pacientes de cirugía general.', 1, 1, 18),
-	(91, 'Quirófano de Oncología 1', 'qui', 4, 'QUI-ONC-401', 'disponible', 1, 'Quirófano especializado en procedimientos oncológicos.', 1, 1, 3),
-	(92, 'Quirófano de Oncología 2', 'qui', 4, 'QUI-ONC-402', 'disponible', 1, 'Preparado para cirugía de tumores complejos.', 1, 1, 3),
-	(93, 'Sala de Recuperación Oncológica', 'hab', 4, 'REC-ONC-403', 'disponible', 3, 'Sala postoperatoria para pacientes oncológicos.', 1, 1, 18),
-	(94, 'Quirófano de Cirugía Vascular 1', 'qui', 4, 'QUI-CV-401', 'disponible', 1, 'Quirófano para procedimientos en vasos sanguíneos.', 1, 1, 3),
-	(95, 'Quirófano de Cirugía Vascular 2', 'qui', 4, 'QUI-CV-402', 'disponible', 1, 'Preparado para bypass y aneurismas.', 1, 1, 3),
-	(96, 'Sala de Recuperación Vascular', 'hab', 4, 'REC-CV-403', 'disponible', 2, 'Área de recuperación postquirúrgica vascular.', 1, 1, 18),
-	(97, 'Quirófano de Cirugía Torácica 1', 'qui', 4, 'QUI-CT-401', 'disponible', 1, 'Quirófano para operaciones de tórax y pulmones.', 1, 1, 3),
-	(98, 'Quirófano de Cirugía Torácica 2', 'qui', 4, 'QUI-CT-402', 'disponible', 1, 'Preparado para cirugía de pleura y pulmones.', 1, 1, 3),
-	(99, 'Sala de Cuidados Post-Torácicos', 'hab', 4, 'REC-CT-403', 'disponible', 3, 'Sala de recuperación para cirugía torácica.', 1, 1, 4),
-	(100, 'Quirófano de Cirugía Plástica 1', 'qui', 3, 'QUI-CP-301', 'disponible', 1, 'Quirófano para cirugía reconstructiva y estética.', 1, 1, 3),
-	(101, 'Quirófano de Cirugía Plástica 2', 'qui', 3, 'QUI-CP-302', 'disponible', 1, 'Preparado para cirugías faciales y corporales.', 1, 1, 3),
-	(102, 'Sala de Recuperación Estética', 'hab', 3, 'REC-CP-303', 'disponible', 4, 'Área de cuidados postoperatorios en cirugía estética.', 0, 1, 18),
-	(103, 'Quirófano de Ortopedia 1', 'qui', 3, 'QUI-ORT-301', 'disponible', 1, 'Quirófano para cirugía traumatológica y ortopédica.', 1, 1, 3),
-	(104, 'Quirófano de Ortopedia 2', 'qui', 3, 'QUI-ORT-302', 'disponible', 1, 'Preparado para implantes y prótesis.', 1, 1, 3),
-	(105, 'Sala de Rehabilitación Ortopédica', 'hab', 2, 'HAB-ORT-201', 'disponible', 6, 'Sala para recuperación de pacientes traumatológicos.', 0, 1, 18),
-	(106, 'Sala de Anestesia 3', 'lab', 4, 'LAB-ANE-401', 'disponible', 2, 'Preparación anestésica para cirugías.', 1, 1, 19),
-	(107, 'Sala de Anestesia 4', 'lab', 4, 'LAB-ANE-402', 'disponible', 2, 'Área para control de anestesia intraoperatoria.', 1, 1, 19),
-	(108, 'Unidad de Recuperación Anestésica', 'hab', 4, 'REC-ANE-403', 'disponible', 4, 'Monitoreo postanestesia inmediato.', 1, 1, 19),
-	(109, 'Unidad de Cuidados Intensivos 1', 'hab', 5, 'UCI-MC-501', 'disponible', 6, 'Área crítica para pacientes graves.', 1, 1, 4),
-	(110, 'Unidad de Cuidados Intensivos 2', 'hab', 5, 'UCI-MC-502', 'disponible', 6, 'Soporte vital avanzado.', 1, 1, 4),
-	(111, 'Unidad de Cuidados Intensivos 3', 'hab', 5, 'UCI-MC-503', 'disponible', 6, 'Atención 24h para pacientes críticos.', 1, 1, 4),
-	(112, 'Unidad de Cuidados Neurocríticos 1', 'hab', 5, 'UCN-NCR-501', 'disponible', 4, 'Manejo de pacientes con patologías neurológicas críticas.', 1, 1, 4),
-	(113, 'Unidad de Cuidados Neurocríticos 2', 'hab', 5, 'UCN-NCR-502', 'disponible', 4, 'Atención a traumatismos craneoencefálicos.', 1, 1, 4),
-	(114, 'Sala de Monitoreo Neurológico', 'lab', 5, 'LAB-NCR-503', 'disponible', 2, 'Monitoreo avanzado de la actividad cerebral.', 1, 1, 17),
-	(115, 'Sala de Radiología 1', 'lab', 1, 'LAB-RAD-101', 'disponible', 2, 'Diagnóstico por rayos X y TAC.', 0, 1, 5),
-	(116, 'Sala de Radiología 2', 'lab', 1, 'LAB-RAD-102', 'disponible', 2, 'Exámenes de radiografía y fluoroscopía.', 0, 1, 5),
-	(117, 'Sala de Resonancia Magnética', 'lab', 1, 'LAB-RAD-103', 'disponible', 1, 'Equipo de RMN de alto campo.', 0, 1, 5),
-	(118, 'Consultorio de Cuidados Paliativos 1', 'cons', 2, 'CONS-CPAL-201', 'disponible', 1, 'Atención integral a pacientes terminales.', 0, 1, 25),
-	(119, 'Consultorio de Cuidados Paliativos 2', 'cons', 2, 'CONS-CPAL-202', 'disponible', 1, 'Apoyo clínico y psicológico.', 0, 1, 25),
-	(120, 'Sala de Cuidados Paliativos', 'hab', 2, 'HAB-CPAL-203', 'disponible', 3, 'Área para internación de pacientes en cuidados paliativos.', 0, 1, 25),
-	(121, 'Sala de Rayos X de Emergencia 1', 'lab', 1, 'LAB-RX-101', 'disponible', 1, 'Radiología rápida para emergencias.', 1, 1, 5),
-	(122, 'Sala de Rayos X de Emergencia 2', 'lab', 1, 'LAB-RX-102', 'disponible', 1, 'Radiografía de tórax y huesos en urgencias.', 1, 1, 5),
-	(123, 'Sala de Ecografía de Emergencia', 'lab', 1, 'LAB-ECO-103', 'disponible', 1, 'Ultrasonido rápido en emergencias.', 1, 1, 5),
-	(124, 'Sala TAC de Emergencia', 'lab', 1, 'LAB-TAC-104', 'disponible', 1, 'Tomógrafo para diagnóstico rápido en trauma.', 1, 1, 5),
-	(125, 'Laboratorio Clínico Central', 'lab', 2, 'LAB-CLI-201', 'disponible', 10, 'Análisis de sangre, orina y bioquímica.', 0, 1, 6),
-	(126, 'Laboratorio Clínico Secundario', 'lab', 2, 'LAB-CLI-202', 'disponible', 6, 'Soporte para análisis de guardia.', 0, 1, 6),
-	(127, 'Sala de Electrocardiogramas', 'lab', 2, 'LAB-ECG-203', 'disponible', 2, 'Equipos para estudios de ritmo cardíaco.', 0, 1, 12),
-	(128, 'Sala de Espirometría', 'lab', 2, 'LAB-PUL-204', 'disponible', 2, 'Evaluación de la función respiratoria.', 0, 1, 15),
-	(129, 'Sala de Endoscopia 2', 'lab', 2, 'LAB-END-205', 'disponible', 2, 'Examen de tubo digestivo superior e inferior.', 1, 1, 22),
-	(130, 'Sala de Audiometría', 'lab', 2, 'LAB-AUD-206', 'disponible', 1, 'Cabina insonorizada para exámenes auditivos.', 0, 1, 26),
-	(131, 'Sala de Exámenes Visuales', 'cons', 2, 'CONS-OFT-207', 'disponible', 1, 'Pruebas de visión y salud ocular.', 0, 1, 27),
-	(132, 'Sala de Pruebas de Alergia', 'cons', 2, 'CONS-ALR-208', 'disponible', 2, 'Pruebas cutáneas y diagnósticos alérgicos.', 0, 1, 28),
-	(133, 'Radiología Quirúrgica 1', 'lab', 3, 'LAB-RQ-301', 'disponible', 1, 'Imagenología en quirófano.', 1, 1, 5),
-	(134, 'Sala TAC Central', 'lab', 1, 'LAB-TAC-105', 'disponible', 1, 'Tomógrafo multicorte de alta resolución.', 1, 1, 5),
-	(135, 'Sala de Resonancia Magnética 1', 'lab', 1, 'LAB-RM-106', 'disponible', 1, 'Resonancia para neurología y ortopedia.', 1, 1, 5),
-	(136, 'Sala de Resonancia Magnética 2', 'lab', 1, 'LAB-RM-107', 'disponible', 1, 'Resonancia de cuerpo completo.', 1, 1, 5),
-	(137, 'Unidad de Monitoreo Cardíaco', 'hab', 3, 'HAB-MON-301', 'disponible', 4, 'Monitoreo continuo de pacientes críticos.', 1, 1, 12),
-	(138, 'Sala de Oxigenoterapia', 'hab', 2, 'HAB-OXI-201', 'disponible', 3, 'Aplicación terapéutica de oxígeno.', 1, 1, 15),
-	(139, 'Sala EEG 1', 'lab', 3, 'LAB-EEG-302', 'disponible', 1, 'Estudios de actividad eléctrica cerebral.', 0, 1, 17),
-	(140, 'Sala de Mamografía', 'lab', 1, 'LAB-MAM-108', 'disponible', 1, 'Diagnóstico de cáncer de mama.', 0, 1, 5),
-	(141, 'Sala de Extracciones de Sangre', 'lab', 2, 'LAB-SANG-209', 'disponible', 5, 'Extracción y procesamiento de muestras.', 0, 1, 6),
-	(142, 'Sala de Análisis de Orina', 'lab', 2, 'LAB-ORI-210', 'disponible', 2, 'Procesamiento de muestras de orina.', 0, 1, 6),
-	(143, 'Laboratorio de Biología Molecular', 'lab', 2, 'LAB-BIO-211', 'disponible', 3, 'PCR, genética y virología.', 1, 1, 14),
-	(144, 'Sala de Asesoría Farmacéutica', 'cons', 2, 'CONS-FAR-212', 'disponible', 1, 'Atención de pacientes sobre medicamentos.', 0, 1, 7),
-	(145, 'Sala de Biopsias', 'lab', 3, 'LAB-BIOP-304', 'disponible', 1, 'Obtención de muestras para análisis oncológico.', 1, 1, 20),
-	(146, 'Sala de Radioterapia 1', 'lab', 3, 'LAB-RADT-305', 'disponible', 1, 'Tratamiento con radiación contra tumores.', 1, 1, 8),
-	(147, 'Sala de Radioterapia 2', 'lab', 3, 'LAB-RADT-306', 'disponible', 1, 'Unidad de acelerador lineal.', 1, 1, 8),
-	(148, 'Unidad Neonatal 3', 'lab', 2, 'NEO-304', 'disponible', 2, 'Pruebas metabólicas y cardíacas en neonatos.', 0, 1, 9),
-	(149, 'Sala de Ecografía Pediátrica', 'lab', 2, 'LAB-ECO-214', 'disponible', 1, 'Ecografía adaptada para niños.', 0, 1, 5),
-	(150, 'Sala de Ecografía Ginecológica', 'lab', 2, 'LAB-ECO-215', 'disponible', 1, 'Ecografía transvaginal y obstétrica.', 0, 1, 5),
-	(151, 'Sala de Pruebas de Fertilidad', 'lab', 2, 'LAB-FER-216', 'disponible', 1, 'Estudios de fertilidad masculina y femenina.', 0, 1, 10),
-	(152, 'Sala de Dermatoscopia', 'cons', 2, 'CONS-DER-217', 'disponible', 1, 'Estudio detallado de lesiones cutáneas.', 0, 1, 11),
-	(153, 'Sala de Pruebas de Alergia Dermatológica', 'cons', 2, 'CONS-DER-218', 'disponible', 1, 'Diagnóstico de dermatitis y eccemas.', 0, 1, 11),
-	(154, 'Oficina de Laboratorio', 'oficina_resultados', 2, 'OFI-LAB-201', 'disponible', 10, 'Oficina de carga de resultados sobre análisis de laboratorio', 0, 1, 29),
-	(155, 'Laboratorio de Endocrinología', 'lab', 2, 'LAB-END-202', 'disponible', 8, 'Análisis especializado de perfiles hormonales y metabólicos para diagnóstico y seguimiento de enfermedades endocrinas como diabetes, trastornos tiroideos y hormonales.', 0, 1, 13),
-	(156, 'Laboratorio de Bacteriología', 'lab', 2, 'LAB-BAC-203', 'disponible', 12, 'Análisis microbiológicos especializados para la identificación, aislamiento y estudio de bacterias patógenas en muestras clínicas, como sangre, orina, esputo y tejidos. Apoya el diagnóstico y tratamiento de infecciones bacterianas mediante cultivos, pruebas de sensibilidad antimicrobiana y otros métodos microbiológicos.', 0, 1, 14),
-	(157, 'Área de Diagnostico Funcional cardiológico', 'cons', 2, 'DIA-CAR-204', 'disponible', 3, 'Área especializada en la realización de estudios funcionales del sistema cardiovascular. Se realizan pruebas como electrocardiograma, ecocardiograma, prueba de esfuerzo, Holter y monitoreo ambulatorio de presión arterial (MAPA). Es un espacio clave para el diagnóstico temprano y seguimiento de enfermedades cardíacas.', 0, 1, 12),
-	(158, 'Laboratorio de Bioquímica Clínica', 'lab', 2, 'LAB-BIOQUI-220', 'disponible', 8, 'El Laboratorio de Bioquímica Clínica es una unidad especializada dedicada al análisis químico de muestras biológicas humanas, como sangre, orina, suero, plasma, líquido cefalorraquídeo, entre otros. Su principal objetivo es proporcionar información diagnóstica, pronóstica y de seguimiento sobre el estado de salud de los pacientes, a través de la medición de diferentes parámetros bioquímicos.', 0, 1, 6),
-	(159, 'Laboratorio de Inmunología', 'lab', 2, 'LAB-INMU-221', 'disponible', 8, '', 0, 1, 6),
-	(160, 'Laboratorio de Banco de Sangre', 'lab', 2, 'LAB-BSAN-222', 'disponible', 5, '', 0, 1, 30),
-	(161, 'Laboratorio de Ecocardiografía', 'lab', 2, 'LAB-ECOCAR-224', 'disponible', 3, '', 0, 1, 12),
-	(162, 'Laboratorio de Función Pulmonar', 'lab', 2, 'LAB-FPUL-225', 'disponible', 5, '', 0, 1, 12),
-	(163, 'Consultorio de Neumología 3', 'cons', 2, 'CONS-NEU-226', 'disponible', 2, '', 0, 1, 15),
-	(164, 'Consultorio de Neumología 4', 'cons', 2, 'CONS-NEU-227', 'disponible', 2, '', 0, 1, 15),
-	(165, 'Laboratorio de Hormonas', 'lab', 2, 'LAB-HOR-227', 'disponible', 10, '', 0, 1, 6),
-	(166, 'Sala de Mamografía', 'lab', 2, 'LAB-MAMO-228', 'disponible', 5, '', 0, 1, 5),
-	(167, 'Laboratorio en Histotecnología', 'lab', 2, 'LAB-HIST-228', 'disponible', 5, '', 0, 1, 20),
-	(168, 'Laboratorios Dermatocosméticos', 'lab', 2, 'LAB-DERCOS-230', 'disponible', 3, '', 0, 1, 11);
+INSERT INTO `hospital_personal_lugar` (`id`, `nombre`, `tipo`, `piso`, `sala`,`abreviacion`, `capacidad`, `descripcion`, `es_critico`, `activo`, `departamento_id`) VALUES
+	(151, 'Sala de Pruebas de Fertilidad', 'lab', 2, 'LAB-FER-216', 1, 'Estudios de fertilidad masculina y femenina.', 0, 1, 10),
+	(152, 'Sala de Dermatoscopia', 'cons', 2, 'CONS-DER-217', 1, 'Estudio detallado de lesiones cutáneas.', 0, 1, 11),
+	(153, 'Sala de Pruebas de Alergia Dermatológica', 'cons', 2, 'CONS-DER-218', 1, 'Diagnóstico de dermatitis y eccemas.', 0, 1, 11),
+	(154, 'Oficina de Laboratorio', 'oficina_resultados', 2, 'OFI-LAB-201', 10, 'Oficina de carga de resultados sobre análisis de laboratorio', 0, 1, 29),
+	(155, 'Laboratorio de Endocrinología', 'lab', 2, 'LAB-END-202', 8, 'Análisis especializado de perfiles hormonales y metabólicos para diagnóstico y seguimiento de enfermedades endocrinas como diabetes, trastornos tiroideos y hormonales.', 0, 1, 13),
+	(156, 'Laboratorio de Bacteriología', 'lab', 2, 'LAB-BAC-203', 12, 'Análisis microbiológicos especializados para la identificación, aislamiento y estudio de bacterias patógenas en muestras clínicas, como sangre, orina, esputo y tejidos. Apoya el diagnóstico y tratamiento de infecciones bacterianas mediante cultivos, pruebas de sensibilidad antimicrobiana y otros métodos microbiológicos.', 0, 1, 14),
+	(157, 'Área de Diagnostico Funcional cardiológico', 'cons', 2, 'DIA-CAR-204', 3, 'Área especializada en la realización de estudios funcionales del sistema cardiovascular. Se realizan pruebas como electrocardiograma, ecocardiograma, prueba de esfuerzo, Holter y monitoreo ambulatorio de presión arterial (MAPA). Es un espacio clave para el diagnóstico temprano y seguimiento de enfermedades cardíacas.', 0, 1, 12),
+	(158, 'Laboratorio de Bioquímica Clínica', 'lab', 2, 'LAB-BIOQUI-220', 8, 'El Laboratorio de Bioquímica Clínica es una unidad especializada dedicada al análisis químico de muestras biológicas humanas, como sangre, orina, suero, plasma, líquido cefalorraquídeo, entre otros. Su principal objetivo es proporcionar información diagnóstica, pronóstica y de seguimiento sobre el estado de salud de los pacientes, a través de la medición de diferentes parámetros bioquímicos.', 0, 1, 6),
+	(159, 'Laboratorio de Inmunología', 'lab', 2, 'LAB-INMU-221', 8, '', 0, 1, 6),
+	(160, 'Laboratorio de Banco de Sangre', 'lab', 2, 'LAB-BSAN-222', 5, '', 0, 1, 30),
+	(161, 'Laboratorio de Ecocardiografía', 'lab', 2, 'LAB-ECOCAR-224', 3, '', 0, 1, 12),
+	(162, 'Laboratorio de Función Pulmonar', 'lab', 2, 'LAB-FPUL-225', 5, '', 0, 1, 12),
+	(163, 'Consultorio de Neumología 3', 'cons', 2, 'CONS-NEU-226', 2, '', 0, 1, 15),
+	(164, 'Consultorio de Neumología 4', 'cons', 2, 'CONS-NEU-227', 2, '', 0, 1, 15),
+	(165, 'Laboratorio de Hormonas', 'lab', 2, 'LAB-HOR-227', 10, '', 0, 1, 6),
+	(166, 'Sala de Mamografía', 'lab', 2, 'LAB-MAMO-228', 5, '', 0, 1, 5),
+	(167, 'Laboratorio en Histotecnología', 'lab', 2, 'LAB-HIST-228', 5, '', 0, 1, 20),
+	(168, 'Laboratorios Dermatocosméticos', 'lab', 2, 'LAB-DERCOS-230', 3, '', 0, 1, 11);
 
 -- Volcando estructura para tabla hospitalbd.hospital_personal_medicaciones
 CREATE TABLE IF NOT EXISTS `hospital_personal_medicaciones` (
@@ -3557,6 +3581,10 @@ INSERT INTO `hospital_personal_usuariolugartrabajoasignado` (`id`, `jornada_id`,
 	(6, 1, 115, 3),
 	(7, 2, 115, 3),
 	(8, 3, 115, 3);
+	
+	
+SELECT nombre FROM `hospital_personal_lugar` WHERE tipo="cons"
+	
 
 -- Volcando estructura para tabla hospitalbd.hospital_personal_usuariorolprofesionalasignado
 CREATE TABLE IF NOT EXISTS `hospital_personal_usuariorolprofesionalasignado` (

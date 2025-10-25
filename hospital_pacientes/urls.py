@@ -11,7 +11,6 @@ urlpatterns = [
     path("turnos/solicitar/<int:paciente_id>", views.seleccionarTurno, name="seleccionarTurno"),
     path("turnos/solicitar-consulta/<int:paciente_id>/", views.sacarTurno, name="sacarTurno"),
     path("turnos/solicitar-estudio/<int:paciente_id>/", views.sacarTurnoEstudio, name="sacarTurnoEstudio"),
-    path("turnos/turno-confirmado/", views.confirmar_turno, name="confirmarTurno"),
     path("turnos/turno-confirmado/<int:turno_id>/", views.turno_confirmado, name="turnoConfirmado"),
     path("turnos/estudio-confirmado/<int:turno_id>/", views.turno_estudio_confirmado, name="turnoEstudioConfirmado"),
     path("turnos/reprogramar/<int:turno_id>/", views.reprogramarTurno, name="reprogramarTurno"),

@@ -646,7 +646,6 @@
 .calendar button {
     padding: 10px;
     text-align: center;
-    border: 1px solid #ccc;
     cursor: pointer;
     background-color: white;
     border: 2px solid transparent;

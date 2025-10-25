@@ -286,7 +286,18 @@
                     {% endif %}
                     {% csrf_token %}
                     <input type="hidden" name="tipo_form" value="form_lugarTrabajo">
-                    <input type="hidden" name="id_usuario" value="{{usuario.id}}">
+                    <input type="hidden" name="id_usuario" value="{{usuario.id}}" id="identificadorUsuario">
+                    <div class="campo-input">
+                        {{ formLugarTrabajo.rolProfesionalAsignado.label_tag }}
+                        {{ formLugarTrabajo.rolProfesionalAsignado }}
+                        {% if formLugarTrabajo.rolProfesionalAsignado.errors %}
+                            <div class="error-message">
+                                {% for error in formLugarTrabajo.rolProfesionalAsignado.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}                        
+                    </div>
                     <div class="campo-input">
                         {{ formLugarTrabajo.lugar.label_tag }}
                         {{ formLugarTrabajo.lugar }}
@@ -344,6 +355,17 @@
                     {% csrf_token %}
                     <input type="hidden" name="tipo_form" value="form_editarLugarTrabajo">
                     <input type="hidden" name="id_instancia" id="id_instancia" value="">
+                    <div class="campo-input">
+                        <label for="id_rol_edit">Rol profesional asignado:</label>
+                        {{ formEditarLugarTrabajo.rolProfesionalAsignado }}
+                        {% if formEditarLugarTrabajo.rolProfesionalAsignado.errors %}
+                            <div class="error-message">
+                                {% for error in formEditarLugarTrabajo.rolProfesionalAsignado.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}                        
+                    </div>
                     <div class="campo-input">
                         {{ formEditarLugarTrabajo.lugar.label_tag }}
                         {{ formEditarLugarTrabajo.lugar }}

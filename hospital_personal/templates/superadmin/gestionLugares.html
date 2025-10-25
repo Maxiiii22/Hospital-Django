@@ -22,7 +22,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
-                        <th>Codigo</th>
+                        <th>N° Sala</th>
                         <th>Piso</th>
                         <th>Es critico</th>
                         <th>Capacidad</th>
@@ -37,7 +37,7 @@
                     <tr class="fila">
                         <td data-label="ID:">{{lugar.id}}</td>
                         <td data-label="Nombre:">{{lugar.nombre}}</td>
-                        <td data-label="Codigo:">{{lugar.codigo}}</td>
+                        <td data-label="N° Sala:">{{lugar.abreviacion}}-{{lugar.sala}}</td>
                         <td data-label="Ubicado en el piso:">N° {{lugar.piso}}</td>
                         <td data-label="Es critico:">{% if lugar.es_critico %} Si {% else %} No {% endif %}</td>
                         <td data-label="Capacidad:">{{lugar.capacidad}}</td>
@@ -105,11 +105,23 @@
             </div>
 
             <div class="campo-input">
-                {{ form.codigo.label_tag }}
-                {{ form.codigo }}
-                {% if form.codigo.errors %}
-                    <div id="error_codigo" class="error-message">
-                        {% for error in form.codigo.errors %}
+                {{ form.sala.label_tag }}
+                {{ form.sala }}
+                {% if form.sala.errors %}
+                    <div class="error-message">
+                        {% for error in form.sala.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="campo-input">
+                {{ form.abreviacion.label_tag }}
+                {{ form.abreviacion }}
+                {% if form.abreviacion.errors %}
+                    <div class="error-message">
+                        {% for error in form.abreviacion.errors %}
                             <p>{{ error }}</p>
                         {% endfor %}
                     </div>

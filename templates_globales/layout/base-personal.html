@@ -124,6 +124,12 @@
                                         <span>{{usuario.especialidad.nombre_especialidad}}</span>
                                     </div>
                                 </li>
+                            {% empty %}
+                                <li>
+                                    <div class="sub-menu-link selectEspecialidad" >
+                                        <span>No asignado a especialidad</span>
+                                    </div>
+                                </li>
                             {% endfor %}
                         </ul>
                     </li>
@@ -155,7 +161,7 @@
                 {% if user.usuario.tipoUsuario.id == 3 %} <!--Medico-->
                     <li class="menu-item menu-item-estatico">
                         <div class="especialidadActual">
-                            <h3>{{especialidad_actual_nombre}}</h3>
+                            <h3>{% if especialidad_actual_nombre %}{{especialidad_actual_nombre}}{% else %}No asignado a especialidad{% endif %}</h3>
                         </div>
                     </li>
                 {% endif %}

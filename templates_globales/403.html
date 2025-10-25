@@ -7,7 +7,13 @@
 </head>
 <body>
     <h1>🚫 Acceso denegado</h1>
-    <p>No tenés permiso para acceder a esta página o realizar esta acción.</p>
+    {% if mensaje %}
+        <p>{{mensaje}}</p>
+    {% else %}
+        <p>No tenés permiso para acceder a esta página o realizar esta acción.</p>
+    {% endif %}
+
+    <button onclick="window.history.back()">Volver a atrás</button>
     {% if user.usuario %}
         <a href="{% url 'indexPersonal' %}">Volver al inicio</a>
     {% elif user.paciente %}

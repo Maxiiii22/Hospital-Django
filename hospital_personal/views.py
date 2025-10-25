@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required 
 from controlUsuario.decorators import personal_required # En controlUsuario.decorators creamos decoradores personalizados que verifiquen si el usuario tiene el atributo de paciente o usuario, y redirigirlo a una página de acceso denegado si intenta acceder a una vista que no le corresponde.
 from .models import UsuarioLugarTrabajoAsignado,UsuarioRolProfesionalAsignado,Departamento,Especialidades,Turno,Consultas,Medicaciones,OrdenEstudio,EstudiosDiagnosticos,TurnoEstudio,ResultadoEstudio,ResultadoImagen,ServicioDiagnostico,Lugar,PlantillaEstudio,Jorna_laboral
-from controlUsuario.models import Usuario,TiposUsuarios,RolesProfesionales
+from controlUsuario.models import Usuario,TiposUsuarios,RolesProfesionales,Persona
 from hospital_pacientes.models import Paciente
 from controlUsuario.forms import FormularioRegistroDePersonal,FormularioActualizarPassword
 from .forms import FormEspecialidades,FormDepartamentos,FormTiposUsuarios,FormConsulta,MedicacionesFormSet,EstudiosFormSet,ResultadoEstudioForm,ResultadoImagenForm,FormularioAsignaciones,FormularioLugarTrabajo,FormRolesProfesionales,FormServiciosDiagnostico,FormEstudiosDiagnosticos,FormLugar,FormPlantillaEstudio,FormularioEditarLugarTrabajo
@@ -14,7 +14,8 @@ from django.forms import modelformset_factory
 from django.contrib.auth import update_session_auth_hash
 from hospital_pacientes.views import obtener_disponibilidad
 import datetime
-
+from django.db.models.functions import Cast
+from django.db.models import Max, IntegerField
 
 # Create your views here.
 
@@ -68,18 +69,25 @@ def gestionDelPersonal(request):
 @login_required
 def altaPersonal(request):
     if request.method == "GET":
+        ultimo_login_id = (
+            Persona.objects
+            .filter(login_id__regex=r'^\d+$')  # Solo login_id numéricos
+            .annotate(login_id_num=Cast('login_id', IntegerField()))
+            .aggregate(max_id=Max('login_id_num'))['max_id'] or 999
+        )
+
+        siguiente_login_id = ultimo_login_id + 1
         formUsuario = FormularioRegistroDePersonal()
-        return render(request, "superadmin/gestionPersonal/altaPersona.html", {"formUsuario": formUsuario})
+        return render(request, "superadmin/gestionPersonal/altaPersona.html", {"formUsuario": formUsuario,"lastLogin_id": siguiente_login_id})
 
     if request.method == "POST":
-        # Instanciar los formularios con los datos del POST
         formUsuario = FormularioRegistroDePersonal(request.POST)
-        print(request.POST)
         
         # Validar que los formularios internos son válidos
         if formUsuario.is_valid() and formUsuario.persona_form.is_valid() and formUsuario.usuario_form.is_valid():
             try:
                 persona = formUsuario.persona_form.save(commit=False)  
+                
                 # Establecer la contraseña de forma segura (hash)
                 persona.set_password(formUsuario.persona_form.cleaned_data['password'])
                 persona.save()  # Ahora guardamos la persona con la contraseña encriptada
@@ -89,7 +97,7 @@ def altaPersonal(request):
                 usuario.save()  
 
                 messages.success(request, "El personal ha sido registrado correctamente.")
-                return redirect('gestionDelPersonal')  # Redirigir a la gestión del personal
+                return redirect('detalle_usuario', id=usuario.id)  # Redirigir a los detalles del nuevo usuario
             except Exception as e:
                 print(f"Error al guardar el usuario: {e}")
                 messages.error(request, "Ocurrió un error al guardar el usuario. Intenta nuevamente.")
@@ -116,7 +124,7 @@ def detalle_usuario(request,id):
     for asignacion in asignacionesDeLugarDeTrabajo:
         departamentos_con_jornadas[asignacion.lugar.departamento].append({
             "id": f"{asignacion.id}",
-            "info": f"Los días <strong>{asignacion.jornada.get_dia_display()}</strong> en el turno: <strong>{asignacion.jornada.get_turno_display()}</strong> trabaja en el <strong>{asignacion.lugar.nombre} ({asignacion.lugar.codigo})</strong>"
+            "info": f"Los días <strong>{asignacion.jornada.get_dia_display()}</strong> en el turno: <strong>{asignacion.jornada.get_turno_display()}</strong> trabaja en el <strong>{asignacion.lugar.nombre} ({asignacion.lugar.abreviacion})</strong> como <strong>{asignacion.rolProfesionalAsignado.rol_profesional.nombre_rol_profesional} (En {getattr(asignacion.rolProfesionalAsignado.rol_profesional.especialidad, 'nombre_especialidad', getattr(asignacion.rolProfesionalAsignado.rol_profesional.servicio_diagnostico, 'nombre_servicio', 'Sin asignar'))}</strong>)"
         })
     
     departamentos_con_jornadas = dict(departamentos_con_jornadas)
@@ -173,10 +181,10 @@ def detalle_usuario(request,id):
                 
                 if omitidos:
                     jornadas_texto = ", ".join(f"{j.get_dia_display()} - {j.get_turno_display()}" for j in omitidos)
-                    messages.info(request, f"Estas jornadas ya estaban asignadas y fueron omitidas: {jornadas_texto}")
+                    messages.info(request, f"Estas jornadas ya estaban asignadas al usuario y fueron omitidas: {jornadas_texto}")
                 
                 if creados:
-                    messages.success(request, f"Se asignaron correctamente {len(creados)} jornada(s) nuevas.")
+                    messages.success(request, f"Se asignaron correctamente {len(creados)} jornada(s) nuevas al usuario.")
                     
                 return redirect('detalle_usuario', id=id_usuario)
             else:
@@ -215,23 +223,28 @@ def detalle_usuario(request,id):
 def getLugarTrabajoDisponibilidad(request):
     if request.method == "GET" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         id_lugar = request.GET.get('id')
+        id_usuario = request.GET.get('usuario_id')
         
-        if id_lugar:
+        if id_lugar and id_usuario:
             lugar = get_object_or_404(Lugar, id=id_lugar)
             jornadas = Jorna_laboral.objects.all()
+            usuario = get_object_or_404(Usuario,id=id_usuario)
             
             disponibilidad_de_jornadas = defaultdict(list)
             for jornada in jornadas:
                 estado, cantidad = lugar.estado_por_jornada(jornada)
+                msg = jornada.jornadaDisponible(usuario,lugar)
+                
                 disponibilidad_de_jornadas[jornada.id].append({
                     "id": f"{jornada.id}",
                     "estado": estado,
                     "cantidad": cantidad,
-                    "maxCantidad": f"{lugar.capacidad}"
+                    "maxCantidad": f"{lugar.capacidad}",
+                    "Disponible": msg
                 })
 
             data = {
-                "disponibilidad": disponibilidad_de_jornadas,            
+                "disponibilidad": disponibilidad_de_jornadas,           
             }
             return JsonResponse(data)
         else:
@@ -250,6 +263,7 @@ def getLugarTrabajoORolProfesional(request):
                 "id_instancia": lugarTrabajo.id,
                 "id_lugar": lugarTrabajo.lugar.id,
                 "id_jornada": lugarTrabajo.jornada.id,            
+                "id_rolProfesionalAsignado": lugarTrabajo.rolProfesionalAsignado.id,            
             }
             return JsonResponse(data)
         elif id_rolProfesional:
@@ -459,7 +473,8 @@ def gestionDeLugares(request):
                 "nombre_lugar": lugar.nombre,
                 "tipo_lugar": lugar.tipo,
                 "piso_lugar": lugar.piso,
-                "codigo_lugar": lugar.codigo,
+                "sala_lugar": lugar.sala,
+                "abreviacion_lugar": lugar.abreviacion,
                 "capacidad_lugar": lugar.capacidad,
                 "departamento_lugar": lugar.departamento.id,
                 "descripcion_lugar": lugar.descripcion,
@@ -640,16 +655,20 @@ def turnosProgramados(request):
     especialidad_id = request.session.get('especialidad_actual')
     if especialidad_id:
         especialidad = Especialidades.objects.get(id=especialidad_id)
-        
-    hoy = timezone.now().date() 
-    turnos = Turno.objects.filter(profesional_id=request.user.usuario, fecha_turno__gte=hoy,especialidad=especialidad ).order_by("fecha_turno") # fecha_turno__gte=hoy: Este filtro asegura que solo se obtendrán los turnos cuya fecha sea hoy o en el futuro
+    else: 
+        especialidad = False
+    
     turnos_hoy = []
     turnos_otros_dias = []
-    for turno in turnos:
-        if turno.fecha_turno == hoy:
-            turnos_hoy.append(turno)
-        else:
-            turnos_otros_dias.append(turno)
+    if especialidad:
+        hoy = timezone.now().date() 
+        turnos = Turno.objects.filter(profesional_id=request.user.usuario, fecha_turno__gte=hoy,especialidad=especialidad ).order_by("fecha_turno") # fecha_turno__gte=hoy: Este filtro asegura que solo se obtendrán los turnos cuya fecha sea hoy o en el futuro
+        
+        for turno in turnos:
+            if turno.fecha_turno == hoy:
+                turnos_hoy.append(turno)
+            else:
+                turnos_otros_dias.append(turno)
         
     return render(request, "medico/turnos/turnosProgramados.html",{ "turnos_hoy": turnos_hoy,"turnos_otros_dias": turnos_otros_dias})
 
@@ -894,9 +913,14 @@ def historialConsultas(request):
     especialidad_id = request.session.get('especialidad_actual')
     if especialidad_id:
         especialidad = Especialidades.objects.get(id=especialidad_id)
-    # Traer consultas, medicaciones y estudios relacionados de forma eficiente
-    consultas = Consultas.objects.filter(turno__profesional=request.user.usuario, turno__especialidad = especialidad).prefetch_related('estudios', 'medicaciones')  # trae todas las medicaciones y estudios asociados a las consultas que hayas filtrado
-
+    else:
+        especialidad = False
+    
+    if especialidad:
+        # Traer consultas, medicaciones y estudios relacionados de forma eficiente
+        consultas = Consultas.objects.filter(turno__profesional=request.user.usuario, turno__especialidad = especialidad).prefetch_related('estudios', 'medicaciones')  # trae todas las medicaciones y estudios asociados a las consultas que hayas filtrado
+    else:
+        consultas = Consultas.objects.none() # Queryset vacio
     return render(request, "medico/consultas/consultas.html",{"consultas":consultas})
 
 

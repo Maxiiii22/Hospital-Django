@@ -4,15 +4,15 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required 
 from controlUsuario.decorators import paciente_required  # En controlUsuario.decorators creamos decoradores personalizados que verifiquen si el usuario tiene el atributo de paciente o usuario, y redirigirlo a una página de acceso denegado si intenta acceder a una vista que no le corresponde.
 from hospital_personal.models import Especialidades,UsuarioRolProfesionalAsignado,UsuarioLugarTrabajoAsignado,Turno,Consultas,Medicaciones,OrdenEstudio,Jorna_laboral,TurnoEstudio,ServicioDiagnostico,Lugar,ResultadoEstudio
+from hospital_personal.forms import FormSacarTurno
 from controlUsuario.models import Usuario
 from controlUsuario.forms import FormularioRegistroPersonalizado
 from .models import Paciente,MenorACargoDePaciente
 from .forms import RegistrarMenorForm
 from django.urls import reverse
-from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Q
-
+from django.db.models import Min
+from django.contrib import messages
 
 # Create your views here.
 
@@ -106,42 +106,172 @@ def sacarTurno(request, paciente_id):
     tarde = Jorna_laboral.objects.filter(turno="tarde").first()
     horariosDeConsultas = [dia, tarde]
     
+    if request.method == "GET":
+        request.session.pop(f"especialidad_seleccionada_id_{paciente_id}", None)
+        request.session.pop(f"horario_seleccionado_{paciente_id}", None)
+    
     if request.method == "POST":
-        estaBuscando = True
-        especialidad_id = request.POST.get("especialidad")
-        horario_turno = request.POST.get("horario")
-        especialidad = Especialidades.objects.get(id=especialidad_id,permite_turno=True)
+        tipo_form = request.POST.get("tipo_form")
         
-        # Filtrar los profesionales que están asociados con la especialidad seleccionada
-        profesionales = UsuarioRolProfesionalAsignado.objects.filter(especialidad=especialidad)
-
-        # Filtrar los profesionales disponibles en el turno especificado
-        profesionales_disponibles = UsuarioLugarTrabajoAsignado.objects.filter(
-            usuario__in=profesionales.values('usuario'),
-            jornada__turno=horario_turno
-        ).values_list('usuario', flat=True).distinct()
-        
-        dias_disponibles = []
-        for profesional in profesionales_disponibles:
-            # Usamos la función de disponibilidad para obtener los días de trabajo de cada profesional
-            disponibilidad = obtener_disponibilidad(profesional,horario_turno)
-            dias_disponibles.append({
-                "profesional": profesional,
-                "disponibilidad": disponibilidad
+        if tipo_form == "formSeleccionEspecialidad":
+            estaBuscando = True
+            especialidad_id = request.POST.get("especialidad")
+            horario_turno = request.POST.get("horario")
+            
+            try:
+                especialidad = Especialidades.objects.get(id=especialidad_id, permite_turno=True)
+            except Especialidades.DoesNotExist:
+                messages.error(request, "La especialidad seleccionada no es válida.")
+                return render(request, "turnos/sacarTurno.html", {
+                    "error": "Especialidad inválida",
+                    "especialidades": especialidades,
+                    "menor": menor,
+                    "parentesco": parentesco,
+                    "horariosDeConsultas": horariosDeConsultas
+                })     
+            
+            # Guardar datos en sesión para validaciones posteriores
+            request.session[f"especialidad_seleccionada_id_{paciente_id}"] = especialidad.id
+            request.session[f"horario_seleccionado_{paciente_id}"] = horario_turno
+            
+            
+            # Filtrar los profesionales que están asociados con la especialidad seleccionada
+            profesionales = UsuarioRolProfesionalAsignado.objects.filter(rol_profesional__especialidad=especialidad)
+            
+            subConsulta = (  # Subconsulta que trae un registro de cada usuario.
+                UsuarioLugarTrabajoAsignado.objects.filter(
+                    usuario__in=profesionales.values('usuario'),
+                    jornada__turno=horario_turno
+                )
+                .values('usuario')
+                .annotate(min_id=Min('id'))
+                .values('min_id')
+            )
+            
+            profesionales_disponibles = UsuarioLugarTrabajoAsignado.objects.filter(id__in=subConsulta)
+                    
+            dias_disponibles = []
+            formularios = [] 
+            paciente = Paciente.objects.get(id=paciente_id)
+            
+            for profesional in profesionales_disponibles:
+                disponibilidad = obtener_disponibilidad(profesional.usuario.id, horario_turno)
+                dias_disponibles.append({
+                    "profesional": profesional.usuario.id,
+                    "disponibilidad": disponibilidad
+                })
+                
+                form = FormSacarTurno(initial={
+                    'horario_turno': horario_turno,
+                    'especialidad': especialidad.id,
+                    'profesional': profesional.usuario.id,
+                    'paciente': paciente.id,
+                    'lugar': profesional.lugar.id
+                })
+                formularios.append({
+                    "profesional": profesional,
+                    "form": form
+                })
+            
+            return render(request, "turnos/sacarTurno.html", {
+                "estaBuscando":estaBuscando,
+                "formularios" : formularios,
+                "dias_disponibles": dias_disponibles,
+                "menor":menor,
+                "parentesco":parentesco,
+                "especialidades": especialidades,
+                "especialidadSeleccionada": especialidad,
+                "horariosDeConsultas":horariosDeConsultas,
+                "horarioSeleccionado": Jorna_laboral.objects.filter(turno=horario_turno).first()
             })
-        
-        return render(request, "turnos/sacarTurno.html", {
-            "paciente": Paciente.objects.get(id=paciente_id),
-            "menor":menor,
-            "parentesco":parentesco,
-            "especialidades": especialidades,
-            "horariosDeConsultas":horariosDeConsultas,
-            "especialidadSeleccionada": especialidad,
-            "horarioSeleccionado": Jorna_laboral.objects.filter(turno=horario_turno).first(),
-            "profesionales" : Usuario.objects.filter(id__in=profesionales_disponibles), # Si profesionales_disponibles es una lista de varios IDs de usuarios, puedes utilizar el operador __in para filtrar los usuarios que coincidan con cualquiera de esos IDs.
-            "dias_disponibles": dias_disponibles,
-            "estaBuscando":estaBuscando
-        })
+            
+        elif tipo_form == "formSeleccionProfesional":
+            form = FormSacarTurno(request.POST)
+
+            paciente_form_id = int(request.POST.get("paciente"))
+            profesional_form_id = int(request.POST.get("profesional"))
+            especialidad_form_id = int(request.POST.get("especialidad"))
+            fecha_turno_form = request.POST.get("fecha_turno")
+            horario_turno_form = request.POST.get("horario_turno")
+
+            if paciente_form_id != paciente_id:
+                response = render(request, "403.html", {
+                    "mensaje": "No podés reservar un turno para otro paciente."
+                })
+                response.status_code = 403
+                return response
+
+            # Validar especialidad y coincidencia con la búsqueda
+            try:
+                especialidad_form = Especialidades.objects.get(id=especialidad_form_id, permite_turno=True)
+            except Especialidades.DoesNotExist:
+                response = render(request, "403.html", {
+                    "mensaje": "Especialidad inválida o no disponible."
+                })
+                response.status_code = 403
+                return response            
+
+            especialidad_sesion = request.session.get(f"especialidad_seleccionada_id_{paciente_id}")
+            if not especialidad_sesion or especialidad_sesion != especialidad_form.id:
+                response = render(request, "403.html", {
+                    "mensaje": "La especialidad no coincide con la seleccionada inicialmente."
+                })
+                response.status_code = 403
+                return response                  
+
+            # Validar horario
+            horario_sesion = request.session.get(f"horario_seleccionado_{paciente_id}")
+            if not horario_sesion or horario_turno_form != horario_sesion:
+                response = render(request, "403.html", {
+                    "mensaje": "El horario no coincide con el seleccionado inicialmente."
+                })
+                response.status_code = 403
+                return response             
+
+            # Validar profesional y su jornada
+            try:
+                profesional = UsuarioLugarTrabajoAsignado.objects.select_related("jornada", "usuario", "lugar").filter(usuario_id=profesional_form_id).first()
+            except UsuarioLugarTrabajoAsignado.DoesNotExist:
+                response = render(request, "403.html", {
+                    "mensaje": "Profesional inválido o no encontrado."
+                })
+                response.status_code = 403
+                return response               
+            
+
+            if not UsuarioRolProfesionalAsignado.objects.filter(usuario=profesional.usuario, rol_profesional__especialidad=especialidad_form).exists():
+                response = render(request, "403.html", {
+                    "mensaje": "El profesional no pertenece a la especialidad seleccionada."
+                })
+                response.status_code = 403
+                return response               
+
+            if profesional.jornada.turno != horario_turno_form:
+                response = render(request, "403.html", {
+                    "mensaje": "El horario no coincide con la jornada del profesional."
+                })
+                response.status_code = 403
+                return response             
+
+            # Validar fecha disponible
+            disponibilidad = obtener_disponibilidad(profesional.usuario.id, horario_turno_form)
+            fechas_validas = [dia["fecha"] for dia in disponibilidad]
+            if fecha_turno_form not in fechas_validas:
+                response = render(request, "403.html", {
+                    "mensaje": "Fecha de turno no válida para este profesional."
+                })
+                response.status_code = 403
+                return response               
+
+            if form.is_valid():
+                turno = form.save()
+
+                request.session.pop(f"especialidad_seleccionada_id_{paciente_id}", None)
+                request.session.pop(f"horario_seleccionado_{paciente_id}", None)
+
+                return redirect(reverse("turnoConfirmado", kwargs={"turno_id": turno.id}))
+            else:
+                messages.error(request, "Ha ocurrido un error al guardar el turno. Intentelo de nuevo")
     
     return render(request, "turnos/sacarTurno.html", {"especialidades": especialidades, "menor":menor,"parentesco":parentesco,"horariosDeConsultas":horariosDeConsultas})
 
@@ -263,6 +393,7 @@ def obtener_disponibilidad(profesional_id, horario):
 
     return dias_serializados
 
+
 def obtener_dias_disponibles_servicio():
     hoy = datetime.date.today()
     dias_disponibles = []
@@ -276,35 +407,6 @@ def obtener_dias_disponibles_servicio():
 
     return dias_disponibles
 
-@paciente_required
-@login_required
-def confirmar_turno(request):
-    if request.method == "POST":
-        paciente_id = request.POST.get("paciente_id")
-        especialidad_id = request.POST.get("especialidad_id")
-        profesional_id = request.POST.get("profesional_id")
-        horario_seleccionado = request.POST.get("horario_seleccionado")
-        fecha_seleccionada = request.POST.get("fecha_seleccionada")
-        motivo = request.POST.get("motivo")
-        
-        fecha_turno = datetime.datetime.strptime(fecha_seleccionada, "%Y-%m-%d").date()
-        
-        # Crear el nuevo turno
-        try:
-            nuevo_turno = Turno(
-                paciente_id=paciente_id,
-                especialidad_id=especialidad_id,
-                profesional_id=profesional_id,
-                horario_turno=horario_seleccionado,
-                fecha_turno=fecha_turno,
-                motivo=motivo,
-                asistio=False  
-            )
-            nuevo_turno.save()
-            print("Turno confirmado exitosamente.")
-            return redirect(reverse("turnoConfirmado", kwargs={"turno_id": nuevo_turno.id}))  # Redirigir a la vista de confirmación pasandole el id del turno recien creado
-        except Exception as e:
-            print(f"Error al guardar el turno: {e}")
 
 @paciente_required
 @login_required
@@ -362,7 +464,6 @@ def reprogramarTurno(request, turno_id):
         else:
             return JsonResponse({"error": "ID no proporcionado"}, status=400)
         
-    # Si es POST, procesar la reprogramación
     if request.method == "POST":
         turno = get_object_or_404(Turno, id=turno_id)
         
@@ -372,20 +473,26 @@ def reprogramarTurno(request, turno_id):
         
         hoy = timezone.now()
         fecha_seleccionada = request.POST.get("fecha_seleccionada")   
-        fecha_turno = datetime.datetime.strptime(fecha_seleccionada, "%Y-%m-%d").date()
-        turno_reprogramado = Turno.objects.get(id=turno_id)
+        
+        # Validar fecha disponible
+        disponibilidad = obtener_disponibilidad(turno.profesional.id, turno.horario_turno)
+        fechas_validas = [dia["fecha"] for dia in disponibilidad]
+        if fecha_seleccionada not in fechas_validas:
+            response = render(request, "403.html", {
+                "mensaje": "Fecha de turno no válida para este profesional."
+            })
+            response.status_code = 403
+            return response           
         
         try:
-            turno_reprogramado.fecha_creacion = hoy
-            turno_reprogramado.fecha_turno = fecha_turno
-            turno_reprogramado.save()
-            print("Turno reprogramado exitosamente.")
-            return redirect(reverse("turnoConfirmado", kwargs={"turno_id": turno_reprogramado.id}))  # Redirigir a la vista de confirmación pasandole el id del turno recien reprogramado
+            turno.fecha_creacion = hoy
+            turno.fecha_turno = fecha_seleccionada
+            turno.save()
+            return redirect(reverse("turnoConfirmado", kwargs={"turno_id": turno.id})) 
         except Exception as e:
             print(f"Error al reprogramar el turno: {e}")
     
     return HttpResponseForbidden(render(request, "403.html"))
-
 
 
 @paciente_required
@@ -441,7 +548,6 @@ def reprogramarTurnoEstudio(request, turno_id):
         else:
             return JsonResponse({"error": "ID no proporcionado"}, status=400)
         
-    # Si es POST, procesar la reprogramación
     if request.method == "POST":
         turno = get_object_or_404(TurnoEstudio, id=turno_id)
         

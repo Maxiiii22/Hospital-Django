@@ -61,6 +61,7 @@ function abrirDetalle(btn) {
 
 async function obtenerDisponibilidadLugar(){
     const id_lugar = document.getElementById("id_lugar").value;
+    const usuario_id = document.getElementById("identificadorUsuario").value;
     const container = document.querySelector("#seccion-lugarTrabajo");
 
     if (id_lugar === "") {
@@ -79,7 +80,7 @@ async function obtenerDisponibilidadLugar(){
         return; // No seguimos al fetch si el valor es vacío
     }
     try {
-        const response = await fetch(`/personal/get-lugarTrabajoDisponibilidad/?id=${id_lugar}`, {
+        const response = await fetch(`/personal/get-lugarTrabajoDisponibilidad/?id=${id_lugar}&usuario_id=${usuario_id}`, {
             headers: {
                 "X-Requested-With": "XMLHttpRequest"
             }
@@ -88,6 +89,7 @@ async function obtenerDisponibilidadLugar(){
         if (!response.ok) throw new Error("Error al obtener datos");
 
         const data = await response.json();
+        console.log(data)
         const disponibilidad = data.disponibilidad;
 
         const container = document.querySelector("#seccion-lugarTrabajo");
@@ -97,23 +99,30 @@ async function obtenerDisponibilidadLugar(){
                 const jornadas = disponibilidad[jornadaId];
     
                 jornadas.forEach(jornada => {
-                const checkbox = container.querySelector(`input[type="checkbox"][value="${jornada.id}"]`);
-                if (checkbox) {
-                    const label = checkbox.closest("label");
-                    if (label) {
-                    const originalText = label.getAttribute('data-original-text') || label.innerText.trim();
-                    label.setAttribute('data-original-text', originalText);
-    
-                    // Limpiar el contenido y restaurar
-                    label.innerHTML = '';
-                    label.appendChild(checkbox);
-                    label.append(` ${originalText} - ${jornada.estado} (${jornada.cantidad}/${jornada.maxCantidad})`);
+                    const checkbox = container.querySelector(`input[type="checkbox"][value="${jornada.id}"]`);
+                    if (checkbox) {
+                        const label = checkbox.closest("label");
+                        if (label) {
+                            const originalText = label.getAttribute('data-original-text') || label.innerText.trim();
+                            label.setAttribute('data-original-text', originalText);
+                
+                            // Limpiar el contenido y restaurar
+                            checkbox.disabled = false;
+                            checkbox.style.cursor = "pointer";
+                            label.innerHTML = '';
+                            label.appendChild(checkbox);
+                            label.append(` ${originalText} - ${jornada.estado} (${jornada.cantidad}/${jornada.maxCantidad})${jornada.Disponible != null ? ' - ' + jornada.Disponible : ''}`);
+
+                            if (jornada.Disponible != null || jornada.cantidad == jornada.maxCantidad ){
+                                checkbox.disabled = true;
+                                checkbox.style.cursor = "not-allowed"
+                                checkbox.checked = false
+                            }
+                        }
                     }
-                }
                 });
             }
         }
-
     } 
     catch (err) {
         alert("Error al cargar los datos");
@@ -362,7 +371,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("id_nombre").value = data.nombre_lugar;
                     document.getElementById("id_tipo").value = data.tipo_lugar;
                     document.getElementById("id_piso").value = data.piso_lugar;
-                    document.getElementById("id_codigo").value = data.codigo_lugar;
+                    document.getElementById("id_sala").value = data.sala_lugar;
+                    document.getElementById("id_abreviacion").value = data.abreviacion_lugar;
                     document.getElementById("id_capacidad").value = data.capacidad_lugar;
                     document.getElementById("id_departamento").value = data.departamento_lugar;
                     document.getElementById("id_descripcion").value = data.descripcion_lugar;
@@ -788,7 +798,8 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("id_nombre").value = "";  
             document.getElementById("id_tipo").value = "";
             document.getElementById("id_piso").value = "";
-            document.getElementById("id_codigo").value = "";
+            document.getElementById("id_sala").value = "";
+            document.getElementById("id_abreviacion").value = "";
             document.getElementById("id_capacidad").value = "";
             document.getElementById("id_departamento").value = "";
             document.getElementById("id_descripcion").value = "";
@@ -1150,6 +1161,7 @@ async function modalEditarLugarTrabajo(id) {
         document.getElementById("id_instancia").value = data.id_instancia;
         document.getElementById("id_lugar_edit").value = data.id_lugar;
         document.getElementById("id_jornada_edit").value = data.id_jornada;
+        document.getElementById("id_rol_edit").value = data.id_rolProfesionalAsignado;
 
         modal.classList.add("show");
         document.body.style.overflow = "hidden"; 

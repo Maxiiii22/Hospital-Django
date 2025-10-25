@@ -264,6 +264,7 @@ class FormularioPersona(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Si estamos editando (es decir, hay una persona_instance), no queremos que la contraseña sea obligatoria
         if persona_instance:
+            self.fields['login_id'].widget.attrs['readonly'] = True
             self.fields['password'].required = False  
 
     def clean_password(self):
@@ -275,17 +276,21 @@ class FormularioPersona(forms.ModelForm):
     def clean_login_id(self):
         login_id = self.cleaned_data.get('login_id')
         
+        if self.instance.pk and login_id != self.instance.login_id:  # Si estamos editando, no permitir cambiar login_id
+            raise ValidationError("No está permitido modificar el Número de Legajo.")
+        
         if not login_id.isdigit():  # Validar que solo sean numeros
             raise ValidationError("El N° Legajo solo puede contener números.")
         
-        persona = Persona.objects.filter(login_id=login_id)
 
         # Si estamos editando una instancia, la excluimos del filtro
+        persona = Persona.objects.filter(login_id=login_id)
         if self.instance.pk:
             persona = persona.exclude(pk=self.instance.pk)
 
         if persona.exists():
             raise ValidationError("Ya existe un usuario registrado con este identificador. Por favor, elige otro.")
+        
         return login_id
 
 class FormularioUsuario(forms.ModelForm):

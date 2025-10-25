@@ -11,7 +11,7 @@
 
 {% block contenido %}
     <div class="container-tabla-medico-global">
-        <h1>Historial de consultas para {{especialidad_actual_nombre}}</h1>
+        <h1>Historial de consultas {% if especialidad_actual_nombre %}de {{especialidad_actual_nombre}}{% endif %}</h1>
         <div class="box-tabla-consultas-medico">
             <table>
                 {% if consultas %}
@@ -54,7 +54,7 @@
                     </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="7" class="empty-message">No se realizaron consultas hasta el momento.</td>
+                            <td colspan="7" class="empty-message">No se realizaron consultas de hasta el momento.</td>
                         </tr>
                     {% endfor %}
                 </tbody>

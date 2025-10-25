@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sacar turno para consulta medica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />  <!-- Toastr CSS: Estilos para mostrar notificaciones tipo toast -->
     <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css" />
     <link rel="stylesheet" href="{% static 'estilos/styles_pacientes.css' %}">
 </head>
@@ -16,9 +17,10 @@
             {% else %}
                 <a class="back-link" href="{% url 'seleccionarTurno' user.paciente.id %}"><i class="hgi hgi-stroke hgi-arrow-left-02"></i> Volver atrás</a>
             {% endif %}
-            <h2>Sacar turno {% if parentesco %}{{parentesco}}{% endif %}</h2>        
+            <h2>Sacar turno {% if parentesco %}{{parentesco}}{% endif %}</h2>     
             <form method="POST"> 
                 {% csrf_token %}
+                <input type="hidden" name="tipo_form" value="formSeleccionEspecialidad">
                 <div>
                     <label for="especialidad">Selecciona una especialidad:</label>
                     <select id="especialidad" name="especialidad">
@@ -43,35 +45,36 @@
         </div>
 
         {% if estaBuscando %}
-            {% if profesionales %}
-                <!-- Mostrar los profesionales como cards -->
+            {% if formularios %}
                 <div class="container-profesionales">
                     <h2>Profesionales disponibles en {{ especialidadSeleccionada.nombre_especialidad }}</h2>
                     <div class="box-cards-profesionales">
-                        {% for profesional in profesionales %}
+                        {% for item in formularios %}
                         <div class="card-profesional">
-                            <h2>{{ profesional.persona.get_full_name }} - DNI: {{ profesional.persona.dni }}</h2>
-                            <p><strong>N° Matricula:</strong> {{ profesional.numero_matricula }}</p>
-                            <p><strong>Sexo:</strong> {{ profesional.persona.sexo }}</p>
-                            <p><strong>Horario:</strong> {{horarioSeleccionado.get_turno_display}}</p>    
-                            <form action="{% url 'confirmarTurno' %}" method="POST">    
-                                {% csrf_token %}        
-                                <!-- Calendario personalizado para cada profesional-->
-                                <input type="hidden" name="paciente_id" value="{{paciente.id}}">
-                                <input type="hidden" name="especialidad_id" value="{{especialidadSeleccionada.id}}">
-                                <input type="hidden" name="profesional_id" value="{{profesional.id}}">
-                                <input type="hidden" name="horario_seleccionado" value="{{horarioSeleccionado.turno}}">
-                                <input type="hidden" name="fecha_seleccionada" id="fecha_seleccionada_{{profesional.id}}" value="">
+                            <h2>{{ item.profesional.usuario.persona.get_full_name }} - DNI: {{ item.profesional.usuario.persona.dni }}</h2>
+                            <p><strong>N° Matricula:</strong> {{ item.profesional.usuario.numero_matricula }}</p>
+                            <p><strong>Sexo:</strong> {{ item.profesional.usuario.persona.sexo }}</p>
+                            <p><strong>Horario:</strong> {{ item.profesional.jornada.get_turno_display }}</p>    
+                            <p><strong>Atención en:</strong> {{item.profesional.lugar.nombre}} <br> <strong>(Piso: {{item.profesional.lugar.piso}} - N° Sala: {{item.profesional.lugar.sala}})</strong></p>    
+                            <form action="" method="POST">    
+                                {% csrf_token %}   
+                                <input type="hidden" name="tipo_form" value="formSeleccionProfesional">
+                                {{ item.form.lugar }}
+                                <input type="hidden" name="{{ item.form.fecha_turno.name }}" id="fecha_seleccionada_{{ item.profesional.usuario.id }}" value=""> 
+                                {{ item.form.horario_turno }}
+                                {{ item.form.especialidad }}
+                                {{ item.form.paciente }}
+                                {{ item.form.profesional }}
                                 <div class="turnos">
                                     <h3>Días disponibles:</h3>
                                     <div class="nav-buttons">
-                                        <button type="button" class="prevMonth_{{ profesional.id }}">Mes Anterior</button>
-                                        <button type="button" class="nextMonth_{{ profesional.id }}">Mes Siguiente</button>
+                                        <button type="button" class="prevMonth_{{ item.profesional.usuario.id }}">Mes Anterior</button>
+                                        <button type="button" class="nextMonth_{{ item.profesional.usuario.id }}">Mes Siguiente</button>
                                     </div>
-                                    <div class="calendar" id="calendar_{{ profesional.id }}"></div>
+                                    <div class="calendar" id="calendar_{{ item.profesional.usuario.id }}"></div>
                                 </div>
-                                <textarea class="textarea-motivo-turno" name="motivo" id="" placeholder="Motivo del turno"></textarea>
-                                <button type="submit" class="btn-global">Confirmar turno</button>
+                                {{ item.form.motivo }}
+                                <button type="submit" disabled class="btn-global btn-form-seleccionar-profesional" id="btn-form-profesional-id_{{item.profesional.usuario.id}}">Confirmar turno</button>
                             </form>
                         </div>
                     {% endfor %}
@@ -86,117 +89,21 @@
         {% endif %}
     </main>
     
+    <script src="{% static 'js/modals.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>  <!-- jQuery (requerido por Toastr.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>  <!-- Toastr JS: Biblioteca para mostrar notificaciones tipo toast -->
 
-
-    <script>
-        const diasDisponiblesProfesional = JSON.parse(document.getElementById('diasDisponibles').textContent);
-    
-        // Almacenar las fechas disponibles por profesional
-        const fechasDisponiblesPorProfesional = {};
-        diasDisponiblesProfesional.forEach(profesional => {
-            fechasDisponiblesPorProfesional[profesional.profesional] = profesional.disponibilidad.map(dia => dia.fecha);
-        });
-    
-        const nombreMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
-                           "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    
-        const currentDate = new Date();
-        const monthOffsetPorProfesional = {};  // Offset por profesional
-    
-        function crearCalendario(idProfesional) {
-            if (!(idProfesional in monthOffsetPorProfesional)) {
-                monthOffsetPorProfesional[idProfesional] = 0;
-            }
-            let offset = monthOffsetPorProfesional[idProfesional];
-    
-            const calendar = document.getElementById('calendar_' + idProfesional);
-            const prevMonthButton = document.querySelector('.prevMonth_' + idProfesional);
-            const nextMonthButton = document.querySelector('.nextMonth_' + idProfesional);           
-            calendar.innerHTML = '';  // Limpiar el calendario
-    
-            const fechaInicio = new Date(currentDate);
-            fechaInicio.setMonth(currentDate.getMonth() + offset);
-            fechaInicio.setDate(1);
-    
-            const fechaLimite = new Date(fechaInicio);
-            fechaLimite.setMonth(fechaInicio.getMonth() + 1);
-            fechaLimite.setDate(0);
-    
-            const mesActual = nombreMes[fechaInicio.getMonth()];
-            const header = document.createElement('div');
-            header.classList.add('header');
-            header.textContent = `${mesActual} ${fechaInicio.getFullYear()}`;
-            calendar.appendChild(header);
-    
-            const diasDeLaSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            for (let i = 0; i < 7; i++) {
-                const diaSemana = document.createElement('div');
-                diaSemana.textContent = diasDeLaSemana[i];
-                diaSemana.style.fontWeight = 'bold';
-                calendar.appendChild(diaSemana);
-            }
-    
-            const diaDeLaSemanaInicio = fechaInicio.getDay();
-            let dia = 1;
-    
-            for (let i = 0; i < diaDeLaSemanaInicio; i++) {
-                const diaVacio = document.createElement('button');
-                diaVacio.disabled = true;
-                calendar.appendChild(diaVacio);
-            }
-    
-            while (dia <= fechaLimite.getDate()) {
-                const botonDia = document.createElement('button');
-                botonDia.type = "button";
-                botonDia.textContent = dia;
-    
-                const fechaDia = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), dia);
-                const fechaFormateada = fechaDia.toISOString().split('T')[0];
-    
-                if (fechasDisponiblesPorProfesional[idProfesional].includes(fechaFormateada)) {
-                    botonDia.classList.add('valid');
-                    botonDia.addEventListener('click', function() {
-                        document.querySelectorAll(`#calendar_${idProfesional} .seleccionado`).forEach(btn => btn.classList.remove('seleccionado'));
-                        const inputFecha = document.getElementById("fecha_seleccionada_" + idProfesional);
-                        inputFecha.value = fechaFormateada;
-                        botonDia.classList.add('seleccionado');
-                        alert(`Fecha seleccionada: ${fechaFormateada} para el profesional ${idProfesional}`);
-                    });
-                } else {
-                    botonDia.disabled = true;
-                    botonDia.classList.add('no-seleccionable');
-                }
-    
-                calendar.appendChild(botonDia);
-                dia++;
-            }
-    
-            const diaDeLaSemanaFin = fechaLimite.getDay();
-            if (diaDeLaSemanaFin !== 6) {
-                for (let i = diaDeLaSemanaFin + 1; i < 7; i++) {
-                    const diaVacio = document.createElement('button');
-                    diaVacio.disabled = true;
-                    calendar.appendChild(diaVacio);
-                }
-            }
-    
-            // Actualizar botones de navegación
-            prevMonthButton.onclick = function () {
-                monthOffsetPorProfesional[idProfesional]--;
-                crearCalendario(idProfesional);
-            };
-    
-            nextMonthButton.onclick = function () {
-                monthOffsetPorProfesional[idProfesional]++;
-                crearCalendario(idProfesional);
-            };
-        }
-    
-        // Inicializar los calendarios
-        diasDisponiblesProfesional.forEach(profesional => {
-            crearCalendario(profesional.profesional);
-        });
-    </script>
-    
+    {% if messages %}
+        <script>
+            {% for message in messages %}
+                toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "timeOut": "5000"
+                };
+                toastr["{{ message.tags|default:'info' }}"]("{{ message|escapejs }}");
+            {% endfor %}
+        </script>
+    {% endif %}
 </body>
 </html>

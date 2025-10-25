@@ -1,9 +1,10 @@
 from django import forms
 from django.forms import modelformset_factory # permite trabajar con múltiples formularios del mismo tipo en una sola vista.
-from .models import Especialidades,Departamento,Consultas, OrdenEstudio, Medicaciones,EstudiosDiagnosticos,ResultadoEstudio,ResultadoImagen,UsuarioLugarTrabajoAsignado,UsuarioRolProfesionalAsignado,Lugar,Jorna_laboral,ServicioDiagnostico,PlantillaEstudio
+from .models import Especialidades,Departamento,Consultas, OrdenEstudio, Medicaciones,EstudiosDiagnosticos,ResultadoEstudio,ResultadoImagen,UsuarioLugarTrabajoAsignado,UsuarioRolProfesionalAsignado,Lugar,Jorna_laboral,ServicioDiagnostico,PlantillaEstudio,Turno
 from controlUsuario.models import TiposUsuarios,RolesProfesionales
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+import datetime
 
 
 
@@ -73,13 +74,14 @@ class FormLugar(forms.ModelForm):
     class Meta:
         model = Lugar 
         fields = [ # Acá ingresamos los campos que queremos que se muestren en el formulario.
-            'nombre', 'tipo', 'piso',"codigo","capacidad","departamento","descripcion","es_critico","activo"
+            'nombre', 'tipo', 'piso',"sala","abreviacion","capacidad","departamento","descripcion","es_critico","activo"
         ]
         widgets = {
             "nombre" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el nombre del lugar"}),
             "tipo" : forms.Select(attrs={'class': "campos-modal"}),
             "piso" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el piso en el que esta ubicado el lugar"}),
-            "codigo" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el codigo del lugar"}),
+            "sala" : forms.NumberInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el N° de sala"}),
+            "abreviacion" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese la abreviación del nombre del lugar"}),
             "capacidad" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese la capacidad del lugar"}),
             "departamento" : forms.Select(attrs={'class': "campos-modal"}),
             "descripcion" : forms.Textarea(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese una descripcion del lugar"}),
@@ -147,6 +149,11 @@ class FormRolesProfesionales(forms.ModelForm):
 
 
 class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelForm a Form Porque ModelForm espera que cada campo del modelo tenga correspondencia exacta en el formulario y en este caso eso no se cumple ya que vamos a manejar "jornada" como si fuera una relacion ManyToMany pese a que sea FK.
+    rolProfesionalAsignado = forms.ModelChoiceField(
+        queryset=UsuarioRolProfesionalAsignado.objects.all(),
+        widget=forms.Select(attrs={"class": "campos-modal"}),
+        label="Rol profesional"
+    )
     lugar = forms.ModelChoiceField(
         queryset=Lugar.objects.all(),
         widget=forms.Select(attrs={"class": "campos-modal"}),
@@ -173,16 +180,17 @@ class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelF
         elif tipo_usuario == 2:  # Admin
             pass
         elif tipo_usuario == 3: # Medicos
-            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="cons",activo=True) #Consultorios
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo__in=["cons","qui","proc"],activo=True) #Los médicos trabajan en consultorios, quirófanos y pueden realizar procedimientos ambulatorios no quirúrgicos
         elif tipo_usuario == 4: # Enfermeros
-            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="hab",activo=True)  # Habitaciones
-        elif tipo_usuario == 5: # Apoyo en Diagnóstico y Tratamiento
-            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="lab",activo=True)  # Laboratorios 
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo__in=["hab","unidad_atenc"],activo=True)  # Los enfermeros se desempeñan principalmente en internación y unidades de atención
+        elif tipo_usuario == 5: # Apoyo en Diagnóstico y Tratamiento (Radiologos,ecografista,tecnico en laboratorio , etc  )
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo__in=["lab", "img","diag_func","unidad_atenc","proc"], activo=True)  # Laboratorios 
         elif tipo_usuario == 6: # Cargador de resultados
-            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="oficina_resultados",activo=True)  # Oficinas de resultados
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="area_apoyo",activo=True)  
 
-        
-        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo}) - Departamento: {obj.departamento}"
+        self.fields['rolProfesionalAsignado'].queryset = UsuarioRolProfesionalAsignado.objects.filter(usuario=self.usuario) 
+        self.fields['rolProfesionalAsignado'].label_from_instance = lambda obj: f"{obj.rol_profesional}"
+        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.abreviacion}) - Departamento: {obj.departamento}"
         self.fields['jornada'].label_from_instance = lambda obj: f"{obj.get_dia_display()} - {obj.get_turno_display()}"
         
     def clean(self):
@@ -224,6 +232,7 @@ class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelF
     def save(self):
         lugar = self.cleaned_data['lugar']
         jornadas = self.cleaned_data['jornada']
+        rolProfesional = self.cleaned_data.get('rolProfesionalAsignado')
 
         registros_creados = []
         jornadas_omitidas = []
@@ -237,6 +246,7 @@ class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelF
             if not existe:
                 obj, creado = UsuarioLugarTrabajoAsignado.objects.get_or_create(
                     usuario=self.usuario,
+                    rolProfesionalAsignado =rolProfesional,
                     lugar=lugar,
                     jornada=jornada
                 )
@@ -250,10 +260,11 @@ class FormularioLugarTrabajo(forms.Form): # Cambiar el formulario base de ModelF
 class FormularioEditarLugarTrabajo(forms.ModelForm):
     class Meta:
         model = UsuarioLugarTrabajoAsignado
-        fields = ['lugar', 'jornada']
+        fields = ['lugar', 'jornada','rolProfesionalAsignado']
         widgets = {
+            "rolProfesionalAsignado": forms.Select(attrs={"class": "campos-modal", "id":"id_rol_edit"}),
             "lugar": forms.Select(attrs={"class": "campos-modal", "id":"id_lugar_edit"}),
-            "jornada": forms.Select(attrs={"class": "campos-modal", "id":"id_jornada_edit"}),
+            "jornada": forms.Select(attrs={"class": "campos-modal", "id":"id_jornada_edit"})
         }
 
     def __init__(self, *args, **kwargs):
@@ -270,16 +281,17 @@ class FormularioEditarLugarTrabajo(forms.ModelForm):
         elif tipo_usuario == 2:  # Admin
             pass
         elif tipo_usuario == 3: # Medicos
-            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="cons") #Consultorios
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo__in=["cons","qui","proc"],activo=True) #Los médicos trabajan en consultorios, quirófanos y pueden realizar procedimientos ambulatorios no quirúrgicos
         elif tipo_usuario == 4: # Enfermeros
-            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="hab")  # Habitaciones
-        elif tipo_usuario == 5: # Apoyo en Diagnóstico y Tratamiento
-            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="lab")  # Laboratorios 
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo__in=["hab","unidad_atenc"],activo=True)  # Los enfermeros se desempeñan principalmente en internación y unidades de atención
+        elif tipo_usuario == 5: # Apoyo en Diagnóstico y Tratamiento (Radiologos,ecografista,tecnico en laboratorio , etc  )
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo__in=["lab", "img","diag_func","unidad_atenc","proc"], activo=True)  # Laboratorios 
         elif tipo_usuario == 6: # Cargador de resultados
-            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="oficina_resultados")  # Oficinas de resultados
+            self.fields['lugar'].queryset = Lugar.objects.filter(tipo="area_apoyo",activo=True)  
 
-        
-        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.codigo}) - Departamento: {obj.departamento}"
+        self.fields['rolProfesionalAsignado'].queryset = UsuarioRolProfesionalAsignado.objects.filter(usuario=self.usuario) 
+        self.fields['rolProfesionalAsignado'].label_from_instance = lambda obj: f"{obj.rol_profesional}"
+        self.fields['lugar'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.abreviacion}) - Departamento: {obj.departamento}"
         self.fields['jornada'].label_from_instance = lambda obj: f"{obj.get_dia_display()} - {obj.get_turno_display()}"
 
     def clean(self):
@@ -296,12 +308,11 @@ class FormularioEditarLugarTrabajo(forms.ModelForm):
                 usuario=self.usuario,
                 jornada=jornada
             ).exclude(pk=self.instance.pk).exists()
-
             if conflicto:
                 self.add_error("jornada", "Este usuario ya tiene asignada esa jornada en otro lugar.")
 
         # Validación de capacidad del lugar
-        asignaciones = UsuarioLugarTrabajoAsignado.objects.filter(lugar=lugar)
+        asignaciones = UsuarioLugarTrabajoAsignado.objects.filter(lugar=lugar,jornada=jornada)
         if self.instance.pk:
             asignaciones = asignaciones.exclude(pk=self.instance.pk)
 
@@ -503,3 +514,39 @@ class ResultadoImagenForm(forms.ModelForm):
 
 
 
+class FormSacarTurno(forms.ModelForm):
+    class Meta:
+        model = Turno
+        fields = ['fecha_turno', 'horario_turno', 'motivo', 'lugar','especialidad','paciente','profesional']
+        widgets = {
+            'motivo': forms.Textarea(attrs={'placeholder': 'Motivo del turno...', "class":"textarea-motivo-turno","cols":"0","rows":"0"}),
+            'especialidad': forms.HiddenInput(),
+            'profesional': forms.HiddenInput(),
+            'paciente': forms.HiddenInput(),
+            'fecha_turno': forms.HiddenInput(),
+            'horario_turno': forms.HiddenInput(),
+            'lugar': forms.HiddenInput()
+        }
+    
+    def clean_fecha_turno(self):
+        fecha = self.cleaned_data.get('fecha_turno')
+        if fecha <= datetime.date.today():
+            raise forms.ValidationError("No se puede seleccionar una fecha pasada.")
+        return fecha    
+    
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     medicamento = cleaned_data.get('medicamento')
+    #     dosis = cleaned_data.get('dosis')
+    #     frecuencia = cleaned_data.get('frecuencia')
+    #     tiempo_uso = cleaned_data.get('tiempo_uso')
+
+    #     if medicamento or dosis or frecuencia or tiempo_uso:
+    #         if not medicamento:
+    #             self.add_error('medicamento', 'Este campo es obligatorio si se completan otros.')
+    #         if not dosis:
+    #             self.add_error('dosis', 'Este campo es obligatorio si se completan otros.')
+    #         if not frecuencia:
+    #             self.add_error('frecuencia', 'Este campo es obligatorio si se completan otros.')
+    #         if not tiempo_uso:
+    #             self.add_error('tiempo_uso', 'Este campo es obligatorio si se completan otros.')
