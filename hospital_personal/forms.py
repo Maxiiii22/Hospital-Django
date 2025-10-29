@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import modelformset_factory # permite trabajar con múltiples formularios del mismo tipo en una sola vista.
-from .models import Especialidades,Departamento,Consultas, OrdenEstudio, Medicaciones,EstudiosDiagnosticos,ResultadoEstudio,ResultadoImagen,UsuarioLugarTrabajoAsignado,UsuarioRolProfesionalAsignado,Lugar,Jorna_laboral,ServicioDiagnostico,PlantillaEstudio,Turno
+from .models import Especialidades,Departamento,Consultas, OrdenEstudio, Medicaciones,EstudiosDiagnosticos,ResultadoEstudio,ResultadoImagen,UsuarioLugarTrabajoAsignado,UsuarioRolProfesionalAsignado,Lugar,Jorna_laboral,ServicioDiagnostico,PlantillaEstudio,Turno,TurnoEstudio
 from controlUsuario.models import TiposUsuarios,RolesProfesionales
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -12,12 +12,13 @@ class FormEspecialidades(forms.ModelForm):
     class Meta:
         model = Especialidades  # Este formulario esta basado sobre el modelo "Especialidades"
         fields = [ # Acá ingresamos los campos que queremos que se muestren en el formulario.
-            'nombre_especialidad', 'descripcion','permite_turno', 'departamento'
+            'nombre_especialidad', 'descripcion','permite_turno',"capacidad_diaria",'departamento'
         ]
         widgets = {
             "nombre_especialidad" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el nombre de la especialidad"}),
             "descripcion" : forms.Textarea(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese una descripcion"}),
             "permite_turno" : forms.CheckboxInput(attrs={'class': "campos-modal"}),
+            "capacidad_diaria" : forms.NumberInput(attrs={'class': "campos-modal"}),
             "departamento" : forms.Select(attrs={'class': "campos-modal"})
         }
 
@@ -37,12 +38,13 @@ class FormServiciosDiagnostico(forms.ModelForm):
     class Meta:
         model = ServicioDiagnostico 
         fields = [ # Acá ingresamos los campos que queremos que se muestren en el formulario.
-            'nombre_servicio', 'descripcion', 'departamento',"lugar"
+            'nombre_servicio', 'descripcion', 'departamento',"capacidad_diaria","lugar"
         ]
         widgets = {
             "nombre_servicio" : forms.TextInput(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese el nombre del servicio de diagnostico"}),
             "descripcion" : forms.Textarea(attrs={'class': "campos-modal",'autofocus':"", 'placeholder':"Ingrese una descripcion"}),
             "departamento" : forms.Select(attrs={'class': "campos-modal"}),
+            "capacidad_diaria" : forms.NumberInput(attrs={'class': "campos-modal"}),
             "lugar" : forms.CheckboxSelectMultiple(attrs={'class': "box-multipleCheck"})
         }
 
@@ -533,20 +535,21 @@ class FormSacarTurno(forms.ModelForm):
         if fecha <= datetime.date.today():
             raise forms.ValidationError("No se puede seleccionar una fecha pasada.")
         return fecha    
-    
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     medicamento = cleaned_data.get('medicamento')
-    #     dosis = cleaned_data.get('dosis')
-    #     frecuencia = cleaned_data.get('frecuencia')
-    #     tiempo_uso = cleaned_data.get('tiempo_uso')
 
-    #     if medicamento or dosis or frecuencia or tiempo_uso:
-    #         if not medicamento:
-    #             self.add_error('medicamento', 'Este campo es obligatorio si se completan otros.')
-    #         if not dosis:
-    #             self.add_error('dosis', 'Este campo es obligatorio si se completan otros.')
-    #         if not frecuencia:
-    #             self.add_error('frecuencia', 'Este campo es obligatorio si se completan otros.')
-    #         if not tiempo_uso:
-    #             self.add_error('tiempo_uso', 'Este campo es obligatorio si se completan otros.')
+class FormSacarTurnoEstudio(forms.ModelForm):
+    class Meta:
+        model = TurnoEstudio
+        fields = ['fecha_turno', 'horario_turno', 'lugar','orden','servicio_diagnostico']
+        widgets = {
+            'orden': forms.HiddenInput(),
+            'servicio_diagnostico': forms.HiddenInput(),
+            'fecha_turno': forms.HiddenInput(attrs={"id": "fecha_seleccionada"}),
+            'horario_turno': forms.HiddenInput(),
+            'lugar': forms.HiddenInput()
+        }
+    
+    def clean_fecha_turno(self):
+        fecha = self.cleaned_data.get('fecha_turno')
+        if fecha <= datetime.date.today():
+            raise forms.ValidationError("No se puede seleccionar una fecha pasada.")
+        return fecha    

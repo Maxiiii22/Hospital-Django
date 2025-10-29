@@ -29,6 +29,15 @@ body{
     color: #555;
 }
 
+.error-message-main{
+    background-color: red;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    border-radius: 15px;
+    font-weight: bold;
+}
+
 .error-message {
     color: red;
     font-size: 0.9em;
@@ -46,6 +55,7 @@ body{
     cursor: pointer;
     border: none;
     border-radius: 5px;
+    display: inline-block;
 }
 
 .btn-global:hover{
@@ -258,7 +268,9 @@ button:disabled {
     }
 }
 
-.modal-detalles-consulta-item pre {
+
+
+.modal-detalles-consulta-item pre, .div-p {
     background-color: #f4f4f4;
     padding: 10px 15px;
     border-radius: 6px;
@@ -267,6 +279,22 @@ button:disabled {
     font-family: 'Courier New', monospace;
     max-height: 115px;
     overflow-y: auto;
+}
+
+.div-p{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.div-p p{
+    padding: 5px;    
+    display: flex;
+    min-height: 40px;
+    background-color: #ccc;
+    border-radius: 5px;
+    justify-content: space-between;
+    align-items: center;
 }
 
 #modalEstudios{
@@ -758,8 +786,16 @@ form .campos .campo-input{
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    width: clamp(303px, 95%, 350px);
+    width: clamp(303px, 95%, 365px);
     transition: border-color 0.2s ease;
+}
+
+.modal-reprogramar-turno .seccion-reprogramar-turnoMedico p ,.modal-reprogramar-turno .seccion-reprogramar-turnoEstudio p  {
+    margin: 5px 0;
+}
+
+.modal-reprogramar-turno h3,.modal-reprogramar-turno p{
+    align-self: flex-start;
 }
 
 .modal-reprogramar-turno #closeEditModal{
@@ -768,6 +804,10 @@ form .campos .campo-input{
 
 .modal-reprogramar-turno h2{
     margin-bottom: 5px;
+}
+
+.modal-reprogramar-turno form{
+    margin-top: 5px;
 }
 
 .modal-reprogramar-turno .nav-buttons button{

@@ -35,10 +35,7 @@
         <h2 id="modal-title">Sacar turno</h2>
         <form id="editForm" method="POST">
             {% csrf_token %}
-            <input type="hidden" name="fecha_seleccionada" id="fecha_seleccionada" value="">
-            <input type="hidden" name="id_orden" id="id_orden" value="">
-            <input type="hidden" name="servicio" id="servicio" value="">
-            <input type="hidden" name="id_lugar" id="lugar" value="">
+            {{form}}
             <p id="orden"></p>
             <p id="estudio"></p>
             <p id="p-servicio"></p>
@@ -50,7 +47,7 @@
                 <button type="button" id="nextMonth" class="nextMonth">Mes Siguiente</button>
             </div>
             <div class="calendar" id="calendar"></div>  
-            <button type="submit" class="btn-global">Confirmar</button>
+            <button type="submit" disabled class="btn-global btn-form-sacar-turnoEstudio">Confirmar</button>
         </form>
         </div>
     </div>

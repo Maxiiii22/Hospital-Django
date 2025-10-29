@@ -46,6 +46,7 @@ function abrirDetalleEstudios(btn) {
     document.getElementById("modalTipoEstudio").textContent = btn.dataset.tipoEstudio;
     document.getElementById("modalMotivo").innerHTML = btn.dataset.motivo;
     document.getElementById("modalIndicaciones").textContent = btn.dataset.indicaciones;
+    document.getElementById("modalEstado").innerHTML = btn.dataset.estado;
 }
 
 function abrirDetalleMedicamento(btn) {
@@ -158,6 +159,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (!response.ok) throw new Error("Error al obtener datos");
         
                     const data = await response.json();
+
+                    document.querySelector(".seccion-reprogramar-turnoEstudio").style.display = "none";
+                    document.querySelector(".seccion-reprogramar-turnoMedico").style.display = "block";
+                    const btnFormReprogramar= document.querySelector(".btn-form-reprogramar");
+                    btnFormReprogramar.disable = true;
+                    document.getElementById("profesional").textContent = data.profesional;
+                    document.getElementById("matricula").innerHTML = `<strong>N° Matricula:</strong> ${data.matricula}`;
+                    document.getElementById("sexo").innerHTML = `<strong>Sexo:</strong> ${data.sexo}`;
+                    document.getElementById("horario").innerHTML = `<strong>Horario:</strong> ${data.horario}`;
+                    document.getElementById("lugar").innerHTML =  `<strong>Atención en:</strong> ${data.lugar}</strong>`;
+                    document.getElementById("fecha_turno").innerHTML =  `<strong>Fecha actual del turno:</strong> ${data.fecha}</strong>`;
                     
                     let currentDate = new Date();
                     let monthOffset = 0;
@@ -233,7 +245,6 @@ document.addEventListener("DOMContentLoaded", function () {
                                     fecha.value = fechaSeleccionada;
                                     botonDia.classList.add('seleccionado');
                                     botonSeleccionado = botonDia;
-                                    const btnFormReprogramar= document.getElementById("btn-form-reprogramar");
                                     btnFormReprogramar.disabled = false;
                                 });
                             } 
@@ -275,8 +286,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
-
-
                     document.getElementById("editForm").action = `/pacientes/turnos/reprogramar/${id_turno}/`;
                     
                 } 
@@ -296,30 +305,143 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (!response.ok) throw new Error("Error al obtener datos");
         
                     const data = await response.json();
-            
-                    // Convertir las fechas disponibles a un array de fechas para fácil comparación
+
+                    document.querySelector(".seccion-reprogramar-turnoMedico").style.display = "none";
+                    document.querySelector(".seccion-reprogramar-turnoEstudio").style.display = "block";
+                    const btnFormReprogramar = document.querySelector(".btn-form-reprogramarEstudio");
+                    btnFormReprogramar.disabled = true;
+                    document.getElementById("fecha_seleccionadaEstudio").value = "";
+                    document.getElementById("orden").innerHTML = `<strong>N° Orden:</strong> ${data.id_orden}`;
+                    document.getElementById("estudio").innerHTML = `<strong>Estudio:</strong> ${data.nombre_estudio}`;
+                    document.getElementById("p-servicio").innerHTML = `<strong>Realizado por:</strong> ${data.nombre_servicio}`;
+
+                    if (data.disponible) {
+                        document.getElementById("id_lugar").value = data.lugar_id;
+                        document.getElementById("p-lugar").innerHTML = `<strong>Lugar:</strong> ${data.lugar_nombre} <br> <strong>(Piso: ${data.lugar_piso} - N° Sala: ${data.lugar_sala})</strong>`;
+                        document.getElementById("horario").innerHTML = `<strong>Horario:</strong> ${data.horario}`;
+                        document.getElementById("p-fecha_turno").innerHTML =  `<strong>Fecha actual del turno:</strong> ${data.fecha}</strong>`;
+                    }
+                    else{
+                        document.getElementById("id_lugar").value = "";
+                        document.getElementById("p-lugar").textContent = data.mensaje;
+                        document.getElementById("p-lugar").classList.add("error-message-main")
+                        document.getElementById("horario").textContent = ""; // limpiar horario
+                    }
+                    
+                    let currentDate = new Date();
+                    let monthOffset = 0;
+                    
                     const fechasDisponibles = data.dias_disponibles.map(d => d.fecha);;
-                            
+                    function crearCalendario(fechas) { // Función para crear el calendario con todos los días del mes
+                    
+                        const nombreMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                    
+                        let botonSeleccionado = null;
+                    
+                    
+                        const calendar = document.getElementById('calendar2');
+                        calendar.innerHTML = '';  // Limpiar el calendario antes de volver a generarlo
+                    
+                        // Fecha de inicio (primer día del mes)
+                        const fechaInicio = new Date(currentDate);
+                        fechaInicio.setMonth(currentDate.getMonth() + monthOffset);
+                        fechaInicio.setDate(1);
+                    
+                        // Fecha límite (último día del mes)
+                        const fechaLimite = new Date(fechaInicio);
+                        fechaLimite.setMonth(fechaInicio.getMonth() + 1);
+                        fechaLimite.setDate(0);
+                    
+                        // Mostrar el nombre del mes actual
+                        const mesActual = nombreMes[fechaInicio.getMonth()];
+                        const header = document.createElement('div');
+                        header.classList.add('header');
+                        header.textContent = `${mesActual} ${fechaInicio.getFullYear()}`;
+                        calendar.appendChild(header);
+                    
+                        // Generar celdas para los días de la semana
+                        const diasDeLaSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                        for (let i = 0; i < 7; i++) {
+                            const diaSemana = document.createElement('div');
+                            diaSemana.textContent = diasDeLaSemana[i];
+                            diaSemana.style.fontWeight = 'bold';
+                            calendar.appendChild(diaSemana);
+                        }
+                    
+                        // Generar los días del mes
+                        const diaDeLaSemanaInicio = fechaInicio.getDay();
+                        let dia = 1;
+                    
+                        for (let i = 0; i < diaDeLaSemanaInicio; i++) {     // Rellenar con días vacíos al principio
+                            const diaVacio = document.createElement('button');
+                            diaVacio.disabled = true;
+                            calendar.appendChild(diaVacio);
+                        }
+                    
+                        while (dia <= fechaLimite.getDate()) {  // Mostrar todos los días del mes
+                            const botonDia = document.createElement('button');
+                            botonDia.type = "button";
+                            botonDia.textContent = dia;
+                    
+                            const fechaDia = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), dia);
+                            const fechaFormateada = fechaDia.toISOString().split('T')[0];  // Obtener la fecha en formato YYYY-MM-DD
+                    
+                            if (fechas.includes(fechaFormateada)) { // Verificar si el día está en la lista de días disponibles
+                                botonDia.classList.add('valid');
+                                botonDia.addEventListener('click', function() {
+                                    if (botonSeleccionado) {
+                                        botonSeleccionado.classList.remove('seleccionado');
+                                    }
+                                    const fecha = document.getElementById("fecha_seleccionadaEstudio");
+                                    const fechaSeleccionada = `${fechaDia.getFullYear()}-${fechaDia.getMonth() + 1}-${fechaDia.getDate()}`;
+                                    fecha.value = fechaSeleccionada;
+                                    botonDia.classList.add('seleccionado');
+                                    botonSeleccionado = botonDia;
+                                    btnFormReprogramar.disabled = false;
+                                });
+                            } 
+                            else {
+                                botonDia.disabled = true;
+                                botonDia.classList.add('no-seleccionable');
+                            }
+                    
+                            calendar.appendChild(botonDia);
+                            dia++;
+                        }
+                    
+                        // Rellenar con días vacíos al final si es necesario
+                        const diaDeLaSemanaFin = fechaLimite.getDay();
+                        if (diaDeLaSemanaFin !== 6) {
+                            for (let i = diaDeLaSemanaFin + 1; i < 7; i++) {
+                                const diaVacio = document.createElement('button');
+                                diaVacio.disabled = true;
+                                calendar.appendChild(diaVacio);
+                            }
+                        }
+                    }                    
+
                     // Función para ir al mes anterior
-                    document.getElementById('prevMonth').addEventListener('click', function() {
+                    document.getElementById('prevMonth2').addEventListener('click', function() {
                         monthOffset--;
                         crearCalendario(fechasDisponibles);
                     });
-
+            
                     // Función para ir al mes siguiente
-                    document.getElementById('nextMonth').addEventListener('click', function() {
+                    document.getElementById('nextMonth2').addEventListener('click', function() {
                         monthOffset++;
                         crearCalendario(fechasDisponibles);
                     });
-
+            
                     // Inicializar el calendario
-                    crearCalendario(fechasDisponibles);        
+                    crearCalendario(fechasDisponibles);     
+                    
 
                     modal.classList.add("show");
                     document.body.style.overflow = "hidden"; 
                     document.documentElement.style.overflow = "hidden";
 
-                    document.getElementById("editForm").action = `/pacientes/turnos/reprogramar-estudio/${id_turnoEstudio}/`;
+                    document.getElementById("editForm2").action = `/pacientes/turnos/reprogramar-estudio/${id_turnoEstudio}/`;
 
                 } 
                 catch (err) {
@@ -345,19 +467,122 @@ document.addEventListener("DOMContentLoaded", function () {
     
                 const data = await response.json();
 
+                
+                const btnFormSacarTurnoEstudio = document.querySelector(".btn-form-sacar-turnoEstudio");
+                btnFormSacarTurnoEstudio.disabled = true;
+                document.getElementById("fecha_seleccionada").value = "";
                 document.getElementById("id_orden").value = data.id_orden;
-                document.getElementById("servicio").value = data.id_servicio;
-                document.getElementById("lugar").value = data.lugar_id;
                 document.getElementById("orden").innerHTML = `<strong>N° Orden:</strong> ${data.id_orden}`;
-                document.getElementById("p-servicio").innerHTML = `<strong>Realizado por:</strong> ${data.nombre_servicio}`;
-                document.getElementById("p-lugar").innerHTML = `<strong>Lugar:</strong> ${data.lugar_nombre} (${data.lugar_tipo}) - <strong>Piso</strong> ${data.lugar_piso} - <strong>Codigo</strong> ${data.lugar_codigo}`;
                 document.getElementById("estudio").innerHTML = `<strong>Estudio:</strong> ${data.nombre_estudio}`;
-                document.getElementById("horario").innerHTML = `<strong>Horario:</strong> ${data.horario}`;
+                document.getElementById("p-servicio").innerHTML = `<strong>Realizado por:</strong> ${data.nombre_servicio}`;
 
-        
-                // Convertir las fechas disponibles a un array de fechas para fácil comparación
+                if (data.disponible) {
+                    document.getElementById("id_lugar").value = data.lugar_id;
+                    document.getElementById("id_servicio_diagnostico").value = data.id_servicio;
+                    document.getElementById("p-lugar").innerHTML = `<strong>Lugar:</strong> ${data.lugar_nombre} <br> <strong>(Piso: ${data.lugar_piso} - N° Sala: ${data.lugar_sala})</strong>`;
+                    document.getElementById("horario").innerHTML = `<strong>Horario:</strong> ${data.horario}`;
+                }
+                else{
+                    document.getElementById("id_lugar").value = "";
+                    document.getElementById("id_servicio_diagnostico").value = "";
+                    document.getElementById("p-lugar").textContent = data.mensaje;
+                    document.getElementById("p-lugar").classList.add("error-message-main")
+                    document.getElementById("horario").textContent = ""; // limpiar horario
+                }
+                
+                let currentDate = new Date();
+                let monthOffset = 0;
+                
                 const fechasDisponibles = data.dias_disponibles.map(d => d.fecha);;
-        
+                function crearCalendario(fechas) { // Función para crear el calendario con todos los días del mes
+                
+                    const nombreMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                
+                    let botonSeleccionado = null;
+                
+                
+                    const calendar = document.getElementById('calendar');
+                    calendar.innerHTML = '';  // Limpiar el calendario antes de volver a generarlo
+                
+                    // Fecha de inicio (primer día del mes)
+                    const fechaInicio = new Date(currentDate);
+                    fechaInicio.setMonth(currentDate.getMonth() + monthOffset);
+                    fechaInicio.setDate(1);
+                
+                    // Fecha límite (último día del mes)
+                    const fechaLimite = new Date(fechaInicio);
+                    fechaLimite.setMonth(fechaInicio.getMonth() + 1);
+                    fechaLimite.setDate(0);
+                
+                    // Mostrar el nombre del mes actual
+                    const mesActual = nombreMes[fechaInicio.getMonth()];
+                    const header = document.createElement('div');
+                    header.classList.add('header');
+                    header.textContent = `${mesActual} ${fechaInicio.getFullYear()}`;
+                    calendar.appendChild(header);
+                
+                    // Generar celdas para los días de la semana
+                    const diasDeLaSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                    for (let i = 0; i < 7; i++) {
+                        const diaSemana = document.createElement('div');
+                        diaSemana.textContent = diasDeLaSemana[i];
+                        diaSemana.style.fontWeight = 'bold';
+                        calendar.appendChild(diaSemana);
+                    }
+                
+                    // Generar los días del mes
+                    const diaDeLaSemanaInicio = fechaInicio.getDay();
+                    let dia = 1;
+                
+                    for (let i = 0; i < diaDeLaSemanaInicio; i++) {     // Rellenar con días vacíos al principio
+                        const diaVacio = document.createElement('button');
+                        diaVacio.disabled = true;
+                        calendar.appendChild(diaVacio);
+                    }
+                
+                    while (dia <= fechaLimite.getDate()) {  // Mostrar todos los días del mes
+                        const botonDia = document.createElement('button');
+                        botonDia.type = "button";
+                        botonDia.textContent = dia;
+                
+                        const fechaDia = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), dia);
+                        const fechaFormateada = fechaDia.toISOString().split('T')[0];  // Obtener la fecha en formato YYYY-MM-DD
+                
+                        if (fechas.includes(fechaFormateada)) { // Verificar si el día está en la lista de días disponibles
+                            botonDia.classList.add('valid');
+                            botonDia.addEventListener('click', function() {
+                                if (botonSeleccionado) {
+                                    botonSeleccionado.classList.remove('seleccionado');
+                                }
+                                const fecha = document.getElementById("fecha_seleccionada");
+                                const fechaSeleccionada = `${fechaDia.getFullYear()}-${fechaDia.getMonth() + 1}-${fechaDia.getDate()}`;
+                                fecha.value = fechaSeleccionada;
+                                botonDia.classList.add('seleccionado');
+                                botonSeleccionado = botonDia;
+                                btnFormSacarTurnoEstudio.disabled = false;
+                            });
+                        } 
+                        else {
+                            botonDia.disabled = true;
+                            botonDia.classList.add('no-seleccionable');
+                        }
+                
+                        calendar.appendChild(botonDia);
+                        dia++;
+                    }
+                
+                    // Rellenar con días vacíos al final si es necesario
+                    const diaDeLaSemanaFin = fechaLimite.getDay();
+                    if (diaDeLaSemanaFin !== 6) {
+                        for (let i = diaDeLaSemanaFin + 1; i < 7; i++) {
+                            const diaVacio = document.createElement('button');
+                            diaVacio.disabled = true;
+                            calendar.appendChild(diaVacio);
+                        }
+                    }
+                }             
+
                 // Función para ir al mes anterior
                 document.getElementById('prevMonth').addEventListener('click', function() {
                     monthOffset--;

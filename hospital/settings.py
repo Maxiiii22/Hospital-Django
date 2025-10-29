@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "controlUsuario",
     "hospital_pacientes",
-    "hospital_personal"
+    "hospital_personal",
+    "intermedio"
 ]
 
 MIDDLEWARE = [

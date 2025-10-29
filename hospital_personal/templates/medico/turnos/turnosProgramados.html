@@ -44,8 +44,11 @@
                                         {% endfor %}
                                     {% elif turno.estado == "pendiente" %}
                                         <a href="{% url 'registrarConsulta' turno.id %}" class="btn-accion">Comenzar consulta</a>
-                                        <button class="btn-accion">Reprogramar</button>
-                                        <button class="btn-accion">Cancelar</button>
+                                        <button type="button" data-id-turno="{{ turno.id }}" class="btn-modal btn-accion">Reprogramar</button>
+                                        <form method="POST" action="{% url 'cancelarTurno' turno.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-accion" onclick="return confirm('¿Estás seguro de que deseas cancelar este turno?')">Cancelar</button>
+                                        </form>
                                     {% endif %}
                                 </div>
                             </td>
@@ -114,7 +117,7 @@
                     <button type="button" id="nextMonth" class="nextMonth">Mes Siguiente</button>
                 </div>
                 <div class="calendar" id="calendar"></div>
-                <button type="submit" class="btn-global">Reprogramar</button>
+                <button type="submit" disabled  class="btn-global btn-form-reprogramar">Reprogramar</button>
             </form>
         </div>
     </div>

@@ -84,7 +84,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (!response.ok) throw new Error("Error al obtener datos");
             
                         const data = await response.json();
-            
+
+
+                        const btnReprogramar = document.querySelector(".btn-form-reprogramar");
+                        btnReprogramar.disabled = true;
                         let currentDate = new Date();
                         let monthOffset = 0;
                 
@@ -162,6 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                         fecha.value = fechaSeleccionada;
                                         botonDia.classList.add('seleccionado');
                                         botonSeleccionado = botonDia;
+                                        btnReprogramar.disabled = false;
                                     });
                                 } else {
                                     botonDia.disabled = true;

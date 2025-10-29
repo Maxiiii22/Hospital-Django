@@ -1,7 +1,7 @@
 from collections import defaultdict
 from django.utils import timezone
 from django.contrib import messages
-from django.http import HttpResponseForbidden, HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse, FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required 
 from controlUsuario.decorators import personal_required # En controlUsuario.decorators creamos decoradores personalizados que verifiquen si el usuario tiene el atributo de paciente o usuario, y redirigirlo a una página de acceso denegado si intenta acceder a una vista que no le corresponde.
@@ -16,6 +16,7 @@ from hospital_pacientes.views import obtener_disponibilidad
 import datetime
 from django.db.models.functions import Cast
 from django.db.models import Max, IntegerField
+from django.conf import settings
 
 # Create your views here.
 
@@ -358,6 +359,7 @@ def gestionDeEspecialidades(request):
                 "nombre_especialidad": especialidad.nombre_especialidad,
                 "permite_turno": especialidad.permite_turno,
                 "descripcion": especialidad.descripcion,
+                "capacidad_diaria": especialidad.capacidad_diaria,
                 "departamento": especialidad.departamento.id
             }
             return JsonResponse(data)
@@ -397,6 +399,7 @@ def gestionDeServiciosDiagnostico(request):
                 "nombre_servicio": servicio.nombre_servicio,
                 "descripcion_servicio": servicio.descripcion,
                 "departamento_servicio": servicio.departamento.id,
+                "capacidad_diaria_servicio": servicio.capaciadad_diaria,
                 "lugar_servicio": [lugar.id for lugar in servicio.lugar.all()]            
             }
             return JsonResponse(data)
@@ -653,6 +656,7 @@ def turnosPaciente(request, id):
 @login_required
 def turnosProgramados(request):
     especialidad_id = request.session.get('especialidad_actual')
+    
     if especialidad_id:
         especialidad = Especialidades.objects.get(id=especialidad_id)
     else: 
@@ -672,7 +676,6 @@ def turnosProgramados(request):
         
     return render(request, "medico/turnos/turnosProgramados.html",{ "turnos_hoy": turnos_hoy,"turnos_otros_dias": turnos_otros_dias})
 
-
 @personal_required
 @login_required
 def reprogramarTurno(request, turno_id):
@@ -684,11 +687,10 @@ def reprogramarTurno(request, turno_id):
         
         # Verificar si el turno pertenece al profesional actual 
         if turno.profesional != usuario_actual:
-            print(turno_id)
             return HttpResponseForbidden(render(request, "403.html"))
         
         if id_turno:
-            disponibilidad = obtener_disponibilidad(turno.profesional_id,turno.horario_turno)
+            disponibilidad = obtener_disponibilidad(turno.profesional_id,turno.horario_turno,turno.especialidad.id,turno.paciente.id)
             dias_disponibles = [{
                 "profesional": turno.profesional_id,
                 "disponibilidad": disponibilidad
@@ -710,24 +712,26 @@ def reprogramarTurno(request, turno_id):
         
         hoy = timezone.now()
         fecha_seleccionada = request.POST.get("fecha_seleccionada") 
-        if fecha_seleccionada:  
-            fecha_turno = datetime.datetime.strptime(fecha_seleccionada, "%Y-%m-%d").date()
-            turno_reprogramado = Turno.objects.get(id=turno_id)
-            
-            try:
-                turno_reprogramado.fecha_creacion = hoy
-                turno_reprogramado.fecha_turno = fecha_turno
-                turno_reprogramado.save()
-                print("Turno reprogramado exitosamente.")
-                return redirect("turnosProgramados")
-            except Exception as e:
-                print(f"Error al reprogramar el turno: {e}")
-        else:
-            messages.error(request, "Por favor, seleccione una fecha")
+        
+        # Validar fecha disponible
+        disponibilidad = obtener_disponibilidad(turno.profesional_id,turno.horario_turno,turno.especialidad.id,turno.paciente.id)
+        fechas_validas = [dia["fecha"] for dia in disponibilidad]
+        if fecha_seleccionada not in fechas_validas:
+            response = render(request, "403.html", {
+                "mensaje": "Fecha de turno no válida para este profesional."
+            })
+            response.status_code = 403
+            return response       
+        
+        try:
+            turno.fecha_creacion = hoy
+            turno.fecha_turno = fecha_seleccionada
+            turno.save()
             return redirect("turnosProgramados")
-
+        except Exception as e:
+            print(f"Error al reprogramar el turno: {e}")
     
-    return HttpResponseForbidden(render(request, "403.html"))
+    return HttpResponseForbidden(render(request, "403.html"))            
 
 
 
@@ -938,44 +942,45 @@ import os
 from io import BytesIO
 from django.core.files.base import ContentFile
 from reportlab.pdfgen import canvas  # ⚠️ Importar esto
-
-
-from io import BytesIO
-from django.core.files.base import ContentFile
-from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-)
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
-from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from PyPDF2 import PdfMerger # sirve para importar la clase PdfMerger del módulo PyPDF2, que se utiliza para combinar (mergear) múltiples archivos PDF en uno solo.  pip install PyPDF2
-import os
-
 
 def generar_pdf_resultado(resultado_estudio):
-    tipo = resultado_estudio.turno_estudio.orden.tipo_estudio.tipo_resultado
+    font_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'DejaVuSans.ttf')
+    if not os.path.exists(font_path):
+        raise FileNotFoundError(
+            f"No se encontró la fuente '{font_path}'.\n"
+            "Asegúrate de haber descargado DejaVuSans.ttf y de colocarla en /static/fonts/"
+        )
 
-    # Obtener datos comunes
+    pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+    
+    tipo = resultado_estudio.turno_estudio.orden.tipo_estudio.tipo_resultado
     turno = resultado_estudio.turno_estudio
-    paciente = turno.orden.consulta.turno.paciente.persona
-    profesional = turno.orden.consulta.turno.profesional.persona
-    servicio = turno.orden.consulta.turno.especialidad
+    paciente = turno.orden.paciente.persona
+    profesional = turno.orden.solicitado_por.persona
+    especialidad = turno.orden.consulta.turno.especialidad
     estudio = turno.orden.tipo_estudio
 
     # Encabezado para todos los tipos
     encabezado = [
         f"<b>Paciente:</b> {paciente.get_full_name()} - <b>DNI:</b> {paciente.dni}",
-        f"<b>Estudio:</b> {estudio.nombre_estudio}",
+        f"<b>Estudio:</b> {estudio.nombre_estudio} - Servicio encargado: {estudio.servicio_diagnostico.nombre_servicio} - Lugar: {turno.lugar.nombre}",
         f"<b>Fecha del estudio:</b> {turno.fecha_turno.strftime('%d/%m/%Y')}",
-        f"<b>Solicitado por:</b> {profesional.get_full_name()} - <b>DNI:</b> {profesional.dni} - <b>Servicio:</b> {servicio.nombre_especialidad}",
+        f"<b>Solicitado por:</b> {profesional.get_full_name()} - <b>DNI:</b> {profesional.dni} - <b>Especialidad:</b> {especialidad.nombre_especialidad}",
         f"<b>N° Orden:</b> {turno.orden.id}",
         f"<b>Motivo del estudio:</b> {turno.orden.motivo_estudio}",
     ]
+    
+    styles = getSampleStyleSheet()
+    styles["Normal"].fontName = 'DejaVuSans'
+    styles["Heading1"].fontName = 'DejaVuSans'
+    styles["Heading2"].fontName = 'DejaVuSans'    
 
-    # --- 🔹 CASO: Imagen ---
+    # --- CASO: Imagen ---
     if tipo == "img":
-        # 1️⃣ Primera página con encabezado e informe
+        # Primera página con encabezado e informe
         buffer_texto = BytesIO()
         doc = SimpleDocTemplate(
             buffer_texto,
@@ -985,9 +990,8 @@ def generar_pdf_resultado(resultado_estudio):
             topMargin=40,
             bottomMargin=40
         )  
-        styles = getSampleStyleSheet()
+
         elements = []
-        
         elements.append(Paragraph("Resultado del Estudio", styles["Heading1"]))
         elements.append(Spacer(1, 20))
 
@@ -999,14 +1003,13 @@ def generar_pdf_resultado(resultado_estudio):
         if resultado_estudio.informe:
             elements.append(Paragraph("<b>Informe</b>", styles["Heading2"]))
             elements.append(Spacer(1, 12))
-            elements.append(Paragraph(resultado_estudio.informe.replace("\n", "<br/>"), styles["Normal"]))
+            elements.append(Paragraph(str(resultado_estudio.informe).replace("\n", "<br/>"), styles["Normal"]))
 
         doc.build(elements)
 
-        # 2️⃣ Páginas de imágenes (una por hoja, tamaño completo)
+        # Páginas de imágenes (una por hoja, tamaño completo)
         buffer_imagenes = BytesIO()
         c = canvas.Canvas(buffer_imagenes, pagesize=A4)
-
         imagenes = resultado_estudio.imagenes.all()
         for img in imagenes:
             try:
@@ -1022,7 +1025,7 @@ def generar_pdf_resultado(resultado_estudio):
 
         c.save()
 
-        # 3️⃣ Combinar textos + imágenes
+        # Combinar textos + imágenes
         pdf_final = BytesIO()
         merger = PdfMerger()
         merger.append(buffer_texto)
@@ -1031,13 +1034,13 @@ def generar_pdf_resultado(resultado_estudio):
         merger.write(pdf_final)
         merger.close()
 
-        # 4️⃣ Guardar PDF final
+        # Guardar PDF final
         nombre_archivo = f"resultado_estudio_{resultado_estudio.id}.pdf"
         resultado_estudio.archivo_pdf.save(nombre_archivo, ContentFile(pdf_final.getvalue()))
         resultado_estudio.save()
         return
 
-    # --- 🔹 Para el resto de tipos (lab, fisio, eval) ---
+    # --- Para el resto de tipos (lab, fisio, eval) ---
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -1047,9 +1050,7 @@ def generar_pdf_resultado(resultado_estudio):
         topMargin=40,
         bottomMargin=40
     )
-    styles = getSampleStyleSheet()
     elements = []
-
     elements.append(Paragraph("Resultado del Estudio", styles["Heading1"]))
     elements.append(Spacer(1, 20))
 
@@ -1058,18 +1059,15 @@ def generar_pdf_resultado(resultado_estudio):
         elements.append(Spacer(1, 6))
     elements.append(Spacer(1, 12))
 
-    # 🔸 Laboratorio
+    # Laboratorio
     if tipo == "lab" and resultado_estudio.datos_especificos:
         data = [["Parámetro", "Valor", "Unidad", "Referencia"]]
-        styles = getSampleStyleSheet()
-        normal_style = styles["Normal"]
-        data = [["Parámetro", "Valor", "Unidad","Referencia"]]
         for param, detalle in resultado_estudio.datos_especificos.items():
             data.append([
-                Paragraph(str(param), normal_style),
-                Paragraph(str(detalle.get("valor", "")), normal_style),
-                Paragraph(str(detalle.get("unidad", "")), normal_style),
-                Paragraph(str(detalle.get("referencia", "")), normal_style)
+                Paragraph(str(param), styles["Normal"]),
+                Paragraph(str(detalle.get("valor", "")), styles["Normal"]),
+                Paragraph(str(detalle.get("unidad", "")), styles["Normal"]),
+                Paragraph(str(detalle.get("referencia", "")), styles["Normal"])
             ])
 
         tabla = Table(data)
@@ -1084,18 +1082,16 @@ def generar_pdf_resultado(resultado_estudio):
         elements.append(tabla)
         elements.append(Spacer(1, 20))
 
-    # 🔸 Estudio fisiológico
+    # Estudio fisiológico
     elif tipo == "fisio" and resultado_estudio.datos_especificos:
-        styles = getSampleStyleSheet()
-        normal_style = styles["Normal"]
         data = [["Parámetro", "Valor", "Unidad","Referencia","Interpretacion"]]
         for param, detalle in resultado_estudio.datos_especificos.items():
             data.append([
-                Paragraph(str(param), normal_style),
-                Paragraph(str(detalle.get("valor", "")), normal_style),
-                Paragraph(str(detalle.get("unidad", "")), normal_style),
-                Paragraph(str(detalle.get("referencia", "")), normal_style),
-                Paragraph(str(detalle.get("interpretacion", "")), normal_style)
+                Paragraph(str(param), styles["Normal"]),
+                Paragraph(str(detalle.get("valor", "")), styles["Normal"]),
+                Paragraph(str(detalle.get("unidad", "")), styles["Normal"]),
+                Paragraph(str(detalle.get("referencia", "")), styles["Normal"]),
+                Paragraph(str(detalle.get("interpretacion", "")), styles["Normal"])
             ])
 
         tabla = Table(data)
@@ -1110,16 +1106,16 @@ def generar_pdf_resultado(resultado_estudio):
         elements.append(tabla)
         elements.append(Spacer(1, 20))
 
-    # 🔸 Evaluación clínica
+    # Evaluación clínica
     elif tipo == "eval":
         elements.append(Paragraph("<b>Evaluación Clínica</b>", styles["Heading2"]))
         elements.append(Spacer(1, 12))
 
-    # 🔸 Informe (para lab, fisio, eval)
+    # Informe (para lab, fisio, eval)
     if resultado_estudio.informe:
         elements.append(Paragraph("<b>Informe</b>", styles["Heading2"]))
         elements.append(Spacer(1, 12))
-        elements.append(Paragraph(resultado_estudio.informe.replace("\n", "<br/>"), styles["Normal"]))
+        elements.append(Paragraph(str(resultado_estudio.informe).replace("\n", "<br/>"), styles["Normal"]))
 
     # Guardar PDF final
     doc.build(elements)
@@ -1130,11 +1126,11 @@ def generar_pdf_resultado(resultado_estudio):
 
 def verEstudios(request):
     usuarioDepartamentos = UsuarioLugarTrabajoAsignado.objects.filter(usuario=request.user.usuario)
-    departamentos_ids = usuarioDepartamentos.values_list('departamento__id', flat=True)
+    # departamentos_ids = usuarioDepartamentos.values_list('departamento__id', flat=True)
 
     estudiosRealizados = TurnoEstudio.objects.filter(
-        estado="atendido",
-        servicio_diagnostico__departamento__id__in=departamentos_ids # Solo traigo los analisis/estudios/radiografias,etc que se hacen en el departamento en donde trabaja este usuario.
+        estado="realizado"
+        # servicio_diagnostico__departamento__id__in=departamentos_ids # Solo traigo los analisis/estudios/radiografias,etc que se hacen en el departamento en donde trabaja este usuario.
     )
 
     return render(request, "cargadorResultados/estudiosRealizados.html", {"estudios": estudiosRealizados})

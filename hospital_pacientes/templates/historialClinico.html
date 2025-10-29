@@ -46,8 +46,6 @@
                                         data-medicaciones="{% for m in consultaEspecifica.medicaciones.all %}• {{ m.medicamento }} - {{ m.dosis }} - {{m.frecuencia}}\n{% empty %}Ninguna{% endfor %}">
                                         Mas detalles
                                         </button>
-                                    {% else %}
-                                        Consulta sin indicaciones de medicación o estudios.
                                     {% endif %}
                                 </td>   
                             </tr>
@@ -80,7 +78,7 @@
                                     <button class="btn-global" onclick="abrirDetalleEstudios(this)"
                                     data-profesional="{{resultadoEstudioEspecifico.turno_estudio.orden.solicitado_por.persona.get_full_name}} - N° Legajo {{resultadoEstudioEspecifico.turno_estudio.orden.solicitado_por.numero_matricula}}"
                                     data-paciente="{{ resultadoEstudioEspecifico.turno_estudio.orden.consulta.turno.paciente.persona.get_full_name}} - DNI: {{resultadoEstudioEspecifico.turno_estudio.orden.consulta.turno.paciente.persona.dni}}"
-                                    data-fecha="{{resultadoEstudioEspecifico.turno_estudio.orden.consulta.fecha|date:"d-m-Y"}}"
+                                    data-fecha="{{resultadoEstudioEspecifico.turno_estudio.orden.consulta.fecha|date:'d-m-Y'}}"
                                     data-tipo-estudio="{{resultadoEstudioEspecifico.turno_estudio.orden.tipo_estudio.nombre_estudio }}"
                                     data-motivo="{{resultadoEstudioEspecifico.turno_estudio.orden.motivo_estudio }}"
                                     data-indicaciones="{{resultadoEstudioEspecifico.turno_estudio.orden.indicaciones }}">
@@ -96,7 +94,6 @@
         <div class="container-historial-clinico">
             <h1>Historial clinico</h1>
             <div class="box-tabla-consultas">
-
                 <h2>Consultas medicas</h2>
                 <table>
                     {% if allConsultas %}
@@ -127,7 +124,7 @@
                                         data-diagnostico="{{ consulta.diagnostico|default:'-'|escapejs }}"
                                         data-observaciones="{{ consulta.observaciones|default:'-'|escapejs }}"
                                         data-tratamiento="{% if consulta.tratamiento %}{{ consulta.tratamiento|default:'-'|escapejs }}{% else %}Ninguno{% endif %}"
-                                        data-estudios="{% for e in consulta.estudios.all %}• {{ e.tipo_estudio.nombre_estudio }} - Estado: {{e.get_estado_display}} - Motivo: {{e.motivo_estudio}} {% if e.turnoEstudio.resultado.archivo_pdf.url %}- <a href='{{e.turnoEstudio.resultado.archivo_pdf.url}}' target='_blank' class='btn-verEstudio'>Ver archivo</a>{% endif %}<br>{% empty %}Ninguno{% endfor %}"
+                                        data-estudios="{% for e in consulta.estudios.all %}<p>• {{ e.tipo_estudio.nombre_estudio }} - Estado: {{e.get_estado_display}} - Motivo: {{e.motivo_estudio}} {{ e.estado_detallado|safe }}</p>{% empty %}<p>Ninguno</p>{% endfor %}"
                                         data-medicaciones="{% for m in consulta.medicaciones.all %}• {{ m.medicamento }} - {{ m.dosis }} - {{m.frecuencia}}\n{% empty %}Ninguna{% endfor %}">
                                         Mas detalles
                                     </button>
@@ -164,19 +161,20 @@
                                     <td><strong>ID:</strong> {{estudio.consulta.id}} - <strong>Especialidad:</strong> {{estudio.consulta.turno.especialidad.nombre_especialidad}} - <strong>Fecha:</strong> {{estudio.consulta.fecha|date:"d-m-Y"}}</td>
                                     <td>{{estudio.tipo_estudio.nombre_estudio}}</td>
                                     <td>
-                                        {% if estudio.estado == "realizado" %}
-                                            <a href="{{estudio.turnoEstudio.resultado.archivo_pdf.url}}" target="_blank" class="btn-accion">Ver archivo</a>
+                                        {% if estudio.turnoEstudio.estado == "realizado" %}
+                                            
                                         {% endif %}
-                                            <button class="btn-global" onclick="abrirDetalleEstudios(this)"
+                                        <button class="btn-global" onclick="abrirDetalleEstudios(this)"
                                             data-profesional="{{estudio.solicitado_por.persona.get_full_name}} - N° Legajo: {{estudio.solicitado_por.numero_matricula}}"
                                             data-paciente="{{ estudio.consulta.turno.paciente.persona.get_full_name}} - DNI: {{estudio.consulta.turno.paciente.persona.dni}}"
-                                            data-fecha="{{estudio.consulta.fecha|date:"d-m-Y"}}"
+                                            data-fecha="{{estudio.consulta.fecha|date:'d-m-Y'}}"
                                             data-tipo-estudio="{{estudio.tipo_estudio.nombre_estudio }}"
                                             data-motivo="{{estudio.motivo_estudio }}"
-                                            data-indicaciones="{{estudio.indicaciones }}">
-                                            Mas detalles
-                                            </button>
-                                        </td>
+                                            data-indicaciones="{{estudio.indicaciones }}"
+                                            data-estado="{{ estudio.estado_detallado|safe }}"
+                                            >Mas detalles
+                                        </button>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -216,7 +214,7 @@
                                         <button class="btn-global" onclick="abrirDetalleMedicamento(this)"
                                         data-profesional="{{medicamento.recetada_por.persona.get_full_name}} - N° Legajo: {{medicamento.recetada_por.numero_matricula}}"
                                         data-paciente="{{ medicamento.consulta.turno.paciente.persona.get_full_name}} - DNI: {{medicamento.consulta.turno.paciente.persona.dni}}"
-                                        data-fecha="{{medicamento.consulta.fecha|date:"d-m-Y"}}"
+                                        data-fecha="{{medicamento.consulta.fecha|date:'d-m-Y'}}"
                                         data-medicamento="{{medicamento.medicamento }}"
                                         data-dosis="{{medicamento.dosis }}"
                                         data-frecuencia="{{medicamento.frecuencia }}"
@@ -263,9 +261,7 @@
                 </div>
                 <div class="modal-detalles-consulta-item">
                     <p><strong>Estudios solicitados:</strong></p>
-                    <div>
-                        <pre id="modalEstudios"></pre>
-                    </div>
+                    <div id="modalEstudios" class="div-p"></div>
                 </div>
                 <div class="modal-detalles-consulta-item">
                     <p><strong>Medicaciones:</strong></p>
@@ -284,6 +280,10 @@
                 <div class="modal-detalles-consulta-item">
                     <p><strong>Indicaciones:</strong></p>
                     <pre id="modalIndicaciones"></pre>
+                </div>
+                <div class="modal-detalles-consulta-item">
+                    <p><strong>Estado:</strong></p>
+                    <pre id="modalEstado"></pre>
                 </div>
             </div>
             <div id="parte-medicamentos">

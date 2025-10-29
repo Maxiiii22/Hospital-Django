@@ -2,7 +2,7 @@ from django.db import models
 from hospital_pacientes.models import Paciente
 from datetime import time
 from django.core.exceptions import ValidationError
-
+from django.urls import reverse
 
 class Departamento(models.Model):
     nombre_departamento = models.CharField(max_length=255)
@@ -106,9 +106,9 @@ class UsuarioRolProfesionalAsignado(models.Model):
     
     def __str__(self):
         if (self.rol_profesional.servicio_diagnostico):
-            return f"Usuario: {self.usuario.persona.get_full_name()} (N° Legajo: {self.usuario.persona.login_id}) - Servicio en el que  trabaja: {self.rol_profesional.servicio_diagnostico.nombre_servicio}"
+            return f"Usuario: {self.usuario.persona.get_full_name()} (N° Legajo: {self.usuario.persona.login_id}) - Servicio en el que  trabaja: {self.rol_profesional.servicio_diagnostico.nombre_servicio} como {self.rol_profesional.nombre_rol_profesional}"
         else:
-            return f"Usuario: {self.usuario.persona.get_full_name()} (N° Legajo: {self.usuario.persona.login_id}) - Especialidad en que trabaja: {self.rol_profesional.especialidad.nombre_especialidad}"
+            return f"Usuario: {self.usuario.persona.get_full_name()} (N° Legajo: {self.usuario.persona.login_id}) - Especialidad en que trabaja: {self.rol_profesional.especialidad.nombre_especialidad} como {self.rol_profesional.nombre_rol_profesional}"
 
 
 class UsuarioLugarTrabajoAsignado(models.Model):
@@ -151,6 +151,7 @@ class ServicioDiagnostico(models.Model):
     lugar = models.ManyToManyField(Lugar, related_name="servicios_diagnostico")
     nombre_servicio = models.CharField(max_length=255)
     descripcion = models.TextField()
+    capacidad_diaria = models.PositiveIntegerField(null=True, blank=True) # Al finalizar la BD quitar el blank y el null
     
     def __str__(self):
         return f"ID servicio de diagnostico {self.id} - Nombre: {self.nombre_servicio} - Departamento: {self.departamento.nombre_departamento}"
@@ -160,7 +161,8 @@ class Especialidades(models.Model):
     nombre_especialidad = models.CharField(max_length=255)
     descripcion = models.TextField()
     permite_turno = models.BooleanField()
-    
+    capacidad_diaria = models.PositiveIntegerField(null=True, blank=True) # Al finalizar la BD quitar el blank y el null
+
     def __str__(self):
         return f"ID especialidad {self.id} - Nombre: {self.nombre_especialidad} - Departamento: {self.departamento.nombre_departamento}"
 
@@ -244,9 +246,9 @@ class Consultas(models.Model):
 
 class OrdenEstudio(models.Model):
     ESTADOS_CHOICES = [
-        ('pendiente', 'Pendiente'),
-        ('realizado', 'Realizado'),
-        ('noRealizado', 'No realizado')
+        ('pendiente', 'En espera de programación'),
+        ('programado', 'Programado'),
+        ('vencida', 'Orden vencida')
     ]
     tipo_estudio = models.ForeignKey(EstudiosDiagnosticos, on_delete=models.CASCADE, related_name='tipo_estudios')
     consulta = models.ForeignKey(Consultas, on_delete=models.CASCADE, related_name='estudios')
@@ -255,9 +257,26 @@ class OrdenEstudio(models.Model):
     fecha_solicitud = models.DateTimeField(auto_now_add=True,blank=True, null=True) 
     estado = models.CharField(max_length=20, choices=ESTADOS_CHOICES, default="pendiente")
     solicitado_por = models.ForeignKey('controlUsuario.Usuario', on_delete=models.CASCADE)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name="ordenesPaciente")
+
+    @property
+    def estado_detallado(self):
+        if self.estado == "programado":
+            turno = getattr(self, "turnoEstudio", None)
+            if turno.estado == "pendiente":
+                return f"Turno programado para {turno.fecha_turno.strftime('%d-%m-%Y')} | {turno.get_horarioTurnoEstudio()}"
+            elif turno.estado == "realizado":
+                if hasattr(turno, "resultado") and turno.resultado.archivo_pdf:
+                    # URL hacia la vista que valida permisos
+                    url_segura = reverse('ver_pdf_estudio', args=[turno.resultado.id])
+                    return f"<a href='{url_segura}' target='_blank' class='btn-global'>Ver resultados</a>"
+            else:
+                return turno.get_estado_display()
+        
+        return self.get_estado_display()
 
     def __str__(self):
-        return f'Solitud pedida en la consulta n°: {self.consulta.id} - N° de orden: {self.id} - Tipo Estudio: "{self.tipo_estudio.nombre_estudio}" - Estado: {self.estado} - Paciente ID: {self.consulta.turno.paciente.id}'
+        return f'Solitud pedida en la consulta n°: {self.consulta.id} - N° de orden: {self.id} - Tipo Estudio: "{self.tipo_estudio.nombre_estudio}" - Estado: {self.estado} - Paciente ID: {self.paciente.id}'
 
 class Medicaciones(models.Model):
     consulta = models.ForeignKey(Consultas, on_delete=models.CASCADE, related_name='medicaciones')
@@ -274,8 +293,7 @@ class Medicaciones(models.Model):
 class TurnoEstudio(models.Model):
     ESTADOS_CHOICES = [
         ('pendiente', 'Pendiente'),
-        ('cancelado', 'Cancelado'),
-        ('atendido', 'Atendido'),
+        ('analisis', 'En análisis'),
         ('noAsistio', 'No asistio'),
         ('realizado', 'Realizado'),
     ]
@@ -291,12 +309,17 @@ class TurnoEstudio(models.Model):
     lugar = models.ForeignKey(Lugar, on_delete=models.CASCADE)
     asistio = models.BooleanField(default=False)
 
+
     # Método para obtener la hora de inicio y fin del turno
     def obtener_rango_turno(self):
         if self.horario_turno == 'dia':
             hora_inicio = time(7, 0)  # 7:00 AM
             hora_fin = time(15, 0)    # 3:00 PM
         return hora_inicio, hora_fin
+    
+    def get_horarioTurnoEstudio(self):
+        if self.horario_turno == "dia":
+            return "07:00 - 15:00"
     
     def __str__(self):
         return f"Turno para {self.orden.tipo_estudio.nombre_estudio} el {self.fecha_turno} solicitado por el paciente: ({self.orden.consulta.turno.paciente.persona.get_full_name()} - DNI: {self.orden.consulta.turno.paciente.persona.dni}) - Estado: {self.get_estado_display()} "

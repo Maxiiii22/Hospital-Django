@@ -119,9 +119,9 @@
                         <ul class="sub-menu">
                             {% for usuario in user.usuario.especialidadesUsuario.all %}
                                 <li>
-                                    <div class="sub-menu-link selectEspecialidad" data-id-especialidad="{{usuario.especialidad.id}}" >
+                                    <div class="sub-menu-link selectEspecialidad" data-id-especialidad="{{usuario.rol_profesional.especialidad.id}}" >
                                         <i class="hgi hgi-stroke hgi-arrow-right-03"></i>
-                                        <span>{{usuario.especialidad.nombre_especialidad}}</span>
+                                        <span>{{usuario.rol_profesional.especialidad.nombre_especialidad}}</span>
                                     </div>
                                 </li>
                             {% empty %}
@@ -145,7 +145,7 @@
                             <span class="span-main">Historial de consultas</span>
                         </a> 
                     </li>
-                {% elif user.usuario.tipoUsuario.id == 4 %} <!--Cargador de Resultados-->
+                {% elif user.usuario.tipoUsuario.id == 6 %} <!--Cargador de Resultados-->
                     <li class="menu-item menu-item-estatico">
                         <a href="{% url 'verEstudios' %}" class="menu-link">
                             <i class="hgi hgi-stroke hgi-task-done-01"></i>

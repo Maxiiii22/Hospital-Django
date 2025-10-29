@@ -167,6 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     else{
                         document.getElementById("id_permite_turno").checked = false;
                     }
+                    document.getElementById("id_capacidad_diaria").value = data.capacidad_diaria;
                     document.getElementById("id_descripcion").value = data.descripcion;
                     document.getElementById("id_departamento").value = data.departamento;
         
@@ -296,6 +297,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("id_servicio").value = data.id_servicio;
                     document.getElementById("id_nombre_servicio").value = data.nombre_servicio;
                     document.getElementById("id_descripcion").value = data.descripcion_servicio;
+                    document.getElementById("id_capacidad_diaria").value = data.capacidad_diaria_servicio;
                     document.getElementById("id_departamento").value = data.departamento_servicio;
 
                     const lugaresIds = data.lugar_servicio;

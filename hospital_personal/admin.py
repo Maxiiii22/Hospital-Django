@@ -8,7 +8,7 @@ class DepartamentoAdmin(admin.ModelAdmin):
     list_display = ['id', 'nombre_departamento','tipo']
 
 class EspecialidadesAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nombre_especialidad','permite_turno','departamento']
+    list_display = ['id', 'nombre_especialidad','permite_turno','departamento',"capacidad_diaria"]
 
 class Jornada_laboralAdmin(admin.ModelAdmin):
     list_display = ['id', 'dia','turno']
@@ -20,10 +20,10 @@ class MedicacionesAdmin(admin.ModelAdmin):
     list_display = ['id', 'medicamento','dosis','frecuencia','tiempo_uso','consulta','recetada_por']
 
 class ServicioDiagnosticoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nombre_servicio','departamento']
+    list_display = ['id', 'nombre_servicio','departamento',"capacidad_diaria"]
 
 class TurnoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'fecha_creacion','fecha_turno','horario_turno','estado','asistio','especialidad','paciente','profesional']
+    list_display = ['id', 'fecha_creacion','fecha_turno','horario_turno','estado','asistio','especialidad',"lugar",'paciente','profesional']
 
 class TurnoEstudioAdmin(admin.ModelAdmin):
     list_display = ['id', 'fecha_creacion','fecha_turno','horario_turno','estado','orden','servicio_diagnostico','lugar','asistio']

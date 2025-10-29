@@ -160,7 +160,7 @@
                             <td data-label="Accion:">
                                 <div class="box-btns-td-acciones">
                                     {% if turno.estado == "pendiente" %}
-                                        <button type="button" data-id-turno-estudio="{{ turno.id }}" data-id-paciente="{{ turno.orden.consulta.turno.paciente.id }}" class="btn-modal">Reprogramar</button>
+                                        <button type="button" data-id-turno-estudio="{{ turno.id }}" data-id-paciente="{{ turno.orden.consulta.turno.paciente.id }}" class="btn-modal btn-global">Reprogramar</button>
                                         <form method="POST" action="{% url 'cancelarTurnoEstudio' turno.id %}">
                                             {% csrf_token %}
                                             <button type="submit" class="btn-global" onclick="return confirm('¿Estás seguro de que deseas cancelar este turno?')">Cancelar</button>
@@ -237,17 +237,48 @@
         <div class="modal-content modal-reprogramar-turno">
             <span id="closeEditModal" class="close">&times;</span>
             <h2 id="modal-title">Reprogramar turno</h2>
-            <form id="editForm" method="POST" action="">
-                {% csrf_token %}
-                <input type="hidden" name="fecha_seleccionada" id="fecha_seleccionada" value="">
-                <h3>Días disponibles:</h3>
-                <div class="nav-buttons">
-                    <button type="button" id="prevMonth" class="prevMonth">Mes Anterior</button>
-                    <button type="button" id="nextMonth" class="nextMonth">Mes Siguiente</button>
-                </div>
-                <div class="calendar" id="calendar"></div>
-                <button type="submit" disabled class="btn-global" id="btn-form-reprogramar">Reprogramar</button>
-            </form>
+            <div class="seccion-reprogramar-turnoMedico">
+                <h3 id="profesional"></h3>
+                <p id="matricula"></p>
+                <p id="sexo"></p>
+                <p id="horario"></p>    
+                <p id="lugar"></p>  
+                <p id="fecha_turno"></p>  
+                <form id="editForm" method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="tipo-form" value="form-reprogramar-turnoMedico">
+                    <input type="hidden" name="fecha_seleccionada" id="fecha_seleccionada" value="">
+                    <h3>Días disponibles:</h3>
+                    <div class="nav-buttons">
+                        <button type="button" id="prevMonth" class="prevMonth">Mes Anterior</button>
+                        <button type="button" id="nextMonth" class="nextMonth">Mes Siguiente</button>
+                    </div>
+                    <div class="calendar" id="calendar"></div>
+                    <button type="submit" disabled class="btn-global btn-form-reprogramar" >Reprogramar</button>
+                </form>                
+            </div>
+            <div class="seccion-reprogramar-turnoEstudio">
+                <p id="orden"></p>
+                <p id="estudio"></p>
+                <p id="p-servicio"></p>    
+                <p id="p-lugar"></p>  
+                <p id="p-fecha_turno"></p>  
+                <p id="horario"></p>  
+                <form id="editForm2" method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="tipo-form" value="form-reprogramar-turnoEstudio">
+                    <input type="hidden" name="fecha_seleccionadaEstudio" id="fecha_seleccionadaEstudio" value="">
+                    <input type="hidden" name="lugar" id="id_lugar" value="">
+                    <h3>Días disponibles:</h3>
+                    <div class="nav-buttons">
+                        <button type="button" id="prevMonth2" class="prevMonth">Mes Anterior</button>
+                        <button type="button" id="nextMonth2" class="nextMonth">Mes Siguiente</button>
+                    </div>
+                    <div class="calendar" id="calendar2"></div>
+                    <button type="submit" disabled class="btn-global btn-form-reprogramarEstudio">Reprogramar</button>
+                </form>  
+            </div>
+
         </div>
     </div>
 {% endblock %}
