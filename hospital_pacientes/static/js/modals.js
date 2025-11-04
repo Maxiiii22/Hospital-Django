@@ -1,6 +1,7 @@
 const modal = document.getElementById("editModal");
 const closeModalBtn = document.getElementById("closeEditModal");
 const btnGuardar = document.querySelector(".btn-guardar");
+const btnVolverConsulta = document.querySelector(".btn-volver-consulta");
 
 function decodeNewlines(text) {
     return text
@@ -13,25 +14,30 @@ function decodeNewlines(text) {
 }
 
 function abrirDetalle(btn) {
+    btnVolverConsulta.dataset.idConsulta = "";
+    btnVolverConsulta.style.display = "none";
     modal.classList.add("show");
     document.getElementById("parte-estudios").style.display = "none";
     document.getElementById("parte-medicamentos").style.display = "none";
     document.getElementById("parte-consultas").style.display = "block";
-    document.getElementById("modal-title").textContent = "Detalle de la consulta";
+    document.getElementById("modal-title").textContent = "Detalles de la consulta";
     document.getElementById("textProfesional").textContent = "Profesional a cargo:";
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden"; 
-    document.getElementById("modalProfesional").textContent = btn.dataset.profesional;
     document.getElementById("modalPaciente").textContent = btn.dataset.paciente;
     document.getElementById("modalFecha").textContent = btn.dataset.fecha;
+    document.getElementById("modalProfesional").textContent = btn.dataset.profesional;
     document.getElementById("modalDiagnostico").textContent = decodeNewlines(btn.dataset.diagnostico);
     document.getElementById("modalObservaciones").textContent = decodeNewlines(btn.dataset.observaciones);
     document.getElementById("modalTratamiento").textContent = decodeNewlines(btn.dataset.tratamiento);
     document.getElementById("modalEstudios").innerHTML = btn.dataset.estudios;
     document.getElementById("modalMedicaciones").textContent = decodeNewlines(btn.dataset.medicaciones);
+    document.documentElement.style.overflow = "hidden"; 
+    document.body.style.overflow = "hidden";
 }
 
+
 function abrirDetalleEstudios(btn) {
+    btnVolverConsulta.style.display = "block";
+    btnVolverConsulta.dataset.idConsulta = btn.dataset.idConsulta;
     modal.classList.add("show");
     document.getElementById("parte-consultas").style.display = "none";
     document.getElementById("parte-medicamentos").style.display = "none";
@@ -50,6 +56,8 @@ function abrirDetalleEstudios(btn) {
 }
 
 function abrirDetalleMedicamento(btn) {
+    btnVolverConsulta.style.display = "block";
+    btnVolverConsulta.dataset.idConsulta = btn.dataset.idConsulta;
     modal.classList.add("show");
     document.getElementById("parte-consultas").style.display = "none";
     document.getElementById("parte-estudios").style.display = "none";
@@ -65,6 +73,24 @@ function abrirDetalleMedicamento(btn) {
     document.getElementById("modalDosis").innerHTML = btn.dataset.dosis;
     document.getElementById("modalFrecuencia").textContent = btn.dataset.frecuencia;
     document.getElementById("modalTiempoUso").textContent = btn.dataset.tiempoUso;
+}
+
+function DetalleConsulta(btn){
+    let idConsulta = btn.dataset.idConsulta;
+    const btnDetalleConsulta = document.getElementById("idConsulta_"+idConsulta);
+    abrirDetalle(btnDetalleConsulta);
+}
+
+function DetalleEstudio(btn){
+    let idOrden = btn.dataset.idOrden;
+    const btnDetalleEstudio = document.getElementById("idOrden_"+idOrden);
+    abrirDetalleEstudios(btnDetalleEstudio);
+}
+
+function DetalleMedicamento(btn){
+    let idMedicamento = btn.dataset.idMedicamento;
+    const btnDetalleMedicamento = document.getElementById("idMedicamento_"+idMedicamento);
+    abrirDetalleMedicamento(btnDetalleMedicamento);
 }
 
 
@@ -119,6 +145,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const id_turnoEstudio = btn.dataset.idTurnoEstudio; 
             const id_paciente = btn.dataset.idPaciente; 
 
+            document.querySelectorAll('.error-message').forEach(errorDiv => {
+                errorDiv.remove();
+            });                  
+
             if (id_menor){
                 try {
                     const response = await fetch(`/pacientes/gestion-menor/?id=${id_menor}`, {
@@ -129,6 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
                     if (!response.ok) throw new Error("Error al obtener datos");
         
+
                     const data = await response.json();
         
                     document.getElementById("id_menor").value = data.id;

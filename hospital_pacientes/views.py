@@ -136,18 +136,17 @@ def sacarTurno(request, paciente_id):
             
             
             # Filtrar los profesionales que están asociados con la especialidad seleccionada
-            profesionales = UsuarioRolProfesionalAsignado.objects.filter(rol_profesional__especialidad=especialidad)
-            
+            profesionales = UsuarioRolProfesionalAsignado.objects.filter(rol_profesional__especialidad=especialidad, usuario__persona__is_active=True) 
             subConsulta = (  # Subconsulta que trae un registro de cada usuario.
                 UsuarioLugarTrabajoAsignado.objects.filter(
                     usuario__in=profesionales.values('usuario'),
-                    jornada__turno=horario_turno
+                    jornada__turno=horario_turno,
+                    rolProfesionalAsignado__rol_profesional__especialidad= especialidad
                 )
                 .values('usuario')
                 .annotate(min_id=Min('id'))
                 .values('min_id')
             )
-            
             profesionales_disponibles = UsuarioLugarTrabajoAsignado.objects.filter(id__in=subConsulta)
                     
             dias_disponibles = []
@@ -260,7 +259,7 @@ def sacarTurno(request, paciente_id):
 
             # Validar profesional y su jornada
             try:
-                profesional = UsuarioLugarTrabajoAsignado.objects.select_related("jornada", "usuario", "lugar").filter(usuario_id=profesional_form_id).first()
+                profesional = UsuarioLugarTrabajoAsignado.objects.select_related("jornada", "usuario", "lugar").filter(usuario_id=profesional_form_id,usuario__persona__is_active=True).first()
             except UsuarioLugarTrabajoAsignado.DoesNotExist:
                 response = render(request, "403.html", {
                     "mensaje": "Profesional inválido o no encontrado."
@@ -497,7 +496,7 @@ def obtener_dias_disponibles_servicio(servicio_id,paciente_id,estudio_id):
     dias_disponibles = []
     servicio_diagnostico = get_object_or_404(ServicioDiagnostico, pk=servicio_id)
     limite = servicio_diagnostico.capacidad_diaria
-    lugaresDisponibles = servicio_diagnostico.lugar.all()
+    lugaresDisponibles = servicio_diagnostico.lugar.filter(activo=True)
     lugarDisponible = None
     for lugar in lugaresDisponibles:
         if TurnoEstudio.objects.filter(servicio_diagnostico=servicio_diagnostico,lugar=lugar).count() < limite:
@@ -727,7 +726,7 @@ def reprogramarTurnoEstudio(request, turno_id):
             return response         
         
         lugar = Lugar.objects.get(pk=lugarSeleccionado_id)   
-        print(lugar)
+
         if TurnoEstudio.objects.filter(fecha_turno=fechaSeleccionada,servicio_diagnostico=turno.servicio_diagnostico,lugar=lugar).count() >= turno.servicio_diagnostico.capacidad_diaria:
             response = render(request, "403.html", {
                 "mensaje": "No podés reservar un turno en un lugar sin disponibilidad."
@@ -778,7 +777,6 @@ def cancelarTurnoEstudio(request, turno_id):
 @login_required
 def miHistorial(request):
     if request.method == "GET":
-        # Traer consultas, medicaciones y estudios relacionados de forma eficiente
         consultas = Consultas.objects.filter(turno__paciente=request.user.paciente).prefetch_related('estudios', 'medicaciones')  # trae todas las medicaciones y estudios asociados a las consultas que hayas filtrado
         estudios = OrdenEstudio.objects.filter(consulta__turno__paciente = request.user.paciente)
         medicamentos = Medicaciones.objects.filter(consulta__turno__paciente = request.user.paciente)
@@ -864,6 +862,8 @@ def gestionMenores(request):
         else:
             return JsonResponse({"error": "ID no proporcionado"}, status=400) 
     
+    adulto = request.user.paciente
+    menores_relaciones = adulto.menores_a_cargo.select_related("menor__persona")
     if request.method == "POST":
         id_menor = request.POST.get("id_menor")  
         if id_menor:
@@ -873,11 +873,10 @@ def gestionMenores(request):
             if form.is_valid():
                 form.save()  
                 return redirect("gestionMenores")
+            else:
+                return render(request, "gestionMenores/gestionMenores.html",{"menores_relaciones": menores_relaciones,"form":form,"error":True,"id_paciente":menor.menor.id})  
         else:
-            print("F")
             return redirect("gestionMenores")
         
-    adulto = request.user.paciente
-    menores_relaciones = adulto.menores_a_cargo.select_related("menor__persona")
     return render(request, "gestionMenores/gestionMenores.html",{"menores_relaciones": menores_relaciones,"form":RegistrarMenorForm()})  
 

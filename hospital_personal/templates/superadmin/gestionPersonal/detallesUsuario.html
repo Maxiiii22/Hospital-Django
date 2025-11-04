@@ -178,11 +178,11 @@
                             </div>
                             <div class="campo-input">
                                 <label for="date_joined">Fecha de registro:</label>
-                                <input type="text" readonly value="{{usuario.persona.date_joined|date:'d-m-Y H:i'}}" id="date_joined">
+                                <input type="text" readonly value="{{usuario.persona.date_joined|date:'d-m-Y H:i A'}}" id="date_joined">
                             </div>
                             <div class="campo-input">
                                 <label for="last_login">Ultimo inicio de sesion:</label>
-                                <input type="text" readonly value="{% if usuario.persona.last_login %}{{usuario.persona.last_login|date:'d-m-Y H:i'}}{% else %}Nunca accedió{% endif %}" id="last_login">
+                                <input type="text" readonly value="{% if usuario.persona.last_login %}{{usuario.persona.last_login|date:'d-m-Y H:i A'}}{% else %}Nunca accedió{% endif %}" id="last_login">
                             </div>
                             <div class="campo-input">
                                 <label for="id_is_active">Usuario habilitado:</label>
@@ -192,6 +192,7 @@
                     </div>
                 </div>
                 <button type="submit" class="btn-global">Guardar cambios</button>
+            </form>
 
                 {% if usuario.tipoUsuario.nombre_tipoUsuario == "Médico" or usuario.tipoUsuario.nombre_tipoUsuario == "Apoyo en Diagnóstico y Tratamiento" or usuario.tipoUsuario.nombre_tipoUsuario == "Cargador de Resultados"  %} 
                     <div class="secciones">
@@ -209,7 +210,7 @@
                                             </div>
                                             <div class="rol-profesional-btns-acciones">
                                                 <button type="button" class="btn-edit-lugarTrabajo" id="usuario-id-{{rolProfesional.id}}" onclick="modalEditarRolProfesional('{{ rolProfesional.id }}')"><i class="hgi hgi-stroke hgi-edit-03"></i></button>
-                                                <form method="POST" action="{% url 'deleteRolProfesional' rolProfesional.id %}">
+                                                <form method="POST" action="{% url 'deleteRolProfesionalAsignado' rolProfesional.id %}">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn-delete-lugarTrabajo"><i class="hgi hgi-stroke hgi-delete-04"></i></button>
                                                 </form>
@@ -267,7 +268,6 @@
                     </div>
                 {% endif %}
     
-            </form>
         </div>
     </main>
 

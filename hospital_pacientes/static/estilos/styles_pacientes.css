@@ -1047,15 +1047,27 @@ form .campos .campo-input{
     padding: 10px 5px;
 }
 
-
 .container-profesionales{
     display: flex;
+    width: clamp(310px, 95%, 1585px);
+    justify-content: center;
     flex-direction: column;
     align-items: center;
     background-color: #fff;
     border-radius: 10px;
     padding: 20px 0;
-    width: clamp(310px, 95%, 1585px);
+    gap: 10px;
+}
+
+
+.box-title-profesionales-disponibles{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.box-title-profesionales-disponibles h2{
+    width: 90%;
 }
 
 .container-profesionales h2{
@@ -1067,20 +1079,20 @@ form .campos .campo-input{
     flex-wrap: wrap;
     flex-direction: row;
     justify-content: center;
-    width: clamp(303px, 99%, 1585px);
+    width: clamp(310px, 100%, 1585px);
+    gap: 15px; 
 }
+
 
 .box-cards-profesionales .card-profesional {
     border: 1px solid #aaa;
-    padding: 20px;
-    margin: 10px;
+    padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 3px;
-    width: clamp(303px, 98%, 365px);
+    width: clamp(303px, 97%, 380px);
     transition: border-color 0.2s ease;
 }
 
@@ -1088,13 +1100,18 @@ form .campos .campo-input{
     border-color: #555;
 }
 
-.box-cards-profesionales .card-profesional h2 {
-    margin-top: 0;
-}
 .box-cards-profesionales .card-profesional p {
     font-size: 14px;
-    align-self: flex-start;
 }
+
+.box-cards-profesionales .card-profesional .calendar {
+    gap: 3px;
+}
+
+.box-cards-profesionales .card-profesional .calendar button {
+    padding: 9.4px;
+}
+
 
 .box-cards-profesionales .nav-buttons {
     display: flex;

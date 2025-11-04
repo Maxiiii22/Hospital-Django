@@ -19,9 +19,7 @@
                     <tr>
                         <th>ID consulta</th>
                         <th>Fecha de la consulta</th>
-                        <th>ID del turno</th>
                         <th class="td-paciente">Paciente</th>
-                        <th class="th-diagnostico">Diagnostico</th>
                         <th>Accion</th>
                     </tr>
                 </thead>
@@ -31,25 +29,9 @@
                     <tr class="fila-consultas-medico">
                         <td>{{consulta.id}}</td>
                         <td>{{consulta.turno.fecha_turno|date:"d-m-Y"}}</td>
-                        <td>{{consulta.turno.id}}</td>
                         <td class="td-paciente">{{consulta.turno.paciente.persona.get_full_name}} - DNI: {{consulta.turno.paciente.persona.dni}}</td>
-                        <td class="td-diagnostico">{{consulta.diagnostico}}</td>
                         <td class="td-acciones">
-                            {% if consulta.medicaciones.all or consulta.estudios.all %}
-                                <button class="btn-accion" onclick="abrirDetalle(this)"
-                                data-profesional="{{ consulta.turno.profesional.persona.get_full_name}} - N° Legajo: {{ consulta.turno.profesional.persona.login_id}}"
-                                data-paciente="{{ consulta.turno.paciente.persona.get_full_name}} - DNI: {{consulta.turno.paciente.persona.dni}}"
-                                data-fecha="{{ consulta.fecha|date:'d/m/Y' }}"
-                                data-diagnostico="{{ consulta.diagnostico|default:'-'|escapejs }}"
-                                data-observaciones="{{ consulta.observaciones|default:'-'|escapejs }}"
-                                data-tratamiento="{% if consulta.tratamiento %}{{ consulta.tratamiento|default:'-'|escapejs }}{% else %}Ninguno{% endif %}"
-                                data-estudios="{% for e in consulta.estudios.all %}• {{ e.tipo_estudio.nombre_estudio }} - Estado: {{e.get_estado_display}} - Motivo: {{e.motivo_estudio}} {% if e.turnoEstudio.resultado.archivo_pdf.url %}- <a href='{{e.turnoEstudio.resultado.archivo_pdf.url}}' target='_blank' class='btn-verEstudio'>Ver archivo</a>{% endif %}<br>{% empty %}Ninguno{% endfor %}"
-                                data-medicaciones="{% for m in consulta.medicaciones.all %}• {{ m.medicamento }} - {{ m.dosis }} - {{m.frecuencia}}\n{% empty %}Ninguna{% endfor %}">
-                                Mas detalles
-                                </button>
-                            {% else %}
-                                Consulta sin indicaciones de medicación o estudios.
-                            {% endif %}
+                            <a href="{% url 'detallesConsulta' consulta.id %}" class="btn-accion">Mas detalles</a>
                         </td>   
                     </tr>
                     {% empty %}

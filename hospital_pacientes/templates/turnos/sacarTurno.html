@@ -47,11 +47,13 @@
         {% if estaBuscando %}
             {% if formularios %}
                 <div class="container-profesionales">
-                    <h2>Profesionales disponibles en {{ especialidadSeleccionada.nombre_especialidad }}</h2>
+                    <div class="box-title-profesionales-disponibles">
+                        <h2>Profesionales disponibles en {{ especialidadSeleccionada.nombre_especialidad }}</h2>
+                    </div>
                     <div class="box-cards-profesionales">
                         {% for item in formularios %}
                         <div class="card-profesional">
-                            <h2>{{ item.profesional.usuario.persona.get_full_name }} - DNI: {{ item.profesional.usuario.persona.dni }}</h2>
+                            <h2>{{ item.profesional.usuario.persona.get_full_name }}</h2>
                             <p><strong>N° Matricula:</strong> {{ item.profesional.usuario.numero_matricula }}</p>
                             <p><strong>Sexo:</strong> {{ item.profesional.usuario.persona.sexo }}</p>
                             <p><strong>Horario:</strong> {{ item.profesional.jornada.get_turno_display }}</p>    
@@ -77,7 +79,7 @@
                                 <button type="submit" disabled class="btn-global btn-form-seleccionar-profesional" id="btn-form-profesional-id_{{item.profesional.usuario.id}}">Confirmar turno</button>
                             </form>
                         </div>
-                    {% endfor %}
+                        {% endfor %}
                     </div>
                 </div>
                 {{ dias_disponibles|json_script:"diasDisponibles" }}
@@ -90,8 +92,8 @@
     </main>
     
     <script src="{% static 'js/modals.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>  <!-- jQuery (requerido por Toastr.js) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>  <!-- Toastr JS: Biblioteca para mostrar notificaciones tipo toast -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>  {# jQuery (requerido por Toastr.js) #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>  {# Toastr JS: Biblioteca para mostrar notificaciones tipo toast #}
 
     {% if messages %}
         <script>

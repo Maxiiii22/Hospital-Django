@@ -6,6 +6,17 @@
     list-style: none;
 }
 
+.fila{
+    background-color: #f4f4f1;
+    border-radius: 5px;
+}
+
+.fila:hover{
+    background-color: #f4f4f1;
+    outline: 1px solid #aaa;
+}
+
+
 /* Clases globales */ 
 .error-message {
     color: red;

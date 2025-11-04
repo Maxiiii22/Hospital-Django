@@ -99,8 +99,8 @@ class Persona(AbstractUser):
         else:
             return f"{self.get_full_name()} (Menor a cargo del DNI: {self.paciente.responsable.adulto.persona.dni})"
     
-    class Meta: # Esto hace que en el admin diga "Personas" en lugar de "Users".
-        verbose_name = "Persona"
+    class Meta: 
+        verbose_name = "Persona"  # Esto hace que en el admin diga "Personas" en lugar de "Users".
         verbose_name_plural = "Personas"
 
 

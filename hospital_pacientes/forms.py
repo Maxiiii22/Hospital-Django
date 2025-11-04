@@ -18,6 +18,21 @@ PARENTESCO_CHOICES = [
     ('TUTOR_LEGAL', 'Tutor Legal'),
 ] 
 class RegistrarMenorForm(forms.ModelForm):
+    dni = forms.CharField(
+        max_length=8,
+        validators=[
+            RegexValidator(
+                regex=r'^\d+$',  # Permite solo números
+                message="El DNI solo puede contener números.",
+                code='invalid_dni'
+            )
+        ],
+        widget=forms.TextInput(attrs={
+            'inputmode': 'numeric',  # Solo permite números 
+            "placeholder" : "DNI",
+            'class': "campos-modal"
+        })
+    )  
     parentesco = forms.ChoiceField(
         choices=PARENTESCO_CHOICES,
         widget=forms.Select(attrs={
@@ -51,7 +66,6 @@ class RegistrarMenorForm(forms.ModelForm):
             'dni','first_name', 'last_name','sexo','fecha_nacimiento'
         ]
         widgets = {
-            "dni" : forms.TextInput(attrs={'class': "campos-modal",'autofucus':"", 'placeholder':"DNI", 'required':""}),
             "sexo" : forms.Select(attrs={'class': "campos-modal", 'required':""}),
             "fecha_nacimiento" : forms.DateInput(attrs={'class': "campos-modal",'placeholder': 'DD/MM/YYYY','type': 'date', 'required':""}) ,
         }

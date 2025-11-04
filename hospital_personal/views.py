@@ -10,6 +10,7 @@ from controlUsuario.models import Usuario,TiposUsuarios,RolesProfesionales,Perso
 from hospital_pacientes.models import Paciente
 from controlUsuario.forms import FormularioRegistroDePersonal,FormularioActualizarPassword
 from .forms import FormEspecialidades,FormDepartamentos,FormTiposUsuarios,FormConsulta,MedicacionesFormSet,EstudiosFormSet,ResultadoEstudioForm,ResultadoImagenForm,FormularioAsignaciones,FormularioLugarTrabajo,FormRolesProfesionales,FormServiciosDiagnostico,FormEstudiosDiagnosticos,FormLugar,FormPlantillaEstudio,FormularioEditarLugarTrabajo
+from .filters import LugarFilter,PacienteFilter,UsuarioFilter
 from django.forms import modelformset_factory
 from django.contrib.auth import update_session_auth_hash
 from hospital_pacientes.views import obtener_disponibilidad
@@ -54,7 +55,7 @@ def indexPersonal(request):
         id_especialidad = request.GET.get('id')
         # Verifica que la especialidad realmente pertenece al usuario
         if request.user.is_authenticated and hasattr(request.user, 'usuario'):
-            if request.user.usuario.especialidadesUsuario.filter(especialidad__id=id_especialidad).exists():
+            if request.user.usuario.rolesProfesionalesUsuario.filter(rol_profesional__especialidad__id=id_especialidad).exists():
                 request.session['especialidad_actual'] = id_especialidad
         
     return render(request, "indexPersonal.html") 
@@ -63,8 +64,14 @@ def indexPersonal(request):
 @personal_required
 @login_required
 def gestionDelPersonal(request):
-    personal = Usuario.objects.all()
-    return render(request, "superadmin/gestionPersonal/gestionPersonal.html", {"allPersonal":personal}) 
+    filtro = UsuarioFilter(request.GET, queryset=Usuario.objects.all(), prefix="form-filter")  # El prefix en Django sirve para diferenciar varios formularios que usan los mismos nombres de campos dentro de la misma página. Es básicamente un “prefijo” que Django antepone a los name e id de los inputs del formulario.
+    personal = filtro.qs
+    
+    if request.method == "GET" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        if request.GET.get("filtrar") == "1":
+            return render(request,"superadmin/tablasDinamicas/_tabla_personal.html", {"allPersonal": personal,"filtro":filtro})   
+    
+    return render(request, "superadmin/gestionPersonal/gestionPersonal.html", {"allPersonal":personal,"filtro":filtro}) 
 
 @personal_required
 @login_required
@@ -284,26 +291,34 @@ def deleteLugarTrabajo(request,id_lugarTrabajo):
         return HttpResponseForbidden(render(request, "403.html"))
     
     lugarTrabajo = get_object_or_404(UsuarioLugarTrabajoAsignado, id=id_lugarTrabajo)
+    usuario_id = lugarTrabajo.usuario.id
+    
     if request.method == 'GET':
-        return redirect('detalle_usuario', id=lugarTrabajo.usuario.id)
+        return redirect('detalle_usuario', id=usuario_id)
         
     if request.method == 'POST':
         lugarTrabajo.delete()
-        return redirect('detalle_usuario', id=lugarTrabajo.usuario.id)
+        return redirect('detalle_usuario', id=usuario_id)
 
 @personal_required
 @login_required
-def deleteRolProfesional(request,id_rolProfesional):
+def deleteRolProfesionalAsignado(request,id_rolProfesionalAsignado):
     if not request.user.is_staff: # si el que intenta acceder no es un superadmin
         return HttpResponseForbidden(render(request, "403.html"))
     
-    rolProfesional = get_object_or_404(UsuarioRolProfesionalAsignado, id=id_rolProfesional)
+    rolProfesionalAsignado = get_object_or_404(UsuarioRolProfesionalAsignado, pk=id_rolProfesionalAsignado)
+    usuario_id = rolProfesionalAsignado.usuario.id
+    
+    if rolProfesionalAsignado.RolesProfesionalesAsignados.exists():
+        messages.info(request, "No es posible eliminar este rol porque tiene lugares de trabajo asignados.")
+        return redirect('detalle_usuario', id=usuario_id)
+    
     if request.method == 'GET':
-        return redirect('detalle_usuario', id=rolProfesional.usuario.id)
-        
+        return redirect('detalle_usuario', id=usuario_id)
+    
     if request.method == 'POST':
-        rolProfesional.delete()
-        return redirect('detalle_usuario', id=rolProfesional.usuario.id)
+        rolProfesionalAsignado.delete()
+        return redirect('detalle_usuario', id=usuario_id)
 
 
 @personal_required
@@ -464,10 +479,15 @@ def gestionDeEstudiosDiagnostico(request):
 @personal_required
 @login_required
 def gestionDeLugares(request):
-    lugares = Lugar.objects.all()
     formLugar = FormLugar()
-
+    
+    filtro = LugarFilter(request.GET, queryset=Lugar.objects.all(), prefix="form-filter")  # El prefix en Django sirve para diferenciar varios formularios que usan los mismos nombres de campos dentro de la misma página. Es básicamente un “prefijo” que Django antepone a los name e id de los inputs del formulario.
+    lugares = filtro.qs
+    
     if request.method == "GET" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        if request.GET.get("filtrar") == "1":
+            return render(request,"superadmin/tablasDinamicas/_tabla_lugares.html", {"allLugares": lugares})
+        
         id = request.GET.get('id')
         if id:
             lugar = get_object_or_404(Lugar, id=id)
@@ -501,9 +521,9 @@ def gestionDeLugares(request):
             return redirect("gestionDeLugares")  
         else:
             print("Errores del formulario:", formLugar.errors)
-            return render(request, "superadmin/gestionLugares.html", {"allLugares": lugares,"form": formLugar,'abrir_modal_por_error': True  })
+            return render(request, "superadmin/gestionLugares.html", {"allLugares": lugares,"form": formLugar,"filtro":filtro,'abrir_modal_por_error': True  })
 
-    return render(request, "superadmin/gestionLugares.html", {"allLugares": lugares,"form": formLugar  })
+    return render(request, "superadmin/gestionLugares.html", {"allLugares": lugares,"form": formLugar, "filtro":filtro  })
 
 @personal_required
 @login_required
@@ -634,9 +654,15 @@ def gestionDeRoles(request):
 
 @personal_required
 @login_required
-def listaPacientes(request):
-    pacientes = Paciente.objects.all()
-    return render(request, "superadmin/listaPacientes/listaPacientes.html", {"allPacientes":pacientes}) 
+def listaPacientes(request):       
+    filtro = PacienteFilter(request.GET, queryset=Paciente.objects.all(), prefix="form-filter")  # El prefix en Django sirve para diferenciar varios formularios que usan los mismos nombres de campos dentro de la misma página. Es básicamente un “prefijo” que Django antepone a los name e id de los inputs del formulario.
+    pacientes = filtro.qs
+    
+    if request.method == "GET" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        if request.GET.get("filtrar") == "1":
+            return render(request,"superadmin/tablasDinamicas/_tabla_pacientes.html", {"allPacientes": pacientes,"filtro":filtro})
+        
+    return render(request, "superadmin/listaPacientes/listaPacientes.html", {"allPacientes":pacientes,"filtro":filtro}) 
 
 @personal_required
 @login_required
@@ -825,6 +851,8 @@ def registrarConsulta(request, id_turno):
 
     return render(request, 'medico/consultas/registroConsulta.html', context)
 
+@personal_required
+@login_required
 def editarConsulta(request, id_consulta):
     hoy = timezone.now().date() 
     consulta = get_object_or_404(Consultas, id=id_consulta)
@@ -909,7 +937,14 @@ def editarConsulta(request, id_consulta):
     }
     return render(request, 'medico/consultas/registroConsulta.html', context)
 
-
+@personal_required
+@login_required
+def detallesConsulta(request, id_consulta):
+    consulta = get_object_or_404(Consultas.objects.prefetch_related('estudios', 'medicaciones'),pk=id_consulta) 
+    if consulta.turno.profesional != request.user.usuario: # Verificar si la consulta pertenece al usuario actual
+        return HttpResponseForbidden(render(request, "403.html"))
+    
+    return render(request, 'medico/consultas/detallesConsulta.html', {"consulta":consulta})
 
 @personal_required
 @login_required

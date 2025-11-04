@@ -14,6 +14,7 @@
         <div class="container-historial-clinico">
             <h1>Consulta del turno N° {{consultaEspecifica.turno.id}}</h1>
             <div class="box-tabla-consultas">
+                <h2>Consulta medica del turno</h2>
                 <table>
                     <thead>
                         <tr>
@@ -21,7 +22,6 @@
                             <th>Especialidad</th>
                             <th>Fecha</th>
                             <th>Paciente</th>
-                            <th>Diagnostico</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -32,17 +32,16 @@
                                 <td>{{consultaEspecifica.turno.especialidad.nombre_especialidad}}</td>
                                 <td>{{consultaEspecifica.fecha|date:"d-m-Y"}}</td>
                                 <td>{{consultaEspecifica.turno.paciente.persona.get_full_name}} - DNI: {{consultaEspecifica.turno.paciente.persona.dni}}</td>
-                                <td>{{consultaEspecifica.diagnostico}}</td>
                                 <td>
                                     {% if consultaEspecifica.medicaciones.all or consultaEspecifica.estudios.all %}
-                                        <button class="btn-accion" onclick="abrirDetalle(this)"
+                                        <button class="btn-global" onclick="abrirDetalle(this)" id="idConsulta_{{consultaEspecifica.id}}"
                                         data-profesional="{{ consultaEspecifica.turno.profesional.persona.get_full_name}} - N° Legajo: {{ consultaEspecifica.turno.profesional.persona.login_id}}"
                                         data-paciente="{{ consultaEspecifica.turno.paciente.persona.get_full_name}} - DNI: {{consultaEspecifica.turno.paciente.persona.dni}}"
                                         data-fecha="{{ consultaEspecifica.fecha|date:'d/m/Y' }}"
                                         data-diagnostico="{{ consultaEspecifica.diagnostico|default:'-'|escapejs }}"
                                         data-observaciones="{{ consultaEspecifica.observaciones|default:'-'|escapejs }}"
                                         data-tratamiento="{% if consultaEspecifica.tratamiento %}{{ consultaEspecifica.tratamiento|default:'-'|escapejs }}{% else %}Ninguno{% endif %}"
-                                        data-estudios="{% for e in consultaEspecifica.estudios.all %}• {{ e.tipo_estudio.nombre_estudio }} - Estado: {{e.get_estado_display}} - Motivo: {{e.motivo_estudio}} {% if e.turnoEstudio.resultado.archivo_pdf.url %}- <a href='{{e.turnoEstudio.resultado.archivo_pdf.url}}' target='_blank' class='btn-verEstudio'>Ver archivo</a>{% endif %}<br>{% empty %}Ninguno{% endfor %}"
+                                        data-estudios="{% for e in consultaEspecifica.estudios.all %}<p>• {{ e.tipo_estudio.nombre_estudio }} <button onClick='DetalleEstudio(this)' class='btn-global' type='button' data-id-orden='{{e.id}}'>Ver detalles</button></p>{% empty %}<p>Ninguno</p>{% endfor %}"
                                         data-medicaciones="{% for m in consultaEspecifica.medicaciones.all %}• {{ m.medicamento }} - {{ m.dosis }} - {{m.frecuencia}}\n{% empty %}Ninguna{% endfor %}">
                                         Mas detalles
                                         </button>
@@ -54,6 +53,88 @@
                 </table>
             </div>
         </div>
+
+            {% if consultaEspecifica.estudios.all %}
+            <div class="container-historial-clinico">
+                <div class="box-tabla-estudios">
+                    <h2>Estudios solicitados en la consulta</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N° Orden</th>
+                                <th>Tipo estudio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for estudio in consultaEspecifica.estudios.all %}
+                                <tr class="filas-historial-clinico">
+                                    <td>{{estudio.id}}</td>
+                                    <td>{{estudio.tipo_estudio.nombre_estudio}}</td>
+                                    <td>
+                                        <button class="btn-global" id="idOrden_{{estudio.id}}" onclick="abrirDetalleEstudios(this)"
+                                            data-id-consulta="{{estudio.consulta.id}}"
+                                            data-profesional="{{estudio.solicitado_por.persona.get_full_name}} - N° Legajo: {{estudio.solicitado_por.numero_matricula}}"
+                                            data-paciente="{{ estudio.consulta.turno.paciente.persona.get_full_name}} - DNI: {{estudio.consulta.turno.paciente.persona.dni}}"
+                                            data-fecha="{{estudio.consulta.fecha|date:'d-m-Y'}}"
+                                            data-tipo-estudio="{{estudio.tipo_estudio.nombre_estudio }}"
+                                            data-motivo="{{estudio.motivo_estudio }}"
+                                            data-indicaciones="{{estudio.indicaciones }}"
+                                            data-estado="{{ estudio.estado_detallado|safe }}"
+                                            >Mas detalles
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if consultaEspecifica.medicaciones.all %}
+                <div class="container-historial-clinico">
+                    <div class="box-tabla-medicamentos">
+                        <h2>Medicamentos recetados en la consulta</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Medicamento</th>
+                                    <th class="columna-dosis">Dosis</th>
+                                    <th class="columna-frecuencia">Frecuencia</th>
+                                    <th class="columna-tiempoUso">Tiempo de uso</th>
+                                    <th class="columna-recetadoPor">Recetados por</th>
+                                    <th class="columna-accion">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for medicamento in consultaEspecifica.medicaciones.all %}
+                                    <tr class="filas-historial-clinico">
+                                        <td>{{medicamento.medicamento}}</td>
+                                        <td class="columna-dosis">{{medicamento.dosis}}</td>
+                                        <td class="columna-frecuencia">{{medicamento.frecuencia}}</td>
+                                        <td class="columna-tiempoUso">{{medicamento.tiempo_uso}}</td>
+                                        <td class="columna-recetadoPor">{{medicamento.recetada_por.persona.get_full_name}} - N° Legajo {{medicamento.recetada_por.numero_matricula}}</td>
+                                        <td class="columna-accion">
+                                            <button class="btn-global" id="idMedicamento_{{medicamento.id}}" onclick="abrirDetalleMedicamento(this)"
+                                            data-id-consulta="{{medicamento.consulta.id}}"
+                                            data-profesional="{{medicamento.recetada_por.persona.get_full_name}} - N° Legajo: {{medicamento.recetada_por.numero_matricula}}"
+                                            data-paciente="{{ medicamento.consulta.turno.paciente.persona.get_full_name}} - DNI: {{medicamento.consulta.turno.paciente.persona.dni}}"
+                                            data-fecha="{{medicamento.consulta.fecha|date:'d-m-Y'}}"
+                                            data-medicamento="{{medicamento.medicamento }}"
+                                            data-dosis="{{medicamento.dosis }}"
+                                            data-frecuencia="{{medicamento.frecuencia }}"
+                                            data-tiempo-uso="{{medicamento.tiempo_uso }}">
+                                            Mas detalles
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}            
         
     {% elif resultadoEstudioEspecifico %}
         <div class="container-historial-clinico">
@@ -103,7 +184,6 @@
                             <th>Especialidad</th>
                             <th>Fecha</th>
                             <th class="columna-paciente">Paciente</th>
-                            <th class="columna-diagnostico">Diagnostico</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -115,17 +195,16 @@
                                 <td>{{consulta.turno.especialidad.nombre_especialidad}}</td>
                                 <td>{{consulta.turno.fecha_turno|date:"d-m-Y"}}</td>
                                 <td class="columna-paciente">{{consulta.turno.paciente.persona.get_full_name}} - DNI: {{consulta.turno.paciente.persona.dni}}</td>
-                                <td class="columna-diagnostico">{{consulta.diagnostico}}</td>
                                 <td class="td-acciones">
-                                    <button class="btn-global" onclick="abrirDetalle(this)"
+                                    <button class="btn-global" onclick="abrirDetalle(this)" id="idConsulta_{{consulta.id}}"
                                         data-profesional="{{ consulta.turno.profesional.persona.get_full_name}} - N° Legajo: {{ consulta.turno.profesional.persona.login_id}}"
                                         data-paciente="{{ consulta.turno.paciente.persona.get_full_name}} - DNI: {{consulta.turno.paciente.persona.dni}}"
                                         data-fecha="{{ consulta.fecha|date:'d/m/Y' }}"
                                         data-diagnostico="{{ consulta.diagnostico|default:'-'|escapejs }}"
                                         data-observaciones="{{ consulta.observaciones|default:'-'|escapejs }}"
                                         data-tratamiento="{% if consulta.tratamiento %}{{ consulta.tratamiento|default:'-'|escapejs }}{% else %}Ninguno{% endif %}"
-                                        data-estudios="{% for e in consulta.estudios.all %}<p>• {{ e.tipo_estudio.nombre_estudio }} - Estado: {{e.get_estado_display}} - Motivo: {{e.motivo_estudio}} {{ e.estado_detallado|safe }}</p>{% empty %}<p>Ninguno</p>{% endfor %}"
-                                        data-medicaciones="{% for m in consulta.medicaciones.all %}• {{ m.medicamento }} - {{ m.dosis }} - {{m.frecuencia}}\n{% empty %}Ninguna{% endfor %}">
+                                        data-estudios="{% for e in consulta.estudios.all %}<p>• {{ e.tipo_estudio.nombre_estudio }} <button onClick='DetalleEstudio(this)' class='btn-global' type='button' data-id-orden='{{e.id}}'>Ver detalles</button></p>{% empty %}<p>Ninguno</p>{% endfor %}"
+                                        data-medicaciones="{% for m in consulta.medicaciones.all %}• {{ m.medicamento }} - {{ m.dosis }} - {{m.frecuencia}} <button onClick='DetalleMedicamento(this)' class='btn-global' type='button' data-id-medicamento='{{m.id}}'>Ver detalles</button>\n{% empty %}Ninguna{% endfor %}">
                                         Mas detalles
                                     </button>
                                 </td>   
@@ -161,10 +240,8 @@
                                     <td><strong>ID:</strong> {{estudio.consulta.id}} - <strong>Especialidad:</strong> {{estudio.consulta.turno.especialidad.nombre_especialidad}} - <strong>Fecha:</strong> {{estudio.consulta.fecha|date:"d-m-Y"}}</td>
                                     <td>{{estudio.tipo_estudio.nombre_estudio}}</td>
                                     <td>
-                                        {% if estudio.turnoEstudio.estado == "realizado" %}
-                                            
-                                        {% endif %}
-                                        <button class="btn-global" onclick="abrirDetalleEstudios(this)"
+                                        <button class="btn-global" id="idOrden_{{estudio.id}}" onclick="abrirDetalleEstudios(this)"
+                                            data-id-consulta="{{estudio.consulta.id}}"
                                             data-profesional="{{estudio.solicitado_por.persona.get_full_name}} - N° Legajo: {{estudio.solicitado_por.numero_matricula}}"
                                             data-paciente="{{ estudio.consulta.turno.paciente.persona.get_full_name}} - DNI: {{estudio.consulta.turno.paciente.persona.dni}}"
                                             data-fecha="{{estudio.consulta.fecha|date:'d-m-Y'}}"
@@ -211,7 +288,8 @@
                                     <td class="columna-tiempoUso">{{medicamento.tiempo_uso}}</td>
                                     <td class="columna-recetadoPor">{{medicamento.recetada_por.persona.get_full_name}} - N° Legajo {{medicamento.recetada_por.numero_matricula}}</td>
                                     <td class="columna-accion">
-                                        <button class="btn-global" onclick="abrirDetalleMedicamento(this)"
+                                        <button class="btn-global" id="idMedicamento_{{medicamento.id}}" onclick="abrirDetalleMedicamento(this)"
+                                        data-id-consulta="{{medicamento.consulta.id}}"
                                         data-profesional="{{medicamento.recetada_por.persona.get_full_name}} - N° Legajo: {{medicamento.recetada_por.numero_matricula}}"
                                         data-paciente="{{ medicamento.consulta.turno.paciente.persona.get_full_name}} - DNI: {{medicamento.consulta.turno.paciente.persona.dni}}"
                                         data-fecha="{{medicamento.consulta.fecha|date:'d-m-Y'}}"
@@ -229,13 +307,15 @@
                 </div>
             </div>
         {% endif %}
+
     {% endif %}
 
 
     <div id="editModal" class="modal">
         <div class="modal-content modal-detalles-consulta">
             <span id="closeEditModal" class="close">&times;</span>
-            <h2 id="modal-title">Detalle de la consulta</h2>
+            <button style="display:none;" onClick='DetalleConsulta(this)' class='btn-global btn-volver-consulta' type='button' data-id-consulta=''><i class="hgi hgi-stroke hgi-arrow-left-02"></i>Volver a la consulta</button>            
+            <h2 id="modal-title">Detalles de la consulta</h2>
 
             <div class="modal-detalles-consulta-item">
                 <p><strong id="textProfesional">Profesional a cargo:</strong> <span id="modalProfesional"></span></p>
@@ -261,7 +341,9 @@
                 </div>
                 <div class="modal-detalles-consulta-item">
                     <p><strong>Estudios solicitados:</strong></p>
-                    <div id="modalEstudios" class="div-p"></div>
+                    <div id="modalEstudios" class="div-p">
+
+                    </div>
                 </div>
                 <div class="modal-detalles-consulta-item">
                     <p><strong>Medicaciones:</strong></p>

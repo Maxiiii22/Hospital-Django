@@ -8,6 +8,11 @@
 
 
 /* Clases globales */
+
+#seccion-form-filter,#seccion-edit{
+    display: none;
+}
+
 .error-message {
     color: red;
     font-size: 0.9em;
@@ -1059,6 +1064,18 @@ form .campos .campo-input{
 .modal-lugares form .campo-textarea{
     width: 100%;
 }
+
+.seccion-form-filter #filtro-form{
+    flex-direction: column;
+}
+
+#filtro-form .campo-input{ 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
 
 
 @media (width <= 1070px ) and (width > 920px){

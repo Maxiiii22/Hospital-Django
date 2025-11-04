@@ -117,7 +117,7 @@
                             <i class="hgi hgi-stroke hgi-arrow-down-01 arrowDesplegable"></i>
                         </div>
                         <ul class="sub-menu">
-                            {% for usuario in user.usuario.especialidadesUsuario.all %}
+                            {% for usuario in user.usuario.rolesProfesionalesUsuario.all %}
                                 <li>
                                     <div class="sub-menu-link selectEspecialidad" data-id-especialidad="{{usuario.rol_profesional.especialidad.id}}" >
                                         <i class="hgi hgi-stroke hgi-arrow-right-03"></i>

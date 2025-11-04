@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     "controlUsuario",
     "hospital_pacientes",
     "hospital_personal",
-    "intermedio"
+    "intermedio",
+    "django_filters"  # pip install django-filter
 ]
 
 MIDDLEWARE = [

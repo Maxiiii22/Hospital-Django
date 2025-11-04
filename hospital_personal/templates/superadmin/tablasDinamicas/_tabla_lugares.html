@@ -1,0 +1,44 @@
+<table id="tabla-gestion-lugares">
+    <thead>
+        {% if allLugares %}
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>N° Sala</th>
+            <th>Piso</th>
+            <th>Es crítico</th>
+            <th class="columna-tipo">Tipo</th>
+            <th class="columna-activo">Activo</th>
+            <th></th>
+        </tr>
+        {% endif %}
+    </thead>
+    <tbody>
+        {% if allLugares %}
+            {% for lugar in allLugares %}
+            <tr class="fila">
+                <td data-label="ID:">{{ lugar.id }}</td>
+                <td data-label="Nombre:">{{ lugar.nombre }}</td>
+                <td data-label="N° Sala:">{{ lugar.abreviacion }}-{{ lugar.sala }}</td>
+                <td data-label="Ubicado en el piso:">N° {{ lugar.piso }}</td>
+                <td data-label="Es crítico:">{% if lugar.es_critico %}Sí{% else %}No{% endif %}</td>
+                <td data-label="Tipo:" class="columna-tipo">{{ lugar.get_tipo_display }}</td>
+                <td data-label="Está activo:" class="columna-activo">{% if lugar.activo %}Sí{% else %}No{% endif %}</td>
+                <td data-label="Acciones:">
+                    <div class="box-btns-td-acciones">
+                        <button class="btn-masDetalles" data-id-lugar="{{ lugar.id }}">Más detalles</button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-message">No hay lugares que coincidan con los filtros.</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="8" class="empty-message">No hay lugares registrados.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>

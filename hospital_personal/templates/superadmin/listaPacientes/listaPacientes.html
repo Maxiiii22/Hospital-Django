@@ -12,101 +12,77 @@
 {% block contenido %}
     <div class="container-global-superadmin">
         <h1>Lista de pacientes</h1>
-        <div class="box-tablas-superadmin">
-            <table id="tabla-lista-pacientes">
-                <thead>
-                    {% if allPacientes %}
-                    <tr>
-                        <th>ID</th>
-                        <th>DNI</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th class="columna-sexo">Sexo</th>
-                        <th class="columna-ultimoAcceso">Ultimo acceso</th>
-                        <th class="columna-estado">Estado</th>
-                        <th class="columna-tipoPaciente">Tipo de paciente</th>
-                        <th>Acciones</th>
-                    </tr>
-                    {% endif %}
-                </thead>
-                <tbody>
-                    {% for paciente in allPacientes %}
-                        <tr class="fila" id="paciente-{{ paciente.persona.dni }}">
-                            <td data-label="ID:">{{paciente.id}}</td>
-                            <td data-label="DNI:">{{paciente.persona.dni}}</td>
-                            <td data-label="Nombre:">{{paciente.persona.first_name}}</td>
-                            <td data-label="Apellido:">{{paciente.persona.last_name}}</td>
-                            <td data-label="Sexo:" class="columna-sexo">{{paciente.persona.sexo}}</td>
-                            <td data-label="Ultimo acceso:" class="columna-ultimoAcceso">{% if paciente.persona.last_login %}{{paciente.persona.last_login|date:"d/m/Y H:i"}} {% else %} N/A {% endif%}</td>
-                            <td data-label="Estado:" class="columna-estado">{% if paciente.persona.is_active %} Activo {% else %} Inactivo {% endif %}</td>
-                            <td data-label="Tipo de paciente:" class="columna-tipoPaciente">{% if paciente.responsable %} Menor (a cargo de:<a class="back-link" href="#paciente-{{ paciente.responsable.adulto.persona.dni }}">{{ paciente.responsable.adulto.persona.dni }}</a>) {% else %} Titular {% endif %}</td>
-                            <td data-label="Acciones:">
-                                <div class="box-btns-td-acciones">
-                                    <a class="btn-accion" href="{% url 'turnosPaciente' paciente.id %}">Sus turnos</a>
-                                    <button class="btn-accion" onclick="abrirDetalle(this)"
-                                        data-paciente="{{ paciente.persona.get_full_name}}"
-                                        data-dni="{{paciente.persona.dni}}"
-                                        data-fecha-nacimiento="{{ paciente.persona.fecha_nacimiento|date:'d/m/Y' }}"
-                                        data-sexo="{{ paciente.persona.sexo }}"
-                                        data-email="{% if paciente.persona.email %}{{paciente.persona.email}}{% else %} N/A {% endif%}"
-                                        data-telefono="{% if paciente.persona.telefono %}{{paciente.persona.telefono}}{% else %} N/A {% endif%}"
-                                        data-direccion="{% if paciente.direccion %}{{paciente.direccion}}{% else %} N/A {% endif%}"
-                                        data-fecha-registro="{{paciente.persona.date_joined|date:"d/m/Y H:i"}}"
-                                        data-ultimo-acceso="{% if paciente.persona.last_login %}{{paciente.persona.last_login|date:"d/m/Y H:i"}} {% else %} N/A {% endif%}"
-                                        data-estado="{% if paciente.persona.is_active %} Activo {% else %} Inactivo {% endif %}"
-                                        data-tipo-paciente="{% if paciente.responsable %} Menor (a cargo de: <a href='#paciente-{{ paciente.responsable.adulto.persona.dni }}'>{{ paciente.responsable.adulto.persona.dni }}</a>) {% else %} Titular {% endif %}">
-                                        Mas detalles
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="9" class="empty-message">No hay pacientes registrados.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="box-btn-add">
+            <button class="btn-masDetalles" id="btnformFilter"><i class="hgi hgi-stroke hgi-search-02"></i> Busqueda avanzada</button>
+        </div>
+        <div class="box-tablas-superadmin" id="tabla-pacientes">
+            {% include 'superadmin/tablasDinamicas/_tabla_pacientes.html' %}
         </div>
     </div>
 
     <div id="editModal" class="modal">
         <div class="modal-content modal-detalles-paciente">
             <span id="closeEditModal" class="close">&times;</span>
-            <h2 id="modal-title">Detalle del paciente</h2>
+            <h2 id="modal-title">Detalles del paciente</h2>
+            <div id="seccion-form-filter">
+                <form id="filtro-form" method="get">
+                    <div class="campo-input">
+                        {{filtro.form.persona__dni.label_tag}}
+                        {{filtro.form.persona__dni}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.persona__first_name.label_tag}}
+                        {{filtro.form.persona__first_name}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.persona__last_name.label_tag}}
+                        {{filtro.form.persona__last_name}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.persona__is_active.label_tag}}
+                        {{filtro.form.persona__is_active}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.responsable.label_tag}}
+                        {{filtro.form.responsable}}
+                    </div>
+                </form>
+            </div>
 
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Tipo de paciente:</strong> <span id="modalTipoPaciente"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>DNI:</strong> <span id="modalDni"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Fecha nacimiento:</strong> <span id="modalFechaNacimiento"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Sexo:</strong> <span id="modalSexo"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Email:</strong> <span id="modalEmail"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Telefono:</strong> <span id="modalTelefono"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Direccion:</strong> <span id="modalDireccion"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Fecha de registro:</strong> <span id="modalFechaRegistro"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Ulltimo acceso:</strong> <span id="modalUltimoAcceso"></span></p>
-            </div>
-            <div class="modal-detalles-paciente-item">
-                <p><strong>Estado:</strong> <span id="modalEstado"></span></p>
+            <div id="seccion-edit">
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Tipo de paciente:</strong> <span id="modalTipoPaciente"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>DNI:</strong> <span id="modalDni"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Fecha nacimiento:</strong> <span id="modalFechaNacimiento"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Sexo:</strong> <span id="modalSexo"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Telefono:</strong> <span id="modalTelefono"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Direccion:</strong> <span id="modalDireccion"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Fecha de registro:</strong> <span id="modalFechaRegistro"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Ulltimo acceso:</strong> <span id="modalUltimoAcceso"></span></p>
+                </div>
+                <div class="modal-detalles-paciente-item">
+                    <p><strong>Estado:</strong> <span id="modalEstado"></span></p>
+                </div>
             </div>
             
         </div>

@@ -11,7 +11,7 @@ urlpatterns = [
     path("get-lugarTrabajoORolProfesional/",views.getLugarTrabajoORolProfesional, name ="getLugarTrabajoORolProfesional"), 
     path("get-lugarTrabajoDisponibilidad/",views.getLugarTrabajoDisponibilidad, name ="getLugarTrabajoDisponibilidad"), 
     path("delete-lugarTrabajo/<int:id_lugarTrabajo>",views.deleteLugarTrabajo, name ="deleteLugarTrabajo"), 
-    path("delete-rolProfesional/<int:id_rolProfesional>",views.deleteRolProfesional, name ="deleteRolProfesional"), 
+    path("delete-rolProfesional/<int:id_rolProfesionalAsignado>",views.deleteRolProfesionalAsignado, name ="deleteRolProfesionalAsignado"), 
     path("gestion-departamentos/", views.gestionDeDepartamentos, name="gestionDeDepartamentos"),
     path("gestion-roles/", views.gestionDeRoles, name="gestionDeRoles"),
     path("gestion-especialidades/", views.gestionDeEspecialidades, name="gestionDeEspecialidades"),
@@ -28,6 +28,7 @@ urlpatterns = [
     path("consultas/", views.historialConsultas, name="historialConsultas"),
     path("consultas/registrar/<int:id_turno>", views.registrarConsulta, name="registrarConsulta"),
     path("consultas/editar/<int:id_consulta>", views.editarConsulta, name="editarConsulta"),
+    path("consultas/detalles/<int:id_consulta>", views.detallesConsulta, name="detallesConsulta"),
     # Cargador de resultados:
     path("cargar-resultados/", views.verEstudios, name="verEstudios"),
     path("cargar-resultados/turno-estudio-<int:turno_id>", views.cargar_resultado, name="cargar_resultado")

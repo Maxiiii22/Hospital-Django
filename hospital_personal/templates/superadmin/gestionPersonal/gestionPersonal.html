@@ -14,53 +14,50 @@
         <h1>Gestion del personal</h1>
         <div class="box-btn-add">
             <a href="{% url 'altaPersonal' %}" class="btn-masDetalles"><i class="hgi hgi-stroke hgi-plus-sign"></i> Añadir nuevo personal</a>
+            <button class="btn-masDetalles" id="btnformFilter"><i class="hgi hgi-stroke hgi-search-02"></i> Busqueda avanzada</button>
         </div>
     
-        <table id="tabla-gestion-personal">
-            <thead>
-                {% if allPersonal %}
-                <tr>
-                    <th>ID</th>
-                    <th>N° Legajo hospitalario</th>
-                    <th>Tipo Usuario</th>
-                    <th class="columna-matricula">N° Matricula</th>
-                    <th class="columna-nombre">Nombre</th>
-                    <th class="columna-apellido">Apellido</th>
-                    <th class="columna-dni">DNI</th>
-                    <th class="columna-ultimoAcceso">Ultimo acceso</th>
-                    <th class="columna-estado">Estado</th>
-                    <th></th>
-                </tr>
-                {% endif %}
-            </thead>
-            <tbody>
-                {% for persona in allPersonal %}
-                <tr class="fila">
-                    <td data-label="ID:">{{persona.id}}</td>
-                    <td data-label="N° Legajo hospitalario:">{{persona.persona.login_id}}</td>
-                    <td data-label="Rol:">{{persona.tipoUsuario}}</td>
-                    <td data-label="N° Matricula:" class="columna-matricula">{% if persona.numero_matricula %}{{persona.numero_matricula}}{% else %}No aplica{% endif %}</td>
-                    <td data-label="Nombre:" class="columna-nombre">{{persona.persona.first_name}}</td>
-                    <td data-label="Apellido:" class="columna-apellido">{{persona.persona.last_name}}</td>
-                    <td data-label="DNI:" class="columna-dni">{{persona.persona.dni}}</td>
-                    <td data-label="Ultimo acceso:" class="columna-ultimoAcceso">{% if persona.persona.last_login %} {{persona.persona.last_login|date:"d-m-Y H:i"}} {% else %} Nunca accedió {% endif %}</td>
-                    <td data-label="Estado:" class="columna-estado">{% if persona.persona.is_active %} Activo {% else %} Inactivo {% endif %}</td>
-                    <td data-label="Acciones:">
-                        <div class="box-btns-td-acciones">
-                            <a href="{% url 'detalle_usuario' persona.id %}" class="btn-masDetalles" >Mas detalles</a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="10" class="empty-message">No hay personal registrado.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    
+        <div class="box-tablas-superadmin" id="tabla-personal">
+            {% include 'superadmin/tablasDinamicas/_tabla_personal.html' %}
+        </div>
     </div>
- 
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+        <span id="closeEditModal" class="close">&times;</span>      
+        <h2 id="modal-title">Buscar por</h2>            
+            <div id="seccion-form-filter">
+                <form id="filtro-form" method="get">
+                    <div class="campo-input">
+                        {{filtro.form.persona__login_id.label_tag}}
+                        {{filtro.form.persona__login_id}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.tipoUsuario.label_tag}}
+                        {{filtro.form.tipoUsuario}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.numero_matricula.label_tag}}
+                        {{filtro.form.numero_matricula}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.persona__first_name.label_tag}}
+                        {{filtro.form.persona__first_name}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.persona__last_name.label_tag}}
+                        {{filtro.form.persona__last_name}}
+                    </div>
+                    <div class="campo-input">
+                        {{filtro.form.persona__is_active.label_tag}}
+                        {{filtro.form.persona__is_active}}
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>    
+
 {% endblock %}
 
 {% block scripts_js %} 

@@ -347,7 +347,12 @@ class FormularioAsignaciones(forms.ModelForm):
         roles_asignados = UsuarioRolProfesionalAsignado.objects.filter(usuario=self.user).values_list('rol_profesional_id', flat=True)
 
         # Excluir los roles ya asignados
-        self.fields['rol_profesional'].queryset = RolesProfesionales.objects.filter(tipoUsuario_id=tipo_usuario).exclude(id__in=roles_asignados)
+        if tipo_usuario == 3: # Medico
+            self.fields['rol_profesional'].queryset = RolesProfesionales.objects.filter(tipoUsuario_id=tipo_usuario,especialidad__permite_turno=True).exclude(id__in=roles_asignados)
+        else:
+            self.fields['rol_profesional'].queryset = RolesProfesionales.objects.filter(tipoUsuario_id=tipo_usuario).exclude(id__in=roles_asignados)
+            
+            
         self.fields['rol_profesional'].label_from_instance = lambda obj: f"{obj.nombre_rol_profesional}" 
 
 

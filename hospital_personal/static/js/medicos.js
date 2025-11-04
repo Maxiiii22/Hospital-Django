@@ -26,6 +26,8 @@ function abrirDetalle(btn) {
     document.getElementById("modalMedicaciones").textContent = decodeNewlines(btn.dataset.medicaciones);
 }
 
+
+
 function agregarFilaFormset(prefix, tbodySelector) {
     // Ej: prefix = 'estudios' o 'medicaciones'
     const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
@@ -67,6 +69,34 @@ function agregarFilaFormset(prefix, tbodySelector) {
     tbody.appendChild(newRow);
     totalFormsInput.value = formNum + 1;
 }
+
+function abrirDetalleEstudios(btn) {
+    modal.classList.add("show");
+    document.getElementById("parte-medicamentos").style.display = "none";
+    document.getElementById("parte-estudios").style.display = "block";
+    document.getElementById("modal-title").textContent = "Detalles del estudio";
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden"; 
+    document.getElementById("modalTipoEstudio").textContent = btn.dataset.tipoEstudio;
+    document.getElementById("modalMotivo").innerHTML = btn.dataset.motivo;
+    document.getElementById("modalIndicaciones").textContent = btn.dataset.indicaciones;
+    document.getElementById("modalEstado").innerHTML = btn.dataset.estado;
+}
+
+function abrirDetalleMedicamento(btn) {
+    modal.classList.add("show");
+    document.getElementById("parte-estudios").style.display = "none";
+    document.getElementById("parte-medicamentos").style.display = "block";
+    document.getElementById("modal-title").textContent = "Detalles del medicamento";
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden"; 
+    document.getElementById("modalMedicamento").textContent = btn.dataset.medicamento;
+    document.getElementById("modalDosis").innerHTML = btn.dataset.dosis;
+    document.getElementById("modalFrecuencia").textContent = btn.dataset.frecuencia;
+    document.getElementById("modalTiempoUso").textContent = btn.dataset.tiempoUso;
+}
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll('.btn-modal').forEach(btn => {

@@ -14,48 +14,12 @@
         <h1>Gestionar lugares del hospital</h1>
         <div class="box-btn-add">
             <button class="btn-masDetalles" id="newLugar"><i class="hgi hgi-stroke hgi-plus-sign"></i> Añadir nuevo lugar</button>
+            <button class="btn-masDetalles" id="btnformFilter"><i class="hgi hgi-stroke hgi-search-02"></i> Busqueda avanzada</button>
         </div>
-        <div class="box-tablas-superadmin">
-            <table id="tabla-gestion-lugares">
-                <thead>
-                    {% if allLugares %}
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>N° Sala</th>
-                        <th>Piso</th>
-                        <th>Es critico</th>
-                        <th>Capacidad</th>
-                        <th class="columna-tipo">Tipo</th>
-                        <th class="columna-activo">Activo</th>
-                        <th></th>
-                    </tr>
-                    {% endif %}
-                </thead>
-                <tbody>
-                    {% for lugar in allLugares %}
-                    <tr class="fila">
-                        <td data-label="ID:">{{lugar.id}}</td>
-                        <td data-label="Nombre:">{{lugar.nombre}}</td>
-                        <td data-label="N° Sala:">{{lugar.abreviacion}}-{{lugar.sala}}</td>
-                        <td data-label="Ubicado en el piso:">N° {{lugar.piso}}</td>
-                        <td data-label="Es critico:">{% if lugar.es_critico %} Si {% else %} No {% endif %}</td>
-                        <td data-label="Capacidad:">{{lugar.capacidad}}</td>
-                        <td data-label="Tipo:" class="columna-tipo">{{lugar.get_tipo_display}}</td>
-                        <td data-label="Esta activo:" class="columna-activo">{% if lugar.activo %} Si {% else %} No {% endif %}</td>
-                        <td data-label="Acciones:">
-                            <div class="box-btns-td-acciones">
-                                <button class="btn-masDetalles" data-id-lugar="{{ lugar.id }}">Mas detalles</button>
-                            </div>
-                        </td>  
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="10" class="empty-message">No hay lugares registrados.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        
+        <div class="box-tablas-superadmin" id="tabla-lugares">
+            {% include 'superadmin/tablasDinamicas/_tabla_lugares.html' %}
         </div>
     </div>
 
@@ -63,133 +27,167 @@
     <div id="editModal" class="modal {% if abrir_modal_por_error %}show{% endif %}">
         <div class="modal-content modal-lugares">
         <span id="closeEditModal" class="close">&times;</span>
-        <h2 id="modal-title">Editar lugar</h2>
-        <form id="editForm" method="POST">
-            {% csrf_token %}
-            <input type="hidden" id="id_lugar" name="id_lugar">
-            
-            <div class="campo-input">
-                {{ form.nombre.label_tag }}
-                {{ form.nombre }}
-                {% if form.nombre.errors %}
-                    <div id="error_nombre" class="error-message">
-                        {% for error in form.nombre.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+        <h2 id="modal-title">Editar lugar</h2>            
+            <div id="seccion-form-filter">
+                <form id="filtro-form" method="get">
+                    <div class="campo-input">
+                        {{filtro.form.nombre.label_tag}}
+                        {{filtro.form.nombre}}
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="campo-input">
-                {{ form.tipo.label_tag }}
-                {{ form.tipo }}
-                {% if form.tipo.errors %}
-                    <div id="error_tipo" class="error-message">
-                        {% for error in form.tipo.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+                    <div class="campo-input">
+                        {{filtro.form.tipo.label_tag}}
+                        {{filtro.form.tipo}}
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="campo-input">
-                {{ form.piso.label_tag }}
-                {{ form.piso }}
-                {% if form.piso.errors %}
-                    <div id="error_piso" class="error-message">
-                        {% for error in form.piso.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+                    <div class="campo-input">
+                        {{filtro.form.piso.label_tag}}
+                        {{filtro.form.piso}}
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="campo-input">
-                {{ form.sala.label_tag }}
-                {{ form.sala }}
-                {% if form.sala.errors %}
-                    <div class="error-message">
-                        {% for error in form.sala.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+                    <div class="campo-input">
+                        {{filtro.form.sala.label_tag}}
+                        {{filtro.form.sala}}
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="campo-input">
-                {{ form.abreviacion.label_tag }}
-                {{ form.abreviacion }}
-                {% if form.abreviacion.errors %}
-                    <div class="error-message">
-                        {% for error in form.abreviacion.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+                    <div class="campo-input">
+                        {{filtro.form.es_critico.label_tag}}
+                        {{filtro.form.es_critico}}
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="campo-input">
-                {{ form.capacidad.label_tag }}
-                {{ form.capacidad }}
-                {% if form.capacidad.errors %}
-                    <div id="error_capacidad" class="error-message">
-                        {% for error in form.capacidad.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+                    <div class="campo-input">
+                        {{filtro.form.activo.label_tag}}
+                        {{filtro.form.activo}}
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="campo-input">
-                {{ form.departamento.label_tag }}
-                {{ form.departamento }}
-                {% if form.departamento.errors %}
-                    <div class="error-message">
-                        {% for error in form.departamento.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+                    <div class="campo-input">
+                        {{filtro.form.departamento.label_tag}}
+                        {{filtro.form.departamento}}
                     </div>
-                {% endif %}
+                </form>
             </div>
-
-            <div class="campo-input campo-textarea">
-                {{ form.descripcion.label_tag }}
-                {{ form.descripcion }}
-                {% if form.descripcion.errors %}
-                    <div id="error_descripcion" class="error-message">
-                        {% for error in form.descripcion.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+            <div id="seccion-edit" {% if abrir_modal_por_error %}style="display:block"{% endif %} >
+                <form id="editForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="id_lugar" name="id_lugar">
+                    
+                    <div class="campo-input">
+                        {{ form.nombre.label_tag }}
+                        {{ form.nombre }}
+                        {% if form.nombre.errors %}
+                            <div id="error_nombre" class="error-message">
+                                {% for error in form.nombre.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="campo-input">
-                <label for="id_es_critico">Marque la casilla si el lugar es "Critico"</label>
-                {{ form.es_critico }}
-                {% if form.es_critico.errors %}
-                    <div id="error_es_critico" class="error-message">
-                        {% for error in form.es_critico.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+        
+                    <div class="campo-input">
+                        {{ form.tipo.label_tag }}
+                        {{ form.tipo }}
+                        {% if form.tipo.errors %}
+                            <div id="error_tipo" class="error-message">
+                                {% for error in form.tipo.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="campo-input">
-                <label for="id_es_critico">Marque la casilla si el lugar esta "Activo"</label>
-                {{ form.activo }}
-                {% if form.activo.errors %}
-                    <div id="error_activo" class="error-message">
-                        {% for error in form.activo.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
+        
+                    <div class="campo-input">
+                        {{ form.piso.label_tag }}
+                        {{ form.piso }}
+                        {% if form.piso.errors %}
+                            <div id="error_piso" class="error-message">
+                                {% for error in form.piso.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                {% endif %}
+        
+                    <div class="campo-input">
+                        {{ form.sala.label_tag }}
+                        {{ form.sala }}
+                        {% if form.sala.errors %}
+                            <div class="error-message">
+                                {% for error in form.sala.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="campo-input">
+                        {{ form.abreviacion.label_tag }}
+                        {{ form.abreviacion }}
+                        {% if form.abreviacion.errors %}
+                            <div class="error-message">
+                                {% for error in form.abreviacion.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="campo-input">
+                        {{ form.capacidad.label_tag }}
+                        {{ form.capacidad }}
+                        {% if form.capacidad.errors %}
+                            <div id="error_capacidad" class="error-message">
+                                {% for error in form.capacidad.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="campo-input">
+                        {{ form.departamento.label_tag }}
+                        {{ form.departamento }}
+                        {% if form.departamento.errors %}
+                            <div class="error-message">
+                                {% for error in form.departamento.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="campo-input campo-textarea">
+                        {{ form.descripcion.label_tag }}
+                        {{ form.descripcion }}
+                        {% if form.descripcion.errors %}
+                            <div id="error_descripcion" class="error-message">
+                                {% for error in form.descripcion.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="campo-input">
+                        <label for="id_es_critico">Marque la casilla si el lugar es "Critico"</label>
+                        {{ form.es_critico }}
+                        {% if form.es_critico.errors %}
+                            <div id="error_es_critico" class="error-message">
+                                {% for error in form.es_critico.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="campo-input">
+                        <label for="id_es_critico">Marque la casilla si el lugar esta "Activo"</label>
+                        {{ form.activo }}
+                        {% if form.activo.errors %}
+                            <div id="error_activo" class="error-message">
+                                {% for error in form.activo.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+        
+                    <button type="submit" class="btn-guardar">Guardar</button>
+                </form>
             </div>
-
-            <button type="submit" class="btn-guardar">Guardar</button>
-        </form>
         </div>
     </div>
 {% endblock %}

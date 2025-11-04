@@ -11,7 +11,10 @@ const btnNewAsignacion = document.getElementById("newAsignaciones");
 const btnNewServicio= document.getElementById("newServicio");
 const btnNewEstudio= document.getElementById("newEstudio");
 const btnNewLugar= document.getElementById("newLugar");
+const btnFormFilter= document.getElementById("btnformFilter");
 const btnPlantillaEstudio= document.getElementById("newPlantillaEstudio");
+const form = document.getElementById('filtro-form');
+
 
 function resaltarElementoDesdeHash() {
     const hash = window.location.hash;
@@ -24,6 +27,11 @@ function resaltarElementoDesdeHash() {
                 targetRow.classList.remove('resaltar');
                 history.replaceState(null, null, window.location.pathname + window.location.search);  // Quitar el hash de la URL sin recargar la página
             }, 3000);
+        }
+        else{
+            setTimeout(() => {
+                history.replaceState(null, null, window.location.pathname + window.location.search);  // Quitar el hash de la URL sin recargar la página
+            }, 3000);      
         }
     }
 }
@@ -42,9 +50,12 @@ scrollable.addEventListener('scroll', () => {
 
 
 function abrirDetalle(btn) {
+    document.getElementById("seccion-form-filter").style.display="none";
+    document.getElementById("seccion-edit").style.display ="block";
     modal.classList.add("show");
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden"; 
+    document.getElementById("modal-title").textContent = "Detalles del paciente"
     document.getElementById("modalTipoPaciente").innerHTML = btn.dataset.tipoPaciente;
     document.getElementById("modalPaciente").textContent = btn.dataset.paciente;
     document.getElementById("modalDni").textContent = btn.dataset.dni;
@@ -132,6 +143,106 @@ async function obtenerDisponibilidadLugar(){
 
 
 document.addEventListener("DOMContentLoaded", function () {
+
+    const tablaLugares = document.getElementById("tabla-lugares");
+    if (tablaLugares) {
+        const tabla = document.getElementById('tabla-lugares');
+        tablaLugares.addEventListener("click", async (e) => {
+            const btn = e.target.closest(".btn-masDetalles");
+            if (!btn) return;
+
+            const id_lugar = btn.dataset.idLugar;
+            if (!id_lugar) return;
+
+            document.getElementById("modal-title").textContent = "Editar lugar";
+
+            try {
+                const response = await fetch(`/personal/gestion-lugares/?id=${id_lugar}`, {
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                if (!response.ok) throw new Error("Error al obtener datos");
+
+                const data = await response.json();
+
+                document.getElementById("seccion-form-filter").style.display="none"
+                document.getElementById("seccion-edit").style.display ="block";
+                document.querySelectorAll(".error-message").forEach(div => div.remove());
+                document.getElementById("id_lugar").value = data.id_lugar;
+                document.getElementById("id_nombre").value = data.nombre_lugar;
+                document.getElementById("id_tipo").value = data.tipo_lugar;
+                document.getElementById("id_piso").value = data.piso_lugar;
+                document.getElementById("id_sala").value = data.sala_lugar;
+                document.getElementById("id_abreviacion").value = data.abreviacion_lugar;
+                document.getElementById("id_capacidad").value = data.capacidad_lugar;
+                if (data.departamento_lugar)
+                    document.getElementById("id_departamento").value = data.departamento_lugar;
+                document.getElementById("id_descripcion").value = data.descripcion_lugar || "";
+                document.getElementById("id_es_critico").checked = data.isCritico_lugar;
+                document.getElementById("id_activo").checked = data.isActivo_lugar;
+
+
+                modal.classList.add("show");
+                document.body.style.overflow = "hidden";
+                document.documentElement.style.overflow = "hidden";
+            } catch (err) {
+                alert("Error al cargar los datos del lugar");
+                console.error(err);
+            }
+        });
+
+        let timeout = null;
+        form.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(async () => {
+                const params = new URLSearchParams(new FormData(form));
+                params.append('filtrar', '1');
+                const response = await fetch(`?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                tabla.innerHTML = html;
+            }, 400);
+        });    
+
+    }
+
+    const tablaPacientes = document.getElementById("tabla-pacientes");
+    if (tablaPacientes) {
+        const tabla = document.getElementById('tabla-pacientes');
+        let timeout = null;
+        form.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(async () => {
+                const params = new URLSearchParams(new FormData(form));
+                params.append('filtrar', '1');
+                const response = await fetch(`?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                tabla.innerHTML = html;
+            }, 400);
+        });    
+    }
+
+    const tablaPersonal = document.getElementById("tabla-personal");
+    if (tablaPersonal) {
+        const tabla = document.getElementById('tabla-personal');
+        let timeout = null;
+        form.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(async () => {
+                const params = new URLSearchParams(new FormData(form));
+                params.append('filtrar', '1');
+                const response = await fetch(`?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                tabla.innerHTML = html;
+            }, 400);
+        });    
+    }
+
+
     document.querySelectorAll('.btn-masDetalles').forEach(btn => {
         btn.addEventListener("click", async () => {
             const id_especialidad = btn.dataset.idEspecialidad; 
@@ -141,7 +252,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const id_consulta = btn.dataset.idConsulta; 
             const id_servicio = btn.dataset.idServicio; 
             const id_estudio = btn.dataset.idEstudio; 
-            const id_lugar = btn.dataset.idLugar; 
             const id_plantilla_estudio = btn.dataset.idPlantillaEstudio; 
     
             if (id_especialidad){
@@ -353,54 +463,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.error(err);
                 }
             }
-            else if (id_lugar){
-                document.getElementById("modal-title").textContent = "Editar lugar";
-                try {
-                    const response = await fetch(`/personal/gestion-lugares/?id=${id_lugar}`, {
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest"
-                        }
-                    });
-        
-                    if (!response.ok) throw new Error("Error al obtener datos");
-        
-                    const data = await response.json();
-                    
-                    document.querySelectorAll('.error-message').forEach(errorDiv => {
-                        errorDiv.remove();
-                    });                    
-                    document.getElementById("id_lugar").value = data.id_lugar;
-                    document.getElementById("id_nombre").value = data.nombre_lugar;
-                    document.getElementById("id_tipo").value = data.tipo_lugar;
-                    document.getElementById("id_piso").value = data.piso_lugar;
-                    document.getElementById("id_sala").value = data.sala_lugar;
-                    document.getElementById("id_abreviacion").value = data.abreviacion_lugar;
-                    document.getElementById("id_capacidad").value = data.capacidad_lugar;
-                    document.getElementById("id_departamento").value = data.departamento_lugar;
-                    document.getElementById("id_descripcion").value = data.descripcion_lugar;
-                    if(data.isCritico_lugar){
-                        document.getElementById("id_es_critico").checked = true;
-                    }
-                    else{
-                        document.getElementById("id_es_critico").checked = false;
-                    }
-
-                    if(data.isActivo_lugar){
-                        document.getElementById("id_activo").checked = true;
-                    }
-                    else{
-                        document.getElementById("id_activo").checked = false;
-                    }
-                    modal.classList.add("show");
-                    document.body.style.overflow = "hidden"; 
-                    document.documentElement.style.overflow = "hidden";
-
-                } 
-                catch (err) {
-                    alert("Error al cargar los datos");
-                    console.error(err);
-                }
-            }
             else if (id_plantilla_estudio){
                 document.getElementById("modal-title").textContent = "Editar plantilla estudio";
                 try {
@@ -434,6 +496,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         });
     });
+
+    if (btnFormFilter){
+        btnFormFilter.addEventListener("click",() => {  
+            const seccionEdit = document.getElementById("seccion-edit");
+            if(seccionEdit){
+                seccionEdit.style.display ="none";
+            }
+            document.getElementById("seccion-form-filter").style.display="block";
+            document.getElementById("modal-title").textContent = "Buscar por";
+            modal.classList.add("show");
+            document.body.style.overflow = "hidden"; 
+            document.documentElement.style.overflow = "hidden";
+        })
+    }
 
     if (btnNewTipoUsuario){
         btnNewTipoUsuario.addEventListener("click",() => {
@@ -796,6 +872,8 @@ document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll('.error-message').forEach(errorDiv => {
                 errorDiv.remove();
             });
+            document.getElementById("seccion-form-filter").style.display="none"
+            document.getElementById("seccion-edit").style.display ="block";
             document.getElementById("id_lugar").value = "";
             document.getElementById("id_nombre").value = "";  
             document.getElementById("id_tipo").value = "";
@@ -822,7 +900,8 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     
             // Seleccionar todos los inputs, select y textarea
-            const allinputsModal = document.querySelectorAll(".campo-input input,select,textarea");
+            const seccionEdit = document.getElementById("seccion-edit");
+            const allinputsModal = seccionEdit.querySelectorAll(".campo-input input,select,textarea");
     
             let hayErrores = false;
     
@@ -857,6 +936,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     
             if (!hayErrores) {
+                console.log("jee")
                 formDelModal.submit();
             }
         });
@@ -1030,8 +1110,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     toggleFields(); // Ejecutar al cargar la página
-
-
 
     if(closeModalBtn){
         closeModalBtn.addEventListener("click", () => {

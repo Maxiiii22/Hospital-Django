@@ -96,7 +96,7 @@ class Lugar(models.Model):
             return f"{self.nombre} ({self.abreviacion}-{self.sala})"
 
 class UsuarioRolProfesionalAsignado(models.Model):
-    usuario = models.ForeignKey('controlUsuario.Usuario', on_delete=models.CASCADE,related_name="especialidadesUsuario")
+    usuario = models.ForeignKey('controlUsuario.Usuario', on_delete=models.CASCADE,related_name="rolesProfesionalesUsuario")
     rol_profesional = models.ForeignKey('controlUsuario.RolesProfesionales', on_delete=models.CASCADE)
     
     class Meta:
@@ -115,7 +115,7 @@ class UsuarioLugarTrabajoAsignado(models.Model):
     lugar = models.ForeignKey(Lugar, on_delete=models.CASCADE)
     usuario = models.ForeignKey('controlUsuario.Usuario', on_delete=models.CASCADE, related_name="UsuariosAsignadosAEsteLugar")
     jornada = models.ForeignKey(Jorna_laboral, on_delete=models.CASCADE)
-    rolProfesionalAsignado = models.ForeignKey(UsuarioRolProfesionalAsignado, on_delete=models.SET_NULL, null=True)
+    rolProfesionalAsignado = models.ForeignKey(UsuarioRolProfesionalAsignado, on_delete=models.SET_NULL, null=True,related_name="RolesProfesionalesAsignados")
     
     class Meta:
         constraints = [
@@ -274,7 +274,7 @@ class OrdenEstudio(models.Model):
                 return turno.get_estado_display()
         
         return self.get_estado_display()
-
+    
     def __str__(self):
         return f'Solitud pedida en la consulta n°: {self.consulta.id} - N° de orden: {self.id} - Tipo Estudio: "{self.tipo_estudio.nombre_estudio}" - Estado: {self.estado} - Paciente ID: {self.paciente.id}'
 

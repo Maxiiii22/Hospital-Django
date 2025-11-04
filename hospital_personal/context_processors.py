@@ -18,7 +18,7 @@ def especialidad_actual(request):
                     pass  # En caso de que se haya borrado, continuar y obtener una nueva
 
             # Si no está en sesión, obtener desde el modelo
-            especialidad_usuario = usuario.especialidadesUsuario.first()
+            especialidad_usuario = usuario.rolesProfesionalesUsuario.first()
             especialidad_usuario = especialidad_usuario.rol_profesional
             if especialidad_usuario and hasattr(especialidad_usuario, 'especialidad'):
                 especialidad_id = especialidad_usuario.especialidad.id
